@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "typeRoots": ["./typings", "./node_modules/@types"],
+    "types": ["express.d.ts"]
+  }
+}
