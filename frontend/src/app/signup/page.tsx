@@ -11,6 +11,8 @@ import {
   Button,
   FormControl,
   Box,
+  Checkbox,
+  Link,
 } from '@mui/material';
 import { FcGoogle } from 'react-icons/fc';
 import { LoginStatus, UserContext } from '@/context/userContext';
@@ -27,6 +29,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
+
+import ModalAgreement from '@/components/login/modal-agreement';
 
 export default function SignUpPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -54,9 +58,15 @@ export default function SignUpPage() {
   const [courseId, setCourseId] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [phone, setPhone] = useState('');
+  const [checked, setChecked] = useState<boolean>(false);
 
   // Alert Message
   const [alertMessage, setAlertMessage] = useState('');
+
+  //Modal
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const handleClose = () => setOpenModal(false);
+  const handleOpen = () => setOpenModal(true);
 
   const handleEmailAuth = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,6 +84,13 @@ export default function SignUpPage() {
       //eslint-disable-next-line
       setAlertMessage("Password and Confirm Password doesn't match");
     }
+  };
+
+  const handleChangeCheckBox = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    event.preventDefault();
+    checked ? setChecked(false) : setChecked(true);
   };
 
   const handleGoogleAuth = async () => {
@@ -238,24 +255,61 @@ export default function SignUpPage() {
                     label='Last Name'
                   />
                   <CourseInput courseId={courseId} setCourseId={setCourseId} />
-
-                  <Typography variant='body2' align='center'>
-                    If you are an instructor, please contact admin.
-                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'flex-start',
+                      gap: '10px',
+                    }}
+                  >
+                    <Checkbox
+                      inputProps={{ 'aria-label': 'controlled' }}
+                      checked={checked}
+                      onChange={handleChangeCheckBox}
+                      sx={{
+                        padding: '0',
+                      }}
+                    />
+                    <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
+                      I acknowledge that I have read and understood the
+                      <Link
+                        type='button'
+                        component='button'
+                        sx={{
+                          '&:hover': {
+                            cursor: 'pointer',
+                          },
+                          marginLeft: '3px',
+                          fontSize: '15px',
+                        }}
+                        onClick={handleOpen}
+                      >
+                        {' '}
+                        Terms and Conditions.
+                      </Link>
+                    </Typography>
+                  </Box>
                 </Stack>
                 <Button
                   type='submit'
                   variant='contained'
                   color='primary'
                   fullWidth
+                  disabled={!checked}
                 >
                   Register
                 </Button>
+
+                <Typography variant='body2' align='center'>
+                  If you are an instructor, please contact admin:{' '}
+                  head.tech@ciccc.ca
+                </Typography>
               </Stack>
             </form>
           )}
         </Stack>
       </Box>
+      <ModalAgreement openModal={openModal} handleClose={handleClose} />
     </>
   );
 }
