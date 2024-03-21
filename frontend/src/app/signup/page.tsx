@@ -307,7 +307,7 @@ export default function SignUpPage() {
                 </Button>
 
                 <Typography variant='body2' align='center'>
-                  If you are an instructor, please contact admin:{' '}
+                  If you are an organizer, please contact admin:{' '}
                   head.tech@ciccc.ca
                 </Typography>
               </Stack>
