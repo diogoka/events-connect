@@ -296,6 +296,12 @@ export default function SignUpPage() {
                   color='primary'
                   fullWidth
                   disabled={!checked}
+                  sx={{
+                    '&:disabled': {
+                      cursor: 'not-allowed',
+                      pointerEvents: 'auto',
+                    },
+                  }}
                 >
                   Register
                 </Button>
