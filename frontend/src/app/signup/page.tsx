@@ -55,6 +55,7 @@ export default function SignUpPage() {
     firstName: '',
     lastName: '',
   });
+
   const [courseId, setCourseId] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [phone, setPhone] = useState('');
