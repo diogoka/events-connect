@@ -67,7 +67,7 @@ function ModalCancelParticipation({
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: laptopQuery ? '30%' : '90%',
+    width: laptopQuery ? '90%' : '30%',
     bgcolor: 'white',
     border: '1px solid #000',
     boxShadow: 24,
