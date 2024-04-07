@@ -182,6 +182,7 @@ export default function EventPage() {
           forPreview={forPreview}
           isAlertVisible={isAlertVisible}
           setIsAlertVisible={setIsAlertVisible}
+          handleAlertFn={handleAlert}
         />
         {event && (
           <DetailInfo
