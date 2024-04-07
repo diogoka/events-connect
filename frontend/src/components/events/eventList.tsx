@@ -21,7 +21,7 @@ type Props = {
 function EventList({ events, tags, user, setEvents, attendance }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const laptopQuery = useMediaQuery('(min-width:769px)');
-  const eventsPerPage = laptopQuery ? 6 : 5;
+  const eventsPerPage = 6;
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = events.slice(indexOfFirstEvent, indexOfLastEvent);
