@@ -2,7 +2,6 @@ import React from 'react';
 import { Button, Modal, Box, Typography, Stack } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { RiErrorWarningFill } from 'react-icons/ri';
-import { fontSize } from '@mui/system';
 
 type Props = {
   isOpen: boolean;
@@ -44,7 +43,7 @@ function ModalAttendParticipation({
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: laptopQuery ? '30%' : '90%',
+    width: laptopQuery ? '90%' : '30%',
     bgcolor: 'white',
     border: '1px solid #000',
     boxShadow: 24,
@@ -70,8 +69,19 @@ function ModalAttendParticipation({
         aria-describedby='modal-modal-description'
       >
         <Box sx={style}>
-          <Stack direction='row' alignItems='center' justifyContent='center' columnGap='.125rem'>
-            <RiErrorWarningFill style={{ fontSize: '1.5rem', color: '#D22B2B', marginBottom: '2px' }} />
+          <Stack
+            direction='row'
+            alignItems='center'
+            justifyContent='center'
+            columnGap='.125rem'
+          >
+            <RiErrorWarningFill
+              style={{
+                fontSize: '1.5rem',
+                color: '#D22B2B',
+                marginBottom: '2px',
+              }}
+            />
             <Typography
               variant='h2'
               fontWeight='bold'
