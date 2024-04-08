@@ -33,6 +33,7 @@ const DetailContainer = ({
   forPreview,
   isAlertVisible,
   setIsAlertVisible,
+  handleAlertFn,
 }: Props) => {
   const locationContainerStyle = {
     fontSize: forMobile ? 'auto' : '1.2rem',
@@ -70,6 +71,7 @@ const DetailContainer = ({
           forMobile={forMobile}
           forPreview={forPreview}
           setIsAlertVisible={setIsAlertVisible}
+          handleAlertFn={handleAlertFn}
         />
       </Box>
 
