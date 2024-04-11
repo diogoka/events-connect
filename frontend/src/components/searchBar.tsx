@@ -1,15 +1,16 @@
 'use client';
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import { TextField, useMediaQuery, Grid, Button } from '@mui/material';
 import IconItem from './icons/iconItem';
 
 type Props = {
   searchEvents: (text: string) => void;
   isDisabled: boolean;
+  clearSearchBar?: boolean;
 };
 
-function SearchBar({ searchEvents, isDisabled }: Props) {
-  const [searchTerm, setSearchTerm] = useState('');
+function SearchBar({ searchEvents, isDisabled, clearSearchBar }: Props) {
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
   const handleSearch = (event: any) => {
@@ -21,6 +22,10 @@ function SearchBar({ searchEvents, isDisabled }: Props) {
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
+
+  useEffect(() => {
+    setSearchTerm('');
+  }, [clearSearchBar]);
 
   const gridContainerStyle = {
     marginTop: laptopQuery ? '4rem' : '2rem',
@@ -51,17 +56,19 @@ function SearchBar({ searchEvents, isDisabled }: Props) {
     <Grid container spacing={0} style={gridContainerStyle}>
       <Grid item xs={9.5} sx={{ height: '3rem' }}>
         <TextField
-          value={isDisabled? '': searchTerm}
+          value={isDisabled ? '' : searchTerm}
           onChange={handleInputChange}
           fullWidth
           InputProps={{
             style: textFieldStyle,
           }}
-          sx={{ backgroundColor: isDisabled? '#eeeeee':'transparent' }} disabled={isDisabled}/>
+          sx={{ backgroundColor: isDisabled ? '#eeeeee' : 'transparent' }}
+          disabled={isDisabled}
+        />
       </Grid>
       <Grid item xs={2.5} style={gridIconContainerStyle}>
         <Button
-          sx={{ width: '100%', backgroundColor: isDisabled? '#606080': null }}
+          sx={{ width: '100%', backgroundColor: isDisabled ? '#606080' : null }}
           onClick={handleSearch}
           disabled={isDisabled}
         >
