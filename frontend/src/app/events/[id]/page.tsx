@@ -224,7 +224,7 @@ export default function EventPage() {
             alertMessage.message,
             alertMessage.severity
           )}
-        <Stack>
+        <Stack sx={{ marginBottom: '5%' }}>
           <Box
             width='100%'
             display='flex'
