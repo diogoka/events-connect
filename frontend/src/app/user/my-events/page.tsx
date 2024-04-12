@@ -4,6 +4,7 @@ import { UserContext } from '@/context/userContext';
 import axios from 'axios';
 import EventList from '@/components/events/eventList';
 import SearchBar from '@/components/searchBar';
+import ResetButton from '@/components/user/reset-button';
 import { Typography, Box, Alert, useMediaQuery } from '@mui/material';
 
 type Event = {
@@ -50,12 +51,20 @@ function UserEvents() {
     message: '',
   });
   const [noEvents, setNoEvents] = useState<boolean>(false);
-
   const laptopQuery = useMediaQuery('(min-width:769px)');
+
+  const [clearSearchBar, setClearSearchBar] = useState<boolean>(false);
+  const [disableButton, setDisableButton] = useState<boolean>(true);
 
   const currentUser: CurrentUser = {
     id: user?.id ? user!.id : '',
     role: user?.roleName ? user!.roleName : '',
+  };
+
+  const resetEvents = async () => {
+    await getEvents();
+    clearSearchBar ? setClearSearchBar(false) : setClearSearchBar(true);
+    setDisableButton(true);
   };
 
   const getEvents = async () => {
@@ -131,6 +140,7 @@ function UserEvents() {
           }, 5000);
         }
       });
+    setDisableButton(false);
   };
 
   const closeAlert = () => {
@@ -164,7 +174,21 @@ function UserEvents() {
         </Alert>
       )}
 
-      <SearchBar searchEvents={searchEvents} isDisabled={noEvents} />
+      <SearchBar
+        searchEvents={searchEvents}
+        isDisabled={noEvents}
+        clearSearchBar={clearSearchBar}
+      />
+      <Box
+        sx={{
+          width: '98%',
+          display: 'flex',
+          justifyContent: 'start',
+          minHeight: '64px',
+        }}
+      >
+        <ResetButton getEvents={resetEvents} disable={disableButton} />
+      </Box>
       {events.length === 0 ? (
         <Typography
           sx={{
