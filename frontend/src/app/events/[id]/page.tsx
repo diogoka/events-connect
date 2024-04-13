@@ -268,11 +268,11 @@ export default function EventPage() {
                 setIsAlertVisible={setIsAlertVisible}
                 handleAlertFn={handleAlert}
               />
-              <Box overflow='hidden'>
+              <Box>
                 <ImageHelper
                   src={`${event?.image_url_event}`}
                   width='100%'
-                  height='20vw'
+                  height='100%'
                   style={{
                     maxHeight: '260px',
                     borderRadius: '.5rem',
