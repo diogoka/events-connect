@@ -1,5 +1,5 @@
 'use client';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import {
@@ -68,6 +68,12 @@ export default function SignUpPage() {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const handleClose = () => setOpenModal(false);
   const handleOpen = () => setOpenModal(true);
+
+  useEffect(() => {
+    if (loginStatus === 'Logged In') {
+      router.replace('/events');
+    }
+  }, [loginStatus]);
 
   const handleEmailAuth = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
