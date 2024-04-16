@@ -72,8 +72,7 @@ export default function ImageContainer({
         sx={{ color: 'red', fontSize: '0.75rem' }}
         style={{ marginTop: '10px' }}
       >
-        For optimal quality, it is advised to utilize width: 380 pixels and
-        height: 220 pixels.
+        For optimal quality, it is advised to utilize the aspect ratio 19:11.
       </Typography>
 
       <Typography variant={'body2'}>{warning}</Typography>
