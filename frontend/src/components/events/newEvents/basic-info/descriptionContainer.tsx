@@ -14,10 +14,10 @@ type Props = {
 };
 export default function DescriptionContainer({ isMobile }: Props) {
   const { createdEvent, dispatch } = useContext(EventContext);
-  const [countedDesc, setCountedDesc] = useState<number>(500);
+  const [countedDesc, setCountedDesc] = useState<number>(800);
 
   const changeDesc = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCountedDesc(500 - event.target.value.length);
+    setCountedDesc(800 - event.target.value.length);
     dispatch({
       type: 'UPDATE_DESCRIPTION',
       payload: { ...createdEvent, description_event: event.target.value },
