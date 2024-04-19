@@ -181,6 +181,7 @@ function EventCard({
             textAlign: 'justify',
             fontSize: '0.75rem',
             height: '2.3rem',
+            wordWrap: 'break-all',
           }}
         >
           {event.description_event.length > 100

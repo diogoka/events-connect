@@ -63,6 +63,7 @@ const ModalAgreement = ({ openModal, handleClose }: Props) => {
                 fontSize: '14px',
                 fontFamily: 'inherit',
                 textAlign: 'justify',
+                wordBreak: 'break-all',
               }}
             >
               {agreement}
