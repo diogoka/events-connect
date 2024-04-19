@@ -370,13 +370,13 @@ export default function PreviewEventPage() {
               forPreview={forPreview}
               setIsAlertVisible={setIsAlertVisible}
             />
-            <Box overflow='hidden'>
+            <Box>
               <ImageHelper
                 src={tempImage}
                 width='100%'
-                height='20vw'
+                height='100%'
                 style={{
-                  maxHeight: '260px',
+                  maxHeight: '220px',
                   borderRadius: '.5rem',
                 }}
                 alt={tempState?.name_event ?? 'Event'}

@@ -24,7 +24,7 @@ export default function ImageContainer({
         <Image
           src={imgTemporary ? imgTemporary : imgURL}
           alt=''
-          width={320}
+          width={380}
           height={220}
           style={{
             objectFit: 'cover',
@@ -67,6 +67,14 @@ export default function ImageContainer({
           }}
         />
       </Button>
+
+      <Typography
+        sx={{ color: 'red', fontSize: '0.75rem' }}
+        style={{ marginTop: '10px' }}
+      >
+        For optimal quality, it is advised to utilize the aspect ratio 19:11.
+      </Typography>
+
       <Typography variant={'body2'}>{warning}</Typography>
     </>
   );
