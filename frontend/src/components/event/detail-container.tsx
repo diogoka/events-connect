@@ -114,7 +114,7 @@ const DetailContainer = ({
             fontFamily: 'inherit',
             margin: 0,
             whiteSpace: 'pre-wrap',
-            wordBreak: 'break-all',
+            wordBreak: 'break-word',
           }}
         >
           {event?.description_event}
