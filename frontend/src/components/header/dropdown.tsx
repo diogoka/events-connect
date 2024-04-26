@@ -30,7 +30,7 @@ export default function Dropdown({ anchorEl, open, handleClose }: Props) {
       .catch((error) => {
         console.error(error);
       });
-    router.push('/');
+    router.push('/login');
   };
   return (
     <Menu
