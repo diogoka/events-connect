@@ -356,7 +356,7 @@ export default function PreviewEventPage() {
           </Box>
 
           {/* /////////// Right /////////// */}
-          <Box width='30%'>
+          <Box minWidth='30%'>
             <DetailIconContainer
               event={tempState!}
               otherInfo={{
