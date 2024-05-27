@@ -18,7 +18,10 @@ export default function PageTitle() {
   return (
     <>
       {currentPage ? (
-        <Typography variant='h2' sx={{ color: '#070F3D' }}>
+        <Typography
+          variant='h2'
+          sx={{ color: '#070F3D', width: '111.59px', textAlign: 'center' }}
+        >
           {currentPage.label}
         </Typography>
       ) : (

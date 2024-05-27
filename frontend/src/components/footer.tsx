@@ -1,9 +1,8 @@
-'use client'
-import { useMediaQuery, Box, Typography } from '@mui/material'
+'use client';
+import { useMediaQuery, Box, Typography } from '@mui/material';
 import { usePathname } from 'next/navigation';
 
 export default function Footer() {
-
   const isMobile = useMediaQuery('(max-width: 768px)');
   const pathname = usePathname();
   const isFooterRight = pathname === '/signup' && !isMobile;
@@ -20,15 +19,16 @@ export default function Footer() {
       zIndex={200}
       textAlign='center'
       sx={{
-        transform: 'translateY(-100%)'
-      }}>
+        transform: 'translateY(-100%)',
+      }}
+    >
       <Typography
         color={isFooterWhite ? 'white' : '#666666'}
         fontSize='.75rem'
         align='center'
       >
-        ©️ 2023 Eventllege All Rights Reserved.
+        ©️ 2023 Cornerstone Connect All Rights Reserved.
       </Typography>
     </Box>
-  )
+  );
 }
