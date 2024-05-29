@@ -1,7 +1,6 @@
 import pool from '../db/db';
 import express from 'express';
 import { sendEmail, EmailOption } from '../helpers/mail';
-import fs from 'fs-extra';
 import moment from 'moment-timezone';
 
 type Attendee = {
@@ -902,14 +901,4 @@ function validateEventInput(eventInput: EventInput): {
     result,
     message,
   };
-}
-
-function copyImage(filename: string, eventId: number) {
-  const oldPath = `${__dirname}/../public/img/events/temp/${filename}`;
-  const newPath = `${__dirname}/../public/img/events/${eventId}`;
-  fs.copySync(oldPath, newPath, { overwrite: true });
-}
-
-function deleteImage(filename: string) {
-  fs.remove(`${__dirname}/../public/img/events/temp/${filename}`);
 }
