@@ -57,3 +57,8 @@ export interface User {
   firstName: string;
   lastName: string;
 }
+
+export type checkedIdResponse = {
+  checked: boolean;
+  message?: string;
+};

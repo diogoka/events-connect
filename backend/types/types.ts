@@ -52,3 +52,8 @@ export type UserResponse = {
   courseName: string;
   is_verified: boolean;
 };
+
+export type CheckData = {
+  checked: boolean;
+  message?: string;
+};

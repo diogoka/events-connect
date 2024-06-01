@@ -1,5 +1,6 @@
 import pool from '../db/db';
-import { UserInput, UserResponse } from '../types/types';
+import { UserInput, UserResponse, CheckData } from '../types/types';
+import axios from 'axios';
 
 export const getAllUsers = async () => {
   const allUsers = await pool.query('SELECT * FROM users');
@@ -124,5 +125,34 @@ export const getUserById = async (userId: string) => {
   } catch (err: any) {
     console.error(err);
     return null;
+  }
+};
+
+export const checkId = async (
+  email: string,
+  studentId: string
+): Promise<CheckData> => {
+  try {
+    const fetchThirdService = await axios.post(
+      `${process.env.CHECK_URL}`,
+      { email, studentId },
+      {
+        headers: {
+          Authorization: `bearer ${process.env.TOKEN_CHECK_URL}`,
+          'Content-type': 'application/json',
+        },
+      }
+    );
+
+    const response = await fetchThirdService.data;
+
+    return {
+      checked: response,
+    };
+  } catch (error: any) {
+    return {
+      checked: false,
+      message: error.response.data.error,
+    };
   }
 };

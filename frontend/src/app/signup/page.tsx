@@ -15,6 +15,7 @@ import { FcGoogle } from 'react-icons/fc';
 import { LoginStatus, UserContext } from '@/context/userContext';
 import { getErrorMessage } from '@/auth/errors';
 import PasswordInput from '@/components/common/password-input';
+import NumberTextFieldInput from '@/components/common/noArrowsTextField';
 
 import {
   getAuth,
@@ -22,6 +23,11 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
+
+import {
+  studentValidation,
+  checkPasswords,
+} from '@/services/studentValidation';
 
 export default function SignUpPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -34,9 +40,10 @@ export default function SignUpPage() {
     useContext(UserContext);
 
   // User Input
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [studentId, setStudentID] = useState<string>('');
 
   // Alert Message
   const [alertMessage, setAlertMessage] = useState('');
@@ -53,7 +60,21 @@ export default function SignUpPage() {
   const handleEmailAuth = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (password === confirmPassword) {
+    const isPasswordMatch = checkPasswords(password, confirmPassword);
+
+    if (!isPasswordMatch) {
+      //eslint-disable-next-line
+      setAlertMessage("Password and Confirm Password doesn't match.");
+      return;
+    }
+
+    const checkStudentID = await studentValidation(email, studentId);
+
+    if (!checkStudentID.checked) {
+      setAlertMessage(checkStudentID.message!);
+
+      return;
+    } else {
       createUserWithEmailAndPassword(getAuth(), email, password)
         .then((result) => {
           setFirebaseAccount(result.user);
@@ -63,9 +84,6 @@ export default function SignUpPage() {
         .catch((error: any) => {
           setAlertMessage(getErrorMessage(error.code));
         });
-    } else {
-      //eslint-disable-next-line
-      setAlertMessage("Password and Confirm Password doesn't match");
     }
   };
 
@@ -147,6 +165,13 @@ export default function SignUpPage() {
                       <PasswordInput
                         label='Confirm Password'
                         setter={setConfirmPassword}
+                      />
+                    </FormControl>
+                    <FormControl required>
+                      <NumberTextFieldInput
+                        label={'Student ID'}
+                        maxLength={6}
+                        setStudentID={setStudentID}
                       />
                     </FormControl>
                     <Typography color='error'>{alertMessage}</Typography>

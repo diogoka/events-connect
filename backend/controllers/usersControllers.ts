@@ -6,6 +6,7 @@ import {
   createUserModel,
   getUserById,
   updateUserModel,
+  checkId,
 } from '../models/userModels';
 import { updateCourse } from '../models/courseModels';
 import { validateUserInput } from '../helpers/validateUser';
@@ -80,4 +81,15 @@ export const createUser = async (
   } catch (err: any) {
     res.status(500).send(err.message);
   }
+};
+
+export const matchStudentId = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { email, studentId } = req.body;
+
+  const checked = await checkId(email, studentId);
+
+  res.status(200).json(checked);
 };
