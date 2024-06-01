@@ -124,12 +124,17 @@ export default function AuthProvider({
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${firebaseAccount.uid}`
           )
           .then((res: any) => {
-            setUser(res.data);
-            setLoginStatus(LoginStatus.LoggedIn);
+            if (res.data) {
+              setUser(res.data);
+              setLoginStatus(LoginStatus.LoggedIn);
+            } else {
+              setUser(null);
+              setLoginStatus(LoginStatus.SigningUp);
+            }
           })
           .catch((error: any) => {
-            setUser(null);
-            setLoginStatus(LoginStatus.SigningUp);
+            //need to handle properly
+            console.log('No user in the DB');
           });
       }
       // When the user logged out or doesn't have an account

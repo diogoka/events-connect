@@ -1,7 +1,6 @@
 'use client';
 import { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import {
   useTheme,
   useMediaQuery,
@@ -11,17 +10,11 @@ import {
   Button,
   FormControl,
   Box,
-  Checkbox,
-  Link,
 } from '@mui/material';
 import { FcGoogle } from 'react-icons/fc';
 import { LoginStatus, UserContext } from '@/context/userContext';
 import { getErrorMessage } from '@/auth/errors';
 import PasswordInput from '@/components/common/password-input';
-import NameInput from '@/components/user/form/name-input';
-import CourseInput from '@/components/user/form/course-input';
-import { User } from '@/types/types';
-import { updateFirstName, updateLastName } from '@/common/functions';
 
 import {
   getAuth,
@@ -30,8 +23,6 @@ import {
   signInWithPopup,
 } from 'firebase/auth';
 
-import ModalAgreement from '@/components/login/modal-agreement';
-
 export default function SignUpPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -39,39 +30,23 @@ export default function SignUpPage() {
 
   const theme = useTheme();
 
-  const {
-    setUser,
-    firebaseAccount,
-    setFirebaseAccount,
-    loginStatus,
-    setLoginStatus,
-  } = useContext(UserContext);
+  const { setFirebaseAccount, loginStatus, setLoginStatus } =
+    useContext(UserContext);
 
   // User Input
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userName, setUserName] = useState<User>({
-    firstName: '',
-    lastName: '',
-  });
-
-  const [courseId, setCourseId] = useState('');
-  const [postalCode, setPostalCode] = useState('');
-  const [phone, setPhone] = useState('');
-  const [checked, setChecked] = useState<boolean>(false);
 
   // Alert Message
   const [alertMessage, setAlertMessage] = useState('');
 
-  //Modal
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  const handleClose = () => setOpenModal(false);
-  const handleOpen = () => setOpenModal(true);
-
   useEffect(() => {
     if (loginStatus === 'Logged In') {
       router.replace('/events');
+    }
+    if (loginStatus === 'Singing Up') {
+      router.replace('/signup/register');
     }
   }, [loginStatus]);
 
@@ -83,6 +58,7 @@ export default function SignUpPage() {
         .then((result) => {
           setFirebaseAccount(result.user);
           setLoginStatus(LoginStatus.SigningUp);
+          router.replace('/signup/register');
         })
         .catch((error: any) => {
           setAlertMessage(getErrorMessage(error.code));
@@ -93,58 +69,16 @@ export default function SignUpPage() {
     }
   };
 
-  const handleChangeCheckBox = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    event.preventDefault();
-    checked ? setChecked(false) : setChecked(true);
-  };
-
   const handleGoogleAuth = async () => {
     signInWithPopup(getAuth(), new GoogleAuthProvider())
       .then((result) => {
         setFirebaseAccount(result.user);
         setLoginStatus(LoginStatus.SigningUp);
+        router.replace('/signup/register');
       })
       .catch((error: any) => {
         setFirebaseAccount(null);
         setAlertMessage(getErrorMessage(error.code));
-      });
-  };
-
-  // Send user info to our server
-  const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!firebaseAccount) {
-      console.error('No firebase account');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('id', firebaseAccount.uid);
-    formData.append('email', firebaseAccount.email!);
-    formData.append('type', '2');
-    formData.append('courseId', courseId.toString());
-    formData.append('firstName', userName.firstName);
-    formData.append('lastName', userName.lastName);
-    formData.append('provider', firebaseAccount.providerData![0].providerId);
-    formData.append('avatarURL', firebaseAccount.photoURL!);
-
-    if (postalCode) formData.append('postalCode', postalCode);
-    if (phone) formData.append('phone', phone);
-
-    axios
-      .post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users`, formData, {
-        headers: { 'content-type': 'multipart/form-data' },
-      })
-      .then((res) => {
-        setUser(res.data);
-        setLoginStatus(LoginStatus.LoggedIn);
-        router.replace('/events');
-      })
-      .catch((error) => {
-        console.error(error.response.data);
       });
   };
 
@@ -243,86 +177,8 @@ export default function SignUpPage() {
               </Button>
             </Stack>
           )}
-
-          {/* Step2: Register for our app */}
-          {loginStatus === LoginStatus.SigningUp && (
-            <form onSubmit={handleSignup}>
-              <Stack rowGap={'20px'}>
-                <Stack rowGap={'10px'}>
-                  <NameInput
-                    name={userName.firstName}
-                    setName={updateFirstName}
-                    setUserName={setUserName}
-                    label='First Name'
-                  />
-                  <NameInput
-                    name={userName.lastName}
-                    setName={updateLastName}
-                    setUserName={setUserName}
-                    label='Last Name'
-                  />
-                  <CourseInput courseId={courseId} setCourseId={setCourseId} />
-                  <Box
-                    sx={{
-                      display: 'inline-flex',
-                      alignItems: 'flex-start',
-                      gap: '10px',
-                    }}
-                  >
-                    <Checkbox
-                      inputProps={{ 'aria-label': 'controlled' }}
-                      checked={checked}
-                      onChange={handleChangeCheckBox}
-                      sx={{
-                        padding: '0',
-                      }}
-                    />
-                    <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
-                      I acknowledge that I have read and understood the
-                      <Link
-                        type='button'
-                        component='button'
-                        sx={{
-                          '&:hover': {
-                            cursor: 'pointer',
-                          },
-                          marginLeft: '3px',
-                          fontSize: '15px',
-                        }}
-                        onClick={handleOpen}
-                      >
-                        {' '}
-                        Terms and Conditions.
-                      </Link>
-                    </Typography>
-                  </Box>
-                </Stack>
-                <Button
-                  type='submit'
-                  variant='contained'
-                  color='primary'
-                  fullWidth
-                  disabled={!checked}
-                  sx={{
-                    '&:disabled': {
-                      cursor: 'not-allowed',
-                      pointerEvents: 'auto',
-                    },
-                  }}
-                >
-                  Register
-                </Button>
-
-                <Typography variant='body2' align='center'>
-                  If you are an organizer, please contact admin:{' '}
-                  head.tech@ciccc.ca
-                </Typography>
-              </Stack>
-            </form>
-          )}
         </Stack>
       </Box>
-      <ModalAgreement openModal={openModal} handleClose={handleClose} />
     </>
   );
 }

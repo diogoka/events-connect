@@ -116,7 +116,7 @@ export default function LoginPage() {
         width={isMobile ? 'auto' : '600px'}
         maxWidth={isMobile ? '345px' : 'auto'}
         marginInline='auto'
-        padding={isMobile ? 'none' : '0 6rem 2rem 6rem'}
+        padding={isMobile ? 'none' : '2rem 6rem'}
         borderRadius='0.75rem'
         bgcolor='white'
         zIndex={100}
@@ -126,11 +126,17 @@ export default function LoginPage() {
           transform: isMobile ? '' : 'translate(-50%, -50%)',
         }}
       >
-        <Container sx={{ width: 'auto', margin: 'auto', paddingBlock: '2rem' }}>
+        <Container
+          sx={{
+            width: 'auto',
+            margin: 'auto',
+            padding: '0rem 2rem 2rem',
+          }}
+        >
           <Image
-            src='/eventllege_logo.svg'
-            width={170}
-            height={108}
+            src='/cornestone-connect-logo-blue-wide.png'
+            width={isMobile ? 267.4 : 305.6}
+            height={isMobile ? 70 : 80}
             alt='logo'
             priority
           />

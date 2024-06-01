@@ -12,20 +12,17 @@ export default function Logo() {
         <Button
           onClick={() => router.push('/')}
           sx={{
-            minWidth: 0,
-
-            width: 'auto',
-            height: 'auto',
             '&:hover': { background: 'none' },
           }}
           disableRipple
           disableTouchRipple
         >
+          {/* height * 3.72 (w/h) = weight */}
           <Image
-            src='/eventllege_Icon.svg'
-            alt='eventllege logo'
-            width={40}
-            height={40}
+            src='/cornestone-connect-logo-blue-wide.png'
+            alt='cornerstone-connect logo'
+            width={111.6}
+            height={30}
             priority={true}
           />
         </Button>
@@ -34,19 +31,19 @@ export default function Logo() {
         <Button
           onClick={() => router.push('/')}
           sx={{
-            width: '10rem',
-            height: '1.875rem',
+            minWidth: '223.20px',
             '&:hover': { background: 'none' },
           }}
           disableRipple
           disableTouchRipple
         >
           <Image
-            src='/eventllege_logoIcon.svg'
-            alt='eventllege logo'
-            width={152}
-            height={30}
+            src='/cornestone-connect-logo-blue-wide.png'
+            alt='cornerstone-connect logo'
+            width={223.2}
+            height={60}
             priority={true}
+            style={{ minWidth: '223.20px' }}
           />
         </Button>
       }

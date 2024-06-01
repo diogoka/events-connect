@@ -17,11 +17,7 @@ export const getUser = async (req: express.Request, res: express.Response) => {
 
   try {
     const user = await getUserResponse(userId);
-    if (user) {
-      res.status(200).json(user);
-    } else {
-      res.status(500).send('Failed to get user');
-    }
+    res.status(200).json(user);
   } catch (err: any) {
     res.status(500).send(err.message);
   }
@@ -199,27 +195,23 @@ async function getUserResponse(userId: string) {
       [userId]
     );
 
-    const user: UserResponse = {
-      id: userResult.rows[0].id,
-      roleId: userResult.rows[0].role_id,
-      roleName: userResult.rows[0].role_name,
-      firstName: userResult.rows[0].first_name,
-      lastName: userResult.rows[0].last_name,
-      email: userResult.rows[0].email,
-      postalCode: userResult.rows[0].postal_code,
-      phone: userResult.rows[0].phone,
-      provider: userResult.rows[0].provider,
-      avatarURL: userResult.rows[0].avatar_url,
-      courseId: 0,
-      courseName: '',
-    };
-
-    if (!user) {
-      return null;
-    }
-
-    const courseResult = await pool.query(
-      `
+    if (userResult.rows[0]) {
+      const user: UserResponse = {
+        id: userResult.rows[0].id,
+        roleId: userResult.rows[0].role_id,
+        roleName: userResult.rows[0].role_name,
+        firstName: userResult.rows[0].first_name,
+        lastName: userResult.rows[0].last_name,
+        email: userResult.rows[0].email,
+        postalCode: userResult.rows[0].postal_code,
+        phone: userResult.rows[0].phone,
+        provider: userResult.rows[0].provider,
+        avatarURL: userResult.rows[0].avatar_url,
+        courseId: 0,
+        courseName: '',
+      };
+      const courseResult = await pool.query(
+        `
         SELECT
             courses.id_course AS course_id,
             courses.name_course AS course_name
@@ -230,13 +222,16 @@ async function getUserResponse(userId: string) {
         WHERE
             users_courses.id_user = $1
         `,
-      [userId]
-    );
+        [userId]
+      );
 
-    user.courseId = courseResult.rows[0].course_id;
-    user.courseName = courseResult.rows[0].course_name;
+      user.courseId = courseResult.rows[0].course_id;
+      user.courseName = courseResult.rows[0].course_name;
 
-    return user;
+      return user;
+    } else {
+      return null;
+    }
   } catch (err: any) {
     console.error(err);
     return null;
