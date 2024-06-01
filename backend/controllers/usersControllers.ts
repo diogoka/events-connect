@@ -1,37 +1,11 @@
 import pool from '../db/db';
 import express from 'express';
-
-type UserInput = {
-  id: string;
-  type: number;
-  courseId: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  postalCode: string;
-  phone: string;
-  provider: string;
-  avatarURL: string;
-};
-
-type UserResponse = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string | null;
-  provider: string;
-  avatarURL: string | null;
-  roleId: number;
-  roleName: string;
-  postalCode: string | null;
-  courseId: number;
-  courseName: string;
-};
+import { UserInput, UserResponse } from '../types/types';
+import { getAllUsers } from '../models/userModels';
 
 export const getUsers = async (req: express.Request, res: express.Response) => {
   try {
-    const users = await pool.query('SELECT * FROM users');
+    const users = await getAllUsers();
     res.status(200).json(users.rows);
   } catch (err: any) {
     res.status(500).send(err.message);
