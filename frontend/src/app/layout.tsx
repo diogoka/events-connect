@@ -12,7 +12,7 @@ import { Box } from '@mui/material';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Eventllege',
+  title: 'Cornerstone Connect',
   description: 'Application for managing events',
 };
 

@@ -2,7 +2,7 @@ import React from 'react';
 import Switcher from '../common/switcher';
 import { useState, useContext } from 'react';
 import { UserContext } from '@/context/userContext';
-import { Avatar, IconButton, Drawer } from '@mui/material';
+import { Avatar, IconButton, Drawer, Box } from '@mui/material';
 import Hamburger from './hamburger';
 import Dropdown from './dropdown';
 
@@ -25,7 +25,9 @@ export default function AvatarIcon() {
   return (
     <Switcher
       sp={
-        <>
+        <Box
+          sx={{ width: '111.59px', display: 'flex', justifyContent: 'center' }}
+        >
           <IconButton onClick={() => toggleMenu(true)} sx={{ p: 0 }}>
             <Avatar
               alt={user?.firstName}
@@ -43,7 +45,7 @@ export default function AvatarIcon() {
           >
             <Hamburger toggleMenu={toggleMenu} />
           </Drawer>
-        </>
+        </Box>
       }
       pc={
         <>
