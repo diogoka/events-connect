@@ -50,4 +50,5 @@ export type UserResponse = {
   postalCode: string | null;
   courseId: number;
   courseName: string;
+  is_verified: boolean;
 };

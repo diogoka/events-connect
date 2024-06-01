@@ -115,9 +115,11 @@ export default function UserEditPage() {
     if (phone) formData.append('phone', phone);
     if (image) formData.append('avatarURL', url);
 
+    formData.append('is_verified', user.is_verified.toString());
+
     axios
       .put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users`, formData, {
-        headers: { 'content-type': 'multipart/form-data' },
+        headers: { 'content-type': 'application/json' },
       })
       .then((res) => {
         setUser(res.data);

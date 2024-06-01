@@ -1,7 +1,12 @@
 import { addingCourse } from './../models/courseModels';
 import express from 'express';
 import { UserInput } from '../types/types';
-import { getAllUsers, updateUser, getUserResponse } from '../models/userModels';
+import {
+  getAllUsers,
+  createUserModel,
+  getUserById,
+  updateUserModel,
+} from '../models/userModels';
 import { updateCourse } from '../models/courseModels';
 import { validateUserInput } from '../helpers/validateUser';
 
@@ -18,7 +23,7 @@ export const getUser = async (req: express.Request, res: express.Response) => {
   const userId = req.params.id;
 
   try {
-    const user = await getUserResponse(userId);
+    const user = await getUserById(userId);
     res.status(200).json(user);
   } catch (err: any) {
     res.status(500).send(err.message);
@@ -36,12 +41,12 @@ export const editUser = async (req: express.Request, res: express.Response) => {
 
   try {
     // Add a new user to DB
-    await updateUser(userInput);
+    await updateUserModel(userInput);
 
     // Add user's course to DB
     await updateCourse(userInput);
 
-    const user = await getUserResponse(userInput.id);
+    const user = await getUserById(userInput.id);
     if (user) {
       res.status(200).json(user);
     } else {
@@ -57,12 +62,7 @@ export const createUser = async (
   res: express.Response
 ) => {
   const userInput: UserInput = req.body;
-
-  console.log('UserInput', userInput);
-
   const { result, message } = validateUserInput(userInput);
-  console.log('result', result);
-
   if (!result) {
     res.status(500).send(message);
     return;
@@ -70,12 +70,12 @@ export const createUser = async (
 
   try {
     // Add a new user to DB
-    await updateUser(userInput);
+    await createUserModel(userInput);
 
     // Add user's course to DB
     await addingCourse(userInput);
 
-    const user = await getUserResponse(userInput.id);
+    const user = await getUserById(userInput.id);
     res.status(200).json(user);
   } catch (err: any) {
     res.status(500).send(err.message);

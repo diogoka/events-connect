@@ -81,8 +81,6 @@ export default function SignUpPage() {
     if (postalCode) formData.append('postalCode', postalCode);
     if (phone) formData.append('phone', phone);
 
-    console.log('formData');
-
     axios
       .post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users`, formData, {
         headers: { 'content-type': 'application/json' },

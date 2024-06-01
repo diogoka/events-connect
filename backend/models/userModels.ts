@@ -6,8 +6,8 @@ export const getAllUsers = async () => {
   return allUsers;
 };
 
-export const updateUser = async (userInput: UserInput) => {
-  const updateUser = await pool.query(
+export const createUserModel = async (userInput: UserInput) => {
+  await pool.query(
     `
             INSERT INTO
                 users (id_user, id_user_type, first_name_user, last_name_user, email_user, postal_code_user, phone_user, avatar_url, provider, is_verified)
@@ -31,7 +31,33 @@ export const updateUser = async (userInput: UserInput) => {
   );
 };
 
-export const getUserResponse = async (userId: string) => {
+export const updateUserModel = async (userInput: UserInput) => {
+  await pool.query(
+    `
+            UPDATE
+                users
+            SET
+                id_user_type = $1, first_name_user = $2, last_name_user = $3, email_user = $4, postal_code_user = $5, phone_user = $6, avatar_url = $7, is_verified = $8
+            WHERE
+                id_user = $9
+            RETURNING
+                *;
+            `,
+    [
+      userInput.type,
+      userInput.firstName,
+      userInput.lastName,
+      userInput.email,
+      userInput.postalCode,
+      userInput.phone,
+      userInput.avatarURL,
+      userInput.is_verified,
+      userInput.id,
+    ]
+  );
+};
+
+export const getUserById = async (userId: string) => {
   try {
     const userResult = await pool.query(
       `
@@ -45,7 +71,8 @@ export const getUserResponse = async (userId: string) => {
             users.postal_code_user AS postal_code,
             users.phone_user AS phone,
             users.provider AS provider,
-            users.avatar_url AS avatar_url
+            users.avatar_url AS avatar_url,
+            users.is_verified AS is_verified
         FROM
             users
         JOIN
@@ -70,6 +97,7 @@ export const getUserResponse = async (userId: string) => {
         avatarURL: userResult.rows[0].avatar_url,
         courseId: 0,
         courseName: '',
+        is_verified: userResult.rows[0].is_verified,
       };
       const courseResult = await pool.query(
         `

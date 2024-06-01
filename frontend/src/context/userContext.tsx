@@ -22,6 +22,7 @@ export type User = {
   profilePhoto?: string;
   provider?: string;
   avatarURL: string;
+  is_verified: boolean;
 };
 
 export type FirebaseAccount = {
