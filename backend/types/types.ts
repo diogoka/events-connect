@@ -34,6 +34,7 @@ export type UserInput = {
   phone: string;
   provider: string;
   avatarURL: string;
+  is_verified: boolean;
 };
 
 export type UserResponse = {

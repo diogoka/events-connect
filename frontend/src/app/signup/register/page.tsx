@@ -35,9 +35,9 @@ export default function SignUpPage() {
     lastName: '',
   });
 
-  const [courseId, setCourseId] = useState('');
-  const [postalCode] = useState('');
-  const [phone] = useState('');
+  const [courseId, setCourseId] = useState<string>('');
+  const [postalCode] = useState<string>('');
+  const [phone] = useState<string>('');
   const [checked, setChecked] = useState<boolean>(false);
 
   //Modal
@@ -76,13 +76,16 @@ export default function SignUpPage() {
     formData.append('lastName', userName.lastName);
     formData.append('provider', firebaseAccount.providerData![0].providerId);
     formData.append('avatarURL', firebaseAccount.photoURL!);
+    formData.append('is_verified', 'false');
 
     if (postalCode) formData.append('postalCode', postalCode);
     if (phone) formData.append('phone', phone);
 
+    console.log('formData');
+
     axios
       .post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users`, formData, {
-        headers: { 'content-type': 'multipart/form-data' },
+        headers: { 'content-type': 'application/json' },
       })
       .then((res) => {
         setUser(res.data);

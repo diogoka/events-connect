@@ -178,7 +178,7 @@ export default function PreviewEventPage() {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/new`,
           formData,
           {
-            headers: { 'Content-Type': 'multipart/form-data' },
+            headers: { 'Content-Type': 'application/json' },
           }
         )
         .then((res) => {

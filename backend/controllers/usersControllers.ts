@@ -1,7 +1,9 @@
-import pool from '../db/db';
+import { addingCourse } from './../models/courseModels';
 import express from 'express';
-import { UserInput, UserResponse } from '../types/types';
-import { getAllUsers } from '../models/userModels';
+import { UserInput } from '../types/types';
+import { getAllUsers, updateUser, getUserResponse } from '../models/userModels';
+import { updateCourse } from '../models/courseModels';
+import { validateUserInput } from '../helpers/validateUser';
 
 export const getUsers = async (req: express.Request, res: express.Response) => {
   try {
@@ -34,43 +36,10 @@ export const editUser = async (req: express.Request, res: express.Response) => {
 
   try {
     // Add a new user to DB
-    await pool.query(
-      `
-            UPDATE
-                users
-            SET
-                id_user_type = $1, first_name_user = $2, last_name_user = $3, email_user = $4, postal_code_user = $5, phone_user = $6, avatar_url = $7
-            WHERE
-                id_user = $8
-            RETURNING
-                *;
-            `,
-      [
-        userInput.type,
-        userInput.firstName,
-        userInput.lastName,
-        userInput.email,
-        userInput.postalCode,
-        userInput.phone,
-        userInput.avatarURL,
-        userInput.id,
-      ]
-    );
+    await updateUser(userInput);
 
     // Add user's course to DB
-    await pool.query(
-      `
-            UPDATE
-                users_courses
-            SET
-                id_course = $1
-            WHERE
-                id_user = $2
-            RETURNING
-                *;
-        `,
-      [userInput.courseId, userInput.id]
-    );
+    await updateCourse(userInput);
 
     const user = await getUserResponse(userInput.id);
     if (user) {
@@ -88,7 +57,12 @@ export const createUser = async (
   res: express.Response
 ) => {
   const userInput: UserInput = req.body;
+
+  console.log('UserInput', userInput);
+
   const { result, message } = validateUserInput(userInput);
+  console.log('result', result);
+
   if (!result) {
     res.status(500).send(message);
     return;
@@ -96,40 +70,10 @@ export const createUser = async (
 
   try {
     // Add a new user to DB
-    await pool.query(
-      `
-            INSERT INTO
-                users (id_user, id_user_type, first_name_user, last_name_user, email_user, postal_code_user, phone_user, avatar_url, provider)
-            VALUES
-                ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            RETURNING
-                *;
-            `,
-      [
-        userInput.id,
-        userInput.type,
-        userInput.firstName,
-        userInput.lastName,
-        userInput.email,
-        userInput.postalCode,
-        userInput.phone,
-        userInput.avatarURL,
-        userInput.provider,
-      ]
-    );
+    await updateUser(userInput);
 
     // Add user's course to DB
-    await pool.query(
-      `
-            INSERT INTO
-                users_courses (id_user, id_course)
-            VALUES
-                ($1, $2)
-            RETURNING
-                *;
-        `,
-      [userInput.id, userInput.courseId]
-    );
+    await addingCourse(userInput);
 
     const user = await getUserResponse(userInput.id);
     res.status(200).json(user);
@@ -137,103 +81,3 @@ export const createUser = async (
     res.status(500).send(err.message);
   }
 };
-
-function validateUserInput(userInput: UserInput): {
-  result: boolean;
-  message: string;
-} {
-  let result = false;
-  let message = '';
-
-  if (!userInput.id) {
-    message = 'Invalid user ID';
-  } else if (isNaN(userInput.type)) {
-    message = 'Invalid User Type';
-  } else if (isNaN(userInput.courseId)) {
-    message = 'Invalid Course ID';
-  } else if (!/^[^@]+@[^.]+\..+$/.test(userInput.email)) {
-    message = 'Invalid Email';
-  } else if (
-    userInput.postalCode &&
-    !/^[A-Za-z0-9]{3}[-\s]?[A-Za-z0-9]{3}$/.test(userInput.postalCode)
-  ) {
-    message = 'Invalid Postal Code';
-  } else if (userInput.phone && !/^[0-9-]+$/.test(userInput.phone)) {
-    message = 'Invalid Phone Number';
-  } else {
-    result = true;
-  }
-
-  return {
-    result,
-    message,
-  };
-}
-
-async function getUserResponse(userId: string) {
-  try {
-    const userResult = await pool.query(
-      `
-        SELECT
-            users.id_user AS id,
-            users.id_user_type AS role_id,
-            users_type.role_user AS role_name,
-            users.first_name_user AS first_name,
-            users.last_name_user AS last_name,
-            users.email_user AS email,
-            users.postal_code_user AS postal_code,
-            users.phone_user AS phone,
-            users.provider AS provider,
-            users.avatar_url AS avatar_url
-        FROM
-            users
-        JOIN
-            users_type ON users.id_user_type = users_type.id_user_type
-        WHERE
-            users.id_user = $1
-        `,
-      [userId]
-    );
-
-    if (userResult.rows[0]) {
-      const user: UserResponse = {
-        id: userResult.rows[0].id,
-        roleId: userResult.rows[0].role_id,
-        roleName: userResult.rows[0].role_name,
-        firstName: userResult.rows[0].first_name,
-        lastName: userResult.rows[0].last_name,
-        email: userResult.rows[0].email,
-        postalCode: userResult.rows[0].postal_code,
-        phone: userResult.rows[0].phone,
-        provider: userResult.rows[0].provider,
-        avatarURL: userResult.rows[0].avatar_url,
-        courseId: 0,
-        courseName: '',
-      };
-      const courseResult = await pool.query(
-        `
-        SELECT
-            courses.id_course AS course_id,
-            courses.name_course AS course_name
-        FROM
-            users_courses
-        JOIN
-            courses ON users_courses.id_course = courses.id_course
-        WHERE
-            users_courses.id_user = $1
-        `,
-        [userId]
-      );
-
-      user.courseId = courseResult.rows[0].course_id;
-      user.courseName = courseResult.rows[0].course_name;
-
-      return user;
-    } else {
-      return null;
-    }
-  } catch (err: any) {
-    console.error(err);
-    return null;
-  }
-}
