@@ -42,12 +42,17 @@ export const editUser = async (req: express.Request, res: express.Response) => {
 
   try {
     // Add a new user to DB
-    await updateUserModel(userInput);
+    const updatedUser = await updateUserModel(userInput);
 
     // Add user's course to DB
-    await updateCourse(userInput);
+    const updatedCourse = await updateCourse(userInput);
 
     const user = await getUserById(userInput.id);
+
+    console.log('updatedUser', updatedUser);
+
+    console.log('user', user);
+
     if (user) {
       res.status(200).json(user);
     } else {
@@ -63,6 +68,7 @@ export const createUser = async (
   res: express.Response
 ) => {
   const userInput: UserInput = req.body;
+
   const { result, message } = validateUserInput(userInput);
   if (!result) {
     res.status(500).send(message);
@@ -71,13 +77,11 @@ export const createUser = async (
 
   try {
     // Add a new user to DB
-    await createUserModel(userInput);
-
+    const newUser = await createUserModel(userInput);
     // Add user's course to DB
-    await addingCourse(userInput);
-
-    const user = await getUserById(userInput.id);
-    res.status(200).json(user);
+    const newUserCourse = await addingCourse(userInput);
+    const userRes = { ...newUser, ...newUserCourse };
+    res.status(200).json(userRes);
   } catch (err: any) {
     res.status(500).send(err.message);
   }
@@ -88,8 +92,6 @@ export const matchStudentId = async (
   res: express.Response
 ) => {
   const { email, studentId } = req.body;
-
   const checked = await checkId(email, studentId);
-
   res.status(200).json(checked);
 };

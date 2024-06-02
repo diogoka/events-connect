@@ -35,6 +35,7 @@ export type UserInput = {
   provider: string;
   avatarURL: string;
   is_verified: boolean;
+  student_id: string;
 };
 
 export type UserResponse = {
@@ -51,6 +52,7 @@ export type UserResponse = {
   courseId: number;
   courseName: string;
   is_verified: boolean;
+  student_id: number;
 };
 
 export type CheckData = {

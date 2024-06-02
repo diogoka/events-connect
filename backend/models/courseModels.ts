@@ -29,6 +29,29 @@ export const addingCourse = async (userInput: UserInput) => {
         `,
     [userInput.id, userInput.courseId]
   );
+
+  const courseName = await getNameCourse(userInput.id);
+
+  return courseName;
+};
+
+export const getNameCourse = async (userId: string) => {
+  const nameCourse = await pool.query(
+    `
+        SELECT
+            courses.id_course AS "courseId",
+            courses.name_course AS "courseName"
+        FROM
+            users_courses
+        JOIN
+            courses ON users_courses.id_course = courses.id_course
+        WHERE
+            users_courses.id_user = $1
+        `,
+    [userId]
+  );
+
+  return nameCourse.rows[0];
 };
 
 export const getAllCourses = async () => {

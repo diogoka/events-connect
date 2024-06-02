@@ -8,14 +8,24 @@ export const getAllUsers = async () => {
 };
 
 export const createUserModel = async (userInput: UserInput) => {
-  await pool.query(
+  const newUser = await pool.query(
     `
             INSERT INTO
-                users (id_user, id_user_type, first_name_user, last_name_user, email_user, postal_code_user, phone_user, avatar_url, provider, is_verified)
+                users (id_user, id_user_type, first_name_user, last_name_user, email_user, postal_code_user, phone_user, avatar_url, provider, is_verified_user, student_id_user)
             VALUES
-                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             RETURNING
-                *;
+                id_user AS id,
+                id_user_type AS "roleId",
+                first_name_user AS "firstName",
+                last_name_user AS "lastName",
+                email_user AS email,
+                postal_code_user AS "postalCode",
+                phone_user AS phone,
+                provider,
+                avatar_url as "avatarURL",
+                is_verified_user as "isVerified", 
+                student_id_user as "studentId";
             `,
     [
       userInput.id,
@@ -28,8 +38,18 @@ export const createUserModel = async (userInput: UserInput) => {
       userInput.avatarURL,
       userInput.provider,
       userInput.is_verified,
+      userInput.student_id,
     ]
   );
+
+  const userRoleName = await pool.query(
+    `SELECT role_user AS "roleName" FROM users_type WHERE id_user_type = $1 `,
+    [userInput.type]
+  );
+
+  const newUserComplete = { ...newUser.rows[0], ...userRoleName.rows[0] };
+
+  return newUserComplete;
 };
 
 export const updateUserModel = async (userInput: UserInput) => {
@@ -38,9 +58,9 @@ export const updateUserModel = async (userInput: UserInput) => {
             UPDATE
                 users
             SET
-                id_user_type = $1, first_name_user = $2, last_name_user = $3, email_user = $4, postal_code_user = $5, phone_user = $6, avatar_url = $7, is_verified = $8
+                id_user_type = $1, first_name_user = $2, last_name_user = $3, email_user = $4, postal_code_user = $5, phone_user = $6, avatar_url = $7
             WHERE
-                id_user = $9
+                id_user = $8
             RETURNING
                 *;
             `,
@@ -52,7 +72,6 @@ export const updateUserModel = async (userInput: UserInput) => {
       userInput.postalCode,
       userInput.phone,
       userInput.avatarURL,
-      userInput.is_verified,
       userInput.id,
     ]
   );
@@ -73,7 +92,8 @@ export const getUserById = async (userId: string) => {
             users.phone_user AS phone,
             users.provider AS provider,
             users.avatar_url AS avatar_url,
-            users.is_verified AS is_verified
+            users.is_verified_user AS is_verified,
+            users.student_id_user AS student_id
         FROM
             users
         JOIN
@@ -99,6 +119,7 @@ export const getUserById = async (userId: string) => {
         courseId: 0,
         courseName: '',
         is_verified: userResult.rows[0].is_verified,
+        student_id: userResult.rows[0].student_id,
       };
       const courseResult = await pool.query(
         `
@@ -127,7 +148,6 @@ export const getUserById = async (userId: string) => {
     return null;
   }
 };
-
 export const checkId = async (
   email: string,
   studentId: string
