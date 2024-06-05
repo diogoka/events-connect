@@ -1,5 +1,6 @@
 'use client';
 import React, { createContext, ReactNode, useState } from 'react';
+import { FirebaseAccount } from '../types/types';
 
 export enum LoginStatus {
   Unknown = 'Unknown',
@@ -22,26 +23,17 @@ export type User = {
   profilePhoto?: string;
   provider?: string;
   avatarURL: string;
-  is_verified: boolean;
-};
-
-export type FirebaseAccount = {
-  uid: string;
-  email: string | null;
-  displayName?: string | null;
-  photoURL?: string | null;
-  providerData?: Array<ProviderData>;
-};
-
-type ProviderData = {
-  providerId: string;
+  isVerified: boolean;
+  studentId: number;
 };
 
 type UserContextProps = {
   user: User | null;
   setUser: (userStatus: User | null) => void;
   firebaseAccount: FirebaseAccount | null;
-  setFirebaseAccount: (firebaseAccount: FirebaseAccount | null) => void;
+  setFirebaseAccount: React.Dispatch<
+    React.SetStateAction<FirebaseAccount | null>
+  >;
   loginStatus: LoginStatus;
   setLoginStatus: (loginStatus: LoginStatus) => void;
 };
@@ -52,9 +44,16 @@ export const UserContext = createContext<UserContextProps>(
 
 export function UserContextProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+
   const [firebaseAccount, setFirebaseAccount] =
     useState<FirebaseAccount | null>(null);
-  const [loginStatus, setLoginStatus] = useState(LoginStatus.Unknown);
+  const [loginStatus, setLoginStatus] = useState<LoginStatus>(
+    LoginStatus.LoggedOut
+  );
+
+  console.log('User-context: ', user);
+  console.log('FirebaseAccount-context', firebaseAccount);
+  console.log('login-status-context', loginStatus);
 
   return (
     <UserContext.Provider

@@ -4,7 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 import { initializeFirebase } from '@/auth/firebase';
 
-import { getAuth } from 'firebase/auth';
+import { getAuth, deleteUser } from 'firebase/auth';
 import { useMediaQuery, Box } from '@mui/material';
 import { UserContext, LoginStatus } from '@/context/userContext';
 import { PageContext, PageStatus } from '@/context/pageContext';
@@ -103,25 +103,51 @@ export default function AuthProvider({
   const pathname = usePathname();
 
   const { pageStatus, setPageStatus } = useContext(PageContext);
-  const { user, setUser, setFirebaseAccount, loginStatus, setLoginStatus } =
-    useContext(UserContext);
+  const {
+    user: userContext,
+    setUser,
+    setFirebaseAccount,
+    loginStatus,
+    setLoginStatus,
+    firebaseAccount: firebaseAccountContext,
+  } = useContext(UserContext);
 
   useEffect(() => {
     initializeFirebase;
 
+    console.log('FireContext', firebaseAccountContext);
+    console.log('UserContext', userContext);
+    console.log('status', loginStatus);
+
     getAuth().onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
+
+      console.log('GetAuth()', firebaseAccount);
+      console.log('loginStatus', loginStatus);
+
+      if (loginStatus === LoginStatus.SigningUp) {
+      }
+
       if (loginStatus !== LoginStatus.Unknown) {
+        console.log('LS');
+
         return;
       }
 
       if (firebaseAccount) {
-        setFirebaseAccount(firebaseAccount);
+        setFirebaseAccount({
+          uid: firebaseAccount!.uid,
+          email: firebaseAccount!.email,
+          providerData: firebaseAccount!.providerData,
+          studentId: '',
+        });
 
         // Get user data from server
         axios
           .get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${firebaseAccount.uid}`
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${
+              firebaseAccount!.uid
+            }`
           )
           .then((res: any) => {
             if (res.data) {
@@ -161,8 +187,8 @@ export default function AuthProvider({
     // If user is logged in
     else if (loginStatus === LoginStatus.LoggedIn) {
       // If this user is a student
-      if (user) {
-        if (user.roleName === 'student') {
+      if (userContext) {
+        if (userContext.roleName === 'student') {
           // Give permission only to allowed pages
           if (
             !(
@@ -263,6 +289,17 @@ export default function AuthProvider({
     </>
   );
 }
+
+export const deleteAccount = async () => {
+  getAuth().onAuthStateChanged(async (firebaseAccount) => {
+    if (firebaseAccount) {
+      console.log(firebaseAccount);
+      const deleted = await deleteUser(firebaseAccount!);
+    } else {
+      console.log('No user is authenticated.');
+    }
+  });
+};
 
 function getPage(pathname: string): Page | undefined {
   return PAGES.find((PAGE: Page) => {

@@ -9,12 +9,12 @@ export const updateCourse = async (userInput: UserInput) => {
             SET
                 id_course = $1
             WHERE
-                id_user = $2
-            RETURNING
-                *;
+                id_user = $2;
         `,
     [userInput.courseId, userInput.id]
   );
+  const courseName = await getNameCourse(userInput.id);
+  return courseName;
 };
 
 export const addingCourse = async (userInput: UserInput) => {

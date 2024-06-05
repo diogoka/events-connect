@@ -16,18 +16,30 @@ import { LoginStatus, UserContext } from '@/context/userContext';
 
 import NameInput from '@/components/user/form/name-input';
 import CourseInput from '@/components/user/form/course-input';
-import { User } from '@/types/types';
+import { User, RegisterMessage } from '@/types/types';
 import { updateFirstName, updateLastName } from '@/common/functions';
 
 import ModalAgreement from '@/components/login/modal-agreement';
+import NumberTextFieldInput from '@/components/common/noArrowsTextField';
+import { studentValidation } from '@/services/studentValidation';
+
+import { deleteAccount } from '@/auth/auth-provider';
+import { signOut, getAuth } from 'firebase/auth';
+import Background from '@/components/registering/background';
+import AlertMessage from '@/components/registering/alertMessage';
 
 export default function SignUpPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const router = useRouter();
 
-  const { setUser, firebaseAccount, loginStatus, setLoginStatus } =
-    useContext(UserContext);
+  const {
+    setUser,
+    firebaseAccount,
+    loginStatus,
+    setLoginStatus,
+    setFirebaseAccount,
+  } = useContext(UserContext);
 
   // User Input
   const [userName, setUserName] = useState<User>({
@@ -44,12 +56,23 @@ export default function SignUpPage() {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const handleClose = () => setOpenModal(false);
   const handleOpen = () => setOpenModal(true);
+  const [studentId, setStudentID] = useState<string>('');
+  const [registerMessage, setRegisterMessage] = useState<RegisterMessage>({
+    showMessage: false,
+    message: '',
+    severity: 'info',
+  });
+
+  const isGoogle =
+    firebaseAccount?.providerData?.[0]?.providerId === 'google.com';
 
   useEffect(() => {
-    if (loginStatus === 'Logged In') {
-      router.replace('/events');
+    console.log('useEffect');
+
+    if (!firebaseAccount) {
+      router.replace('/signup');
     }
-  }, [loginStatus]);
+  }, []);
 
   const handleChangeCheckBox = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -58,58 +81,126 @@ export default function SignUpPage() {
     checked ? setChecked(false) : setChecked(true);
   };
 
-  // Send user info to our server
-  const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleGoogleAuth = async () => {
+    const checkStudentID = await studentValidation(
+      firebaseAccount!.email!,
+      studentId
+    );
 
-    if (!firebaseAccount) {
-      console.error('No firebase account');
-      return;
+    if (!checkStudentID.checked) {
+      //Means error
+      handleCheckError(checkStudentID.code!, checkStudentID.message!);
+    } else {
+      await sendUserToServer();
     }
+  };
 
+  const handleCheckError = async (code: number, message: string) => {
+    //code 3 is email is not in the class365
+
+    if (code === 3) {
+      //open modal
+
+      const deletion = await deleteAccount();
+      setFirebaseAccount(null);
+      setLoginStatus(LoginStatus.LoggedOut);
+      handleMessage(
+        {
+          showMessage: true,
+          message: `${message}. You are being redirected to Sign up. \n Please, select a different email.`,
+          severity: 'error',
+        },
+        7,
+        '/signup'
+      );
+    } else {
+      handleMessage(
+        { showMessage: true, message: message, severity: 'error' },
+        5
+      );
+    }
+  };
+
+  const handleMessage = (
+    messageToShow: RegisterMessage,
+    time: number,
+    navigate?: string
+  ) => {
+    setRegisterMessage({
+      showMessage: messageToShow.showMessage,
+      message: messageToShow.message,
+      severity: messageToShow.severity,
+    });
+
+    setTimeout(() => {
+      setRegisterMessage({ showMessage: false, message: '', severity: 'info' });
+      console.log('navigate', navigate);
+
+      if (navigate) {
+        router.replace(navigate);
+      }
+    }, time * 1000);
+  };
+
+  const sendUserToServer = async () => {
     const formData = new FormData();
-    formData.append('id', firebaseAccount.uid);
-    formData.append('email', firebaseAccount.email!);
+    formData.append('id', firebaseAccount!.uid);
+    formData.append('email', firebaseAccount!.email!);
     formData.append('type', '2');
     formData.append('courseId', courseId.toString());
     formData.append('firstName', userName.firstName);
     formData.append('lastName', userName.lastName);
-    formData.append('provider', firebaseAccount.providerData![0].providerId);
-    formData.append('avatarURL', firebaseAccount.photoURL!);
+    formData.append('provider', firebaseAccount!.providerData![0].providerId);
+    formData.append('avatarURL', firebaseAccount!.photoURL!);
     formData.append('is_verified', 'false');
-
+    formData.append(
+      'student_id',
+      firebaseAccount!.studentId === '' ? studentId : firebaseAccount!.studentId
+    );
     if (postalCode) formData.append('postalCode', postalCode);
     if (phone) formData.append('phone', phone);
 
-    axios
+    await axios
       .post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users`, formData, {
         headers: { 'content-type': 'application/json' },
       })
       .then((res) => {
-        setUser(res.data);
-        setLoginStatus(LoginStatus.LoggedIn);
-        router.replace('/events');
+        handleMessage(
+          {
+            showMessage: true,
+            message: `${res.data} Please verify your email.`,
+            severity: 'success',
+          },
+          6,
+          '/login'
+        );
+        setFirebaseAccount(null);
+        setLoginStatus(LoginStatus.LoggedOut);
+        signOut(getAuth());
       })
       .catch((error) => {
         console.error(error.response.data);
       });
   };
 
+  //Handle different type of sign up
+  const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!firebaseAccount) {
+      console.error('No firebase account');
+      return;
+    }
+    if (!isGoogle) {
+      sendUserToServer();
+    } else {
+      handleGoogleAuth();
+    }
+  };
+
   return (
     <>
-      {!isMobile && (
-        <Box
-          width='100%'
-          height='calc(100vh - 4rem)'
-          position='absolute'
-          sx={{
-            inset: '4rem auto auto 0',
-            backgroundImage: 'url("/auth-bg.png")',
-            backgroundSize: 'cover',
-            backgroundPositionX: '50%',
-          }}
-        ></Box>
-      )}
+      {!isMobile && <Background registerMessage={registerMessage} />}
 
       <Box
         bgcolor='white'
@@ -135,13 +226,13 @@ export default function SignUpPage() {
               variant='h1'
               fontWeight='bold'
             >
-              Sign Up
+              Finish Registration
             </Typography>
           )}
 
           {/* Step2: Register for our app */}
 
-          <form onSubmit={handleSignup}>
+          <form onSubmit={handleSignUp}>
             <Stack rowGap={'20px'}>
               <Stack rowGap={'10px'}>
                 <NameInput
@@ -157,6 +248,14 @@ export default function SignUpPage() {
                   label='Last Name'
                 />
                 <CourseInput courseId={courseId} setCourseId={setCourseId} />
+
+                {isGoogle && (
+                  <NumberTextFieldInput
+                    label={'Student ID'}
+                    maxLength={6}
+                    setStudentID={setStudentID}
+                  />
+                )}
                 <Box
                   sx={{
                     display: 'inline-flex',

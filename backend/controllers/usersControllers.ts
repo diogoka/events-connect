@@ -7,9 +7,12 @@ import {
   getUserById,
   updateUserModel,
   checkId,
+  verifyEmail,
 } from '../models/userModels';
 import { updateCourse } from '../models/courseModels';
 import { validateUserInput } from '../helpers/validateUser';
+import { sendEmail, sendConfirmationEmail } from '../helpers/mail';
+import { generateToken, checkToken } from '../helpers/tokenHandler';
 
 export const getUsers = async (req: express.Request, res: express.Response) => {
   try {
@@ -25,7 +28,12 @@ export const getUser = async (req: express.Request, res: express.Response) => {
 
   try {
     const user = await getUserById(userId);
-    res.status(200).json(user);
+
+    if (!user?.is_verified) {
+      return res.status(401).send('Email is not verified.');
+    } else {
+      res.status(200).json(user);
+    }
   } catch (err: any) {
     res.status(500).send(err.message);
   }
@@ -41,23 +49,15 @@ export const editUser = async (req: express.Request, res: express.Response) => {
   }
 
   try {
-    // Add a new user to DB
+    // Update User
     const updatedUser = await updateUserModel(userInput);
 
-    // Add user's course to DB
+    // Update Course
     const updatedCourse = await updateCourse(userInput);
 
-    const user = await getUserById(userInput.id);
+    const fullUpdated = { ...updatedUser, ...updatedCourse };
 
-    console.log('updatedUser', updatedUser);
-
-    console.log('user', user);
-
-    if (user) {
-      res.status(200).json(user);
-    } else {
-      res.status(500).send('Failed to edit user');
-    }
+    res.status(200).json(fullUpdated);
   } catch (err: any) {
     res.status(500).send(err.message);
   }
@@ -81,7 +81,12 @@ export const createUser = async (
     // Add user's course to DB
     const newUserCourse = await addingCourse(userInput);
     const userRes = { ...newUser, ...newUserCourse };
-    res.status(200).json(userRes);
+
+    const token = generateToken(userInput.id, userInput.email);
+
+    await sendConfirmationEmail(userInput.email, token);
+
+    res.status(200).send('User Created.');
   } catch (err: any) {
     res.status(500).send(err.message);
   }
@@ -94,4 +99,37 @@ export const matchStudentId = async (
   const { email, studentId } = req.body;
   const checked = await checkId(email, studentId);
   res.status(200).json(checked);
+};
+
+export const validateEmail = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { token } = req.params;
+
+  const tokenValidation = checkToken(token);
+
+  if (tokenValidation.valid) {
+    const isVerified = await verifyEmail(tokenValidation.payload as string);
+
+    if (isVerified.verified) {
+      res
+        .status(200)
+        .json(`${isVerified.message} You can close this window now.`);
+    } else {
+      res.status(400).json(`${isVerified.message}`);
+    }
+  } else {
+    if (tokenValidation.message === 'jwt expired') {
+      const tokenChecked = tokenValidation!.payload!;
+
+      const newToken = generateToken(tokenChecked.id, tokenChecked.email);
+      await sendConfirmationEmail(tokenChecked.email, newToken);
+      res
+        .status(400)
+        .json('Token expired. A new one was generated. Check your email');
+    } else {
+      res.status(401).json('Unauthorized.');
+    }
+  }
 };

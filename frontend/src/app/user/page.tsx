@@ -18,6 +18,8 @@ export default function UserPage() {
   const { user, firebaseAccount } = useContext(UserContext);
   const { setPageStatus } = useContext(PageContext);
 
+  console.log('user', user);
+
   useEffect(() => {
     setPageStatus(PageStatus.Ready);
   });

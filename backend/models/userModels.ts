@@ -7,6 +7,15 @@ export const getAllUsers = async () => {
   return allUsers;
 };
 
+export const getUserRoleName = async (type: number) => {
+  const userRoleName = await pool.query(
+    `SELECT role_user AS "roleName" FROM users_type WHERE id_user_type = $1 `,
+    [type]
+  );
+
+  return userRoleName.rows[0];
+};
+
 export const createUserModel = async (userInput: UserInput) => {
   const newUser = await pool.query(
     `
@@ -42,18 +51,14 @@ export const createUserModel = async (userInput: UserInput) => {
     ]
   );
 
-  const userRoleName = await pool.query(
-    `SELECT role_user AS "roleName" FROM users_type WHERE id_user_type = $1 `,
-    [userInput.type]
-  );
-
-  const newUserComplete = { ...newUser.rows[0], ...userRoleName.rows[0] };
+  const userRoleName = await getUserRoleName(userInput.type);
+  const newUserComplete = { ...newUser.rows[0], ...userRoleName };
 
   return newUserComplete;
 };
 
 export const updateUserModel = async (userInput: UserInput) => {
-  await pool.query(
+  const updatedUser = await pool.query(
     `
             UPDATE
                 users
@@ -62,7 +67,15 @@ export const updateUserModel = async (userInput: UserInput) => {
             WHERE
                 id_user = $8
             RETURNING
-                *;
+                id_user_type AS "roleId",
+                first_name_user AS "firstName",
+                last_name_user AS "lastName",
+                email_user as email,
+                postal_code_user as "postalCode",
+                phone_user as phone,
+                avatar_url as "avatarURL",
+                id_user as id,
+                student_id_user as "studentId";
             `,
     [
       userInput.type,
@@ -75,6 +88,12 @@ export const updateUserModel = async (userInput: UserInput) => {
       userInput.id,
     ]
   );
+
+  const roleName = await getUserRoleName(userInput.type);
+
+  const updatedUserComplete = { ...updatedUser.rows[0], ...roleName };
+
+  return updatedUserComplete;
 };
 
 export const getUserById = async (userId: string) => {
@@ -148,6 +167,29 @@ export const getUserById = async (userId: string) => {
     return null;
   }
 };
+
+export const verifyEmail = async (
+  id: string
+): Promise<{ verified: boolean; message: string }> => {
+  try {
+    const isVerified = await pool.query(
+      `SELECT is_verified_user FROM users WHERE id_user = $1`,
+      [id]
+    );
+    if (!isVerified.rows[0].is_verified_user) {
+      await pool.query(
+        `UPDATE users SET is_verified_user = true WHERE id_user = $1`,
+        [id]
+      );
+      return { verified: true, message: 'User verified.' };
+    } else {
+      return { verified: false, message: 'User already verified.' };
+    }
+  } catch (error) {
+    return { verified: false, message: `Error: ${error}` };
+  }
+};
+
 export const checkId = async (
   email: string,
   studentId: string
@@ -170,9 +212,12 @@ export const checkId = async (
       checked: response,
     };
   } catch (error: any) {
+    console.log(error);
+
     return {
       checked: false,
-      message: error.response.data.error,
+      message: error.response.data.message,
+      code: error.response.data.code,
     };
   }
 };

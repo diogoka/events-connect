@@ -28,6 +28,8 @@ import {
   studentValidation,
   checkPasswords,
 } from '@/services/studentValidation';
+import { RegisterMessage } from '@/types/types';
+import Background from '@/components/registering/background';
 
 export default function SignUpPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -45,8 +47,11 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [studentId, setStudentID] = useState<string>('');
 
-  // Alert Message
-  const [alertMessage, setAlertMessage] = useState('');
+  const [registerMessage, setRegisterMessage] = useState<RegisterMessage>({
+    showMessage: false,
+    message: '',
+    severity: 'info',
+  });
 
   useEffect(() => {
     if (loginStatus === 'Logged In') {
@@ -57,32 +62,84 @@ export default function SignUpPage() {
     }
   }, [loginStatus]);
 
+  const handleMessage = (
+    messageToShow: RegisterMessage,
+    time: number,
+    navigate?: string
+  ) => {
+    setRegisterMessage({
+      showMessage: messageToShow.showMessage,
+      message: messageToShow.message,
+      severity: messageToShow.severity,
+    });
+
+    setTimeout(() => {
+      setRegisterMessage({
+        showMessage: false,
+        message: '',
+        severity: 'info',
+      });
+      console.log('navigate', navigate);
+
+      if (navigate) {
+        router.replace(navigate);
+      }
+    }, time * 1000);
+  };
+
   const handleEmailAuth = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const isPasswordMatch = checkPasswords(password, confirmPassword);
 
     if (!isPasswordMatch) {
-      //eslint-disable-next-line
-      setAlertMessage("Password and Confirm Password doesn't match.");
+      handleMessage(
+        {
+          showMessage: true,
+          message: 'Passwords does not match.',
+          severity: 'error',
+        },
+        6
+      );
+
       return;
     }
 
     const checkStudentID = await studentValidation(email, studentId);
 
     if (!checkStudentID.checked) {
-      setAlertMessage(checkStudentID.message!);
+      handleMessage(
+        {
+          showMessage: true,
+          message: `${checkStudentID.message}`,
+          severity: 'error',
+        },
+        6
+      );
 
       return;
     } else {
       createUserWithEmailAndPassword(getAuth(), email, password)
         .then((result) => {
-          setFirebaseAccount(result.user);
+          setFirebaseAccount({
+            uid: result.user.uid,
+            email: result.user.email,
+            providerData: result.user.providerData,
+            studentId: studentId,
+          });
+
           setLoginStatus(LoginStatus.SigningUp);
           router.replace('/signup/register');
         })
         .catch((error: any) => {
-          setAlertMessage(getErrorMessage(error.code));
+          handleMessage(
+            {
+              showMessage: true,
+              message: `${getErrorMessage(error.code)}`,
+              severity: 'error',
+            },
+            7
+          );
         });
     }
   };
@@ -90,31 +147,32 @@ export default function SignUpPage() {
   const handleGoogleAuth = async () => {
     signInWithPopup(getAuth(), new GoogleAuthProvider())
       .then((result) => {
-        setFirebaseAccount(result.user);
+        setFirebaseAccount({
+          uid: result.user.uid,
+          email: result.user.email,
+          providerData: result.user.providerData,
+          studentId: studentId,
+          photoURL: result.user.photoURL,
+        });
         setLoginStatus(LoginStatus.SigningUp);
         router.replace('/signup/register');
       })
       .catch((error: any) => {
         setFirebaseAccount(null);
-        setAlertMessage(getErrorMessage(error.code));
+        handleMessage(
+          {
+            showMessage: true,
+            message: `${getErrorMessage(error.code)}`,
+            severity: 'error',
+          },
+          6
+        );
       });
   };
 
   return (
     <>
-      {!isMobile && (
-        <Box
-          width='100%'
-          height='calc(100vh - 4rem)'
-          position='absolute'
-          sx={{
-            inset: '4rem auto auto 0',
-            backgroundImage: 'url("/auth-bg.png")',
-            backgroundSize: 'cover',
-            backgroundPositionX: '50%',
-          }}
-        ></Box>
-      )}
+      {!isMobile && <Background registerMessage={registerMessage} />}
 
       <Box
         bgcolor='white'
@@ -174,7 +232,6 @@ export default function SignUpPage() {
                         setStudentID={setStudentID}
                       />
                     </FormControl>
-                    <Typography color='error'>{alertMessage}</Typography>
                   </Stack>
 
                   <Button

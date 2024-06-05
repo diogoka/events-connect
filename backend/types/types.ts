@@ -1,3 +1,5 @@
+import { JwtPayload } from 'jsonwebtoken';
+
 export type Attendee = {
   id: string;
   firstName: string;
@@ -57,5 +59,12 @@ export type UserResponse = {
 
 export type CheckData = {
   checked: boolean;
+  code?: number;
   message?: string;
+};
+
+export type CheckToken = {
+  valid: boolean;
+  message?: string;
+  payload?: JwtPayload | string;
 };

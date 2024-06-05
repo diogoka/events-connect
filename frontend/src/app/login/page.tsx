@@ -11,6 +11,9 @@ import {
   Button,
   FormControl,
   Container,
+  Box,
+  useMediaQuery,
+  Alert,
 } from '@mui/material';
 import { FcGoogle } from 'react-icons/fc';
 import PasswordInput from '@/components/common/password-input';
@@ -19,13 +22,13 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  signOut,
 } from 'firebase/auth';
 import { getErrorMessage } from '@/auth/errors';
 import { UserContext, LoginStatus } from '@/context/userContext';
 import { EventContext } from '@/context/eventContext';
 import PasswordResetModal from '@/components/login/password-reset-modal';
-import { useMediaQuery } from '@mui/material';
-import { Box } from '@mui/system';
+import { ErrorMessage } from '../../types/types';
 
 export default function LoginPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -39,25 +42,38 @@ export default function LoginPage() {
 
   const { pathName, setShowedPage } = useContext(EventContext);
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  // Alert Message
-  const [alertMessage, setAlertMessage] = useState('');
-
-  const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isPasswordReset, setIsPasswordReset] = useState<boolean>(false);
+  const [userServerError, setUserServerError] = useState<ErrorMessage>({
+    error: false,
+    message: '',
+  });
 
   const getUserFromServer = (uid: string) => {
     axios
       .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${uid}`)
       .then((res: any) => {
         setUser(res.data);
+        setFirebaseAccount((prevState) => {
+          return {
+            ...prevState!,
+            studentId: res.data.student_id!,
+          };
+        });
+
         setLoginStatus(LoginStatus.LoggedIn);
         route.replace('/events');
       })
       .catch((error: any) => {
+        signOut(getAuth());
+        setFirebaseAccount(null);
         setUser(null);
-        setLoginStatus(LoginStatus.SigningUp);
+        setLoginStatus(LoginStatus.LoggedOut);
+        handleSetUserServerError(
+          { error: true, message: error.response.data },
+          6
+        );
       });
   };
 
@@ -65,11 +81,20 @@ export default function LoginPage() {
     event.preventDefault();
     signInWithEmailAndPassword(getAuth(), email, password)
       .then((result) => {
-        setFirebaseAccount(result.user);
+        setFirebaseAccount({
+          uid: result.user.uid,
+          email: result.user.email,
+          providerData: result.user.providerData,
+          studentId: '',
+        });
         getUserFromServer(result.user.uid);
       })
       .catch((error) => {
-        setAlertMessage(getErrorMessage(error.code));
+        console.log(getErrorMessage(error.code));
+        handleSetUserServerError(
+          { error: true, message: getErrorMessage(error.code) },
+          6
+        );
       });
 
     if (pathName === '/login') {
@@ -80,14 +105,39 @@ export default function LoginPage() {
     }
   };
 
+  const handleSetUserServerError = (
+    errorObject: ErrorMessage,
+    seconds: number
+  ): void => {
+    setUserServerError({
+      error: errorObject.error,
+      message: errorObject.message,
+    });
+
+    setTimeout(() => {
+      setUserServerError({
+        error: false,
+        message: '',
+      });
+    }, seconds * 1000);
+  };
+
   const handleGoogleLogin = async () => {
     signInWithPopup(getAuth(), new GoogleAuthProvider())
       .then((result) => {
-        setFirebaseAccount(result.user);
+        setFirebaseAccount({
+          uid: result.user.uid,
+          email: result.user.email,
+          providerData: result.user.providerData,
+          studentId: '',
+        });
         getUserFromServer(result.user.uid);
       })
       .catch((error) => {
-        setAlertMessage(getErrorMessage(error.code));
+        handleSetUserServerError(
+          { error: true, message: getErrorMessage(error.code) },
+          6
+        );
       });
 
     if (pathName === '/login') {
@@ -110,8 +160,15 @@ export default function LoginPage() {
             backgroundImage: 'url("/auth-bg.png")',
             backgroundSize: 'cover',
           }}
-        ></Box>
+        >
+          {userServerError.error && (
+            <Alert sx={{ width: '28%', margin: '5%' }} severity='error'>
+              {userServerError.message}
+            </Alert>
+          )}
+        </Box>
       )}
+
       <Stack
         width={isMobile ? 'auto' : '600px'}
         maxWidth={isMobile ? '345px' : 'auto'}
@@ -155,7 +212,6 @@ export default function LoginPage() {
                 </FormControl>
                 <FormControl required>
                   <PasswordInput label='Password' setter={setPassword} />
-                  <Typography color='error'>{alertMessage}</Typography>
                 </FormControl>
                 <Typography
                   onClick={() => {
