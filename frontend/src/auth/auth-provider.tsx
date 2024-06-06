@@ -107,8 +107,6 @@ export default function AuthProvider({
     getAuth().onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
 
-      console.log('fire-auth', firebaseAccount);
-
       if (loginStatus !== LoginStatus.Unknown) {
         return;
       }
@@ -276,6 +274,7 @@ export const deleteAccount = async () => {
   getAuth().onAuthStateChanged(async (firebaseAccount) => {
     if (firebaseAccount) {
       const deleted = await deleteUser(firebaseAccount!);
+      console.log('deleted', deleted);
     } else {
       console.log('No user is authenticated.');
     }

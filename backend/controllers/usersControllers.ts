@@ -28,10 +28,14 @@ export const getUser = async (req: express.Request, res: express.Response) => {
 
   try {
     const user = await getUserById(userId);
-    if (!user?.is_verified) {
-      return res.status(401).send('Email is not verified.');
+    if (user) {
+      if (!user?.is_verified) {
+        return res.status(401).send('Email is not verified.');
+      } else {
+        res.status(200).json(user);
+      }
     } else {
-      res.status(200).json(user);
+      res.status(401).json('You need to finish the registration.');
     }
   } catch (err: any) {
     res.status(500).send(err.message);

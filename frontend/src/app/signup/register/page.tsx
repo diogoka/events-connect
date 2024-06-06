@@ -69,9 +69,6 @@ export default function SignUpPage() {
     firebaseAccount?.providerData?.[0]?.providerId === 'google.com';
 
   useEffect(() => {
-    console.log('Send user to server', firebaseAccount);
-    console.log('user', user);
-
     if (!firebaseAccount) {
       router.replace('/signup');
     }

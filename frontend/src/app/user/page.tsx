@@ -23,18 +23,14 @@ export default function UserPage() {
     setPageStatus(PageStatus.Ready);
   });
 
-  const source =
+  const imagURL =
     user?.provider === 'password' ? user.avatarURL : firebaseAccount?.photoURL;
 
   return (
     <Stack width='100%' paddingBlock='4rem'>
       <Stack alignItems='center' rowGap='1rem'>
         <Avatar
-          src={`${
-            user?.provider === 'password'
-              ? user.avatarURL
-              : firebaseAccount?.photoURL
-          }`}
+          src={`${imagURL}`}
           alt={user?.firstName}
           sx={{
             width: isMobile ? '7.5rem' : '10rem',
