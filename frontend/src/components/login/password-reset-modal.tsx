@@ -1,9 +1,7 @@
-import React, { useState } from 'react'
-import { Modal, Typography, TextField, Stack, Button } from '@mui/material'
-import {
-  getAuth,
-  sendPasswordResetEmail
-} from 'firebase/auth';
+import React, { useState } from 'react';
+import { Modal, Typography, TextField, Stack, Button } from '@mui/material';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { PasswordResetStatus } from '@/types/components.types';
 
 const style = {
   position: 'absolute',
@@ -26,28 +24,23 @@ const style = {
 type Props = {
   isPasswordReset: boolean;
   setIsPasswordReset: (isPasswordReset: boolean) => void;
-}
-
-enum PasswordResetStatus {
-  BeforeSending,
-  Successful,
-  Failed
-}
+};
 
 export default function PasswordResetModal(props: Props) {
-
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState(PasswordResetStatus.BeforeSending);
 
-  const handlePasswordReset = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handlePasswordReset = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     sendPasswordResetEmail(getAuth(), email)
       .then(() => {
         setStatus(PasswordResetStatus.Successful);
       })
       .catch(() => {
         setStatus(PasswordResetStatus.Failed);
-      })
-  }
+      });
+  };
 
   let component;
   if (status === PasswordResetStatus.BeforeSending) {
@@ -57,7 +50,13 @@ export default function PasswordResetModal(props: Props) {
           <Typography variant='h6' align='center'>
             Reset Password
           </Typography>
-          <TextField type='email' label='Email' onChange={(event) => setEmail(event.target.value)} required fullWidth />
+          <TextField
+            type='email'
+            label='Email'
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            fullWidth
+          />
           <Button
             type='submit'
             onClick={() => sendPasswordResetEmail(getAuth(), email)}
@@ -68,19 +67,23 @@ export default function PasswordResetModal(props: Props) {
           </Button>
         </Stack>
       </form>
-    )
+    );
   } else if (status === PasswordResetStatus.Successful) {
-    component =
+    component = (
       <Typography align='center'>
-        Password reset email sent successfully.<br />
+        Password reset email sent successfully.
+        <br />
         Please check your inbox.
       </Typography>
+    );
   } else {
-    component =
+    component = (
       <Typography align='center'>
-        Failed to send email.<br />
+        Failed to send email.
+        <br />
         Please check your email address and try again.
       </Typography>
+    );
   }
 
   return (
@@ -93,9 +96,7 @@ export default function PasswordResetModal(props: Props) {
       aria-labelledby='modal-modal-title'
       aria-describedby='modal-modal-description'
     >
-      <Stack sx={style}>
-        {component}
-      </Stack>
+      <Stack sx={style}>{component}</Stack>
     </Modal>
-  )
+  );
 }

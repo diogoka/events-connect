@@ -3,14 +3,14 @@ import { IconContext } from 'react-icons';
 import * as IconLibrary from 'react-icons/fa';
 import { Box } from '@mui/material';
 
-interface Props {
+type Props = {
   iconName: string;
   size?: string;
   color?: string;
   onClick?: (event: React.MouseEvent) => void;
   isClickable: boolean;
   iconHoverColor?: string;
-}
+};
 
 function IconItem({ iconName, size, color, onClick, isClickable }: Props) {
   const IconStyle = {

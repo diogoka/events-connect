@@ -4,21 +4,13 @@ import Category from './category';
 import RadioBtn from './radio';
 import Tag from './tag';
 import { Box, Grid } from '@mui/material';
-
-type Category = {
-  category_course: string;
-};
-
-type Tag = {
-  id_tag: number;
-  name_tag: string;
-};
+import { Tag as TagType } from '@/types/context.types';
 
 type Props = {
   category: string;
   setCategory: (value: string) => void;
-  selectedTags: Tag[];
-  setSelectedTags: (value: Tag[]) => void;
+  selectedTags: TagType[];
+  setSelectedTags: (value: TagType[]) => void;
   isMobile: boolean;
 };
 

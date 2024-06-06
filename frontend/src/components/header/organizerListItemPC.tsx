@@ -2,11 +2,7 @@ import { useEffect, useContext } from 'react';
 import { EventContext, initialState } from '@/context/eventContext';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@mui/material';
-
-interface Page {
-  label: string;
-  path: string;
-}
+import { Page } from '@/types/components.types';
 
 const organizerBtns: Page[] = [
   { label: 'Events', path: '/' || '/events?isPublished=true' },

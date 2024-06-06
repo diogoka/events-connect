@@ -2,11 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@mui/material';
-
-interface Page {
-  label: string;
-  path: string;
-}
+import { Page } from '@/types/components.types';
 
 const usersBtns: Page[] = [
   { label: 'Events', path: '/' },

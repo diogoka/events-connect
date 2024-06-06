@@ -2,12 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import axios from 'axios';
-
-type Course = {
-  id: number;
-  name: string;
-  category: string;
-};
+import { Course } from '@/types/components.types';
 
 type Props = {
   courseId: string;

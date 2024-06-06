@@ -17,6 +17,7 @@ import EventCard from './eventCard';
 import EventLine from './eventLine';
 import EventIcons from './eventIcons';
 import alertFn from '@/components/common/alertFunction';
+import { AlertState } from '@/types/alert.types';
 
 type Props = {
   event: Event;
@@ -30,12 +31,6 @@ type Props = {
   oldEvent?: boolean;
   page?: number;
 };
-
-interface AlertState {
-  title: string;
-  message: string;
-  severity: AlertColor;
-}
 
 function EventItem({
   event,
@@ -180,7 +175,7 @@ function EventItem({
           />
           {isAlertVisible &&
             alertFn(
-              alertMessage.title,
+              alertMessage.title!,
               alertMessage.message,
               alertMessage.severity,
               handleAlertClose
@@ -216,7 +211,7 @@ function EventItem({
           />
           {isAlertVisible &&
             alertFn(
-              alertMessage.title,
+              alertMessage.title!,
               alertMessage.message,
               alertMessage.severity,
               handleAlertClose

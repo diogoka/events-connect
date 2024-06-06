@@ -13,18 +13,15 @@ import {
   FormLabel,
 } from '@mui/material';
 
-type Tag = {
-  id_tag: number;
-  name_tag: string;
-};
+import { Tag as TagType } from '@/types/context.types';
 
 type Props = {
-  selectedTags: Tag[];
-  setSelectedTags: (value: Tag[]) => void;
+  selectedTags: TagType[];
+  setSelectedTags: (value: TagType[]) => void;
 };
 
 export default function Tag({ selectedTags, setSelectedTags }: Props) {
-  const [tags, setTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<TagType[]>([]);
   // Tag data from server
   useEffect(() => {
     axios
@@ -47,8 +44,8 @@ export default function Tag({ selectedTags, setSelectedTags }: Props) {
     const selectedValue =
       typeof value === 'string' ? value.split(',').map(Number) : value;
 
-    const selectedTagsName: Tag[] = tags.filter(
-      (tag: Tag) => tag && selectedValue.includes(tag.id_tag)
+    const selectedTagsName: TagType[] = tags.filter(
+      (tag: TagType) => tag && selectedValue.includes(tag.id_tag)
     );
 
     if (selectedTagsName.length > 0) {

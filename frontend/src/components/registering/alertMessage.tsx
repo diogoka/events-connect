@@ -1,4 +1,4 @@
-import { PropsAlert, RegisterMessage } from '@/types/alert.types';
+import { PropsAlert } from '@/types/alert.types';
 import { Alert } from '@mui/material';
 
 const AlertMessage = ({ registerMessage }: PropsAlert) => {

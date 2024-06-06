@@ -6,10 +6,7 @@ import { Grid, Box, Stack, Button, Typography } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { hourOfToday, endHourOfToday } from '@/context/eventContext';
-interface DateRange {
-  dateStart: dayjs.Dayjs;
-  dateEnd: dayjs.Dayjs;
-}
+import { DateRange } from '@/types/context.types';
 
 type Props = {
   dates: DateRange[];

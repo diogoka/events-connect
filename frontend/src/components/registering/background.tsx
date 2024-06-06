@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import AlertMessage from './alertMessage';
-import { PropsAlert, RegisterMessage } from '@/types/alert.types';
+import { PropsAlert } from '@/types/alert.types';
 
 const Background = ({ registerMessage }: PropsAlert) => {
   return (
