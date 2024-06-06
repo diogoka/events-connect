@@ -90,7 +90,6 @@ export default function LoginPage() {
         getUserFromServer(result.user.uid);
       })
       .catch((error) => {
-        console.log(getErrorMessage(error.code));
         handleSetUserServerError(
           { error: true, message: getErrorMessage(error.code) },
           6

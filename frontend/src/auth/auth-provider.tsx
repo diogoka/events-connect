@@ -115,22 +115,10 @@ export default function AuthProvider({
   useEffect(() => {
     initializeFirebase;
 
-    console.log('FireContext', firebaseAccountContext);
-    console.log('UserContext', userContext);
-    console.log('status', loginStatus);
-
     getAuth().onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
 
-      console.log('GetAuth()', firebaseAccount);
-      console.log('loginStatus', loginStatus);
-
-      if (loginStatus === LoginStatus.SigningUp) {
-      }
-
       if (loginStatus !== LoginStatus.Unknown) {
-        console.log('LS');
-
         return;
       }
 
@@ -152,6 +140,12 @@ export default function AuthProvider({
           .then((res: any) => {
             if (res.data) {
               setUser(res.data);
+              setFirebaseAccount((prevState) => {
+                return {
+                  ...prevState!,
+                  studentId: res.data.student_id!,
+                };
+              });
               setLoginStatus(LoginStatus.LoggedIn);
             } else {
               setUser(null);
@@ -293,7 +287,6 @@ export default function AuthProvider({
 export const deleteAccount = async () => {
   getAuth().onAuthStateChanged(async (firebaseAccount) => {
     if (firebaseAccount) {
-      console.log(firebaseAccount);
       const deleted = await deleteUser(firebaseAccount!);
     } else {
       console.log('No user is authenticated.');

@@ -67,8 +67,6 @@ export default function SignUpPage() {
     firebaseAccount?.providerData?.[0]?.providerId === 'google.com';
 
   useEffect(() => {
-    console.log('useEffect');
-
     if (!firebaseAccount) {
       router.replace('/signup');
     }
@@ -134,8 +132,6 @@ export default function SignUpPage() {
 
     setTimeout(() => {
       setRegisterMessage({ showMessage: false, message: '', severity: 'info' });
-      console.log('navigate', navigate);
-
       if (navigate) {
         router.replace(navigate);
       }

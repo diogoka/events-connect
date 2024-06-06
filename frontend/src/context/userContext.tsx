@@ -1,6 +1,5 @@
 'use client';
 import React, { createContext, ReactNode, useState } from 'react';
-import { FirebaseAccount } from '../types/types';
 
 export enum LoginStatus {
   Unknown = 'Unknown',
@@ -27,6 +26,19 @@ export type User = {
   studentId: number;
 };
 
+export type FirebaseAccount = {
+  uid: string;
+  email: string | null;
+  displayName?: string | null;
+  photoURL?: string | null;
+  providerData?: Array<ProviderData>;
+  studentId?: string;
+};
+
+type ProviderData = {
+  providerId: string;
+};
+
 type UserContextProps = {
   user: User | null;
   setUser: (userStatus: User | null) => void;
@@ -48,12 +60,8 @@ export function UserContextProvider({ children }: { children: ReactNode }) {
   const [firebaseAccount, setFirebaseAccount] =
     useState<FirebaseAccount | null>(null);
   const [loginStatus, setLoginStatus] = useState<LoginStatus>(
-    LoginStatus.LoggedOut
+    LoginStatus.Unknown
   );
-
-  console.log('User-context: ', user);
-  console.log('FirebaseAccount-context', firebaseAccount);
-  console.log('login-status-context', loginStatus);
 
   return (
     <UserContext.Provider

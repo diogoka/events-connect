@@ -62,3 +62,8 @@ export type checkedIdResponse = {
   checked: boolean;
   message?: string;
 };
+
+export type ErrorMessage = {
+  error: boolean;
+  message: string;
+};

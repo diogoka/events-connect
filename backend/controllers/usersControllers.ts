@@ -28,7 +28,6 @@ export const getUser = async (req: express.Request, res: express.Response) => {
 
   try {
     const user = await getUserById(userId);
-
     if (!user?.is_verified) {
       return res.status(401).send('Email is not verified.');
     } else {
@@ -76,12 +75,8 @@ export const createUser = async (
   }
 
   try {
-    // Add a new user to DB
-    const newUser = await createUserModel(userInput);
-    // Add user's course to DB
-    const newUserCourse = await addingCourse(userInput);
-    const userRes = { ...newUser, ...newUserCourse };
-
+    await createUserModel(userInput);
+    await addingCourse(userInput);
     const token = generateToken(userInput.id, userInput.email);
 
     await sendConfirmationEmail(userInput.email, token);

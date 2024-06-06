@@ -79,8 +79,6 @@ export default function SignUpPage() {
         message: '',
         severity: 'info',
       });
-      console.log('navigate', navigate);
-
       if (navigate) {
         router.replace(navigate);
       }
