@@ -1,7 +1,7 @@
-import { RegisterMessage, PropsBackground } from '@/types/types';
+import { PropsAlert, RegisterMessage } from '@/types/alert.types';
 import { Alert } from '@mui/material';
 
-const AlertMessage = ({ registerMessage }: PropsBackground) => {
+const AlertMessage = ({ registerMessage }: PropsAlert) => {
   return (
     <>
       {registerMessage.showMessage && (

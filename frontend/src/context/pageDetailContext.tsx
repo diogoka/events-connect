@@ -1,19 +1,6 @@
 'use client';
-import React, { createContext, ReactNode, useEffect, useState } from 'react';
-
-export type Attendee = {
-  id: string | undefined;
-  name: string | undefined;
-};
-
-type DetailPageContextProps = {
-  isAlertVisible: boolean;
-  setIsAlertVisible: (state: boolean) => void;
-  setAttendees: (
-    state: (prevData: Attendee[] | undefined) => Attendee[]
-  ) => void;
-  setApplied: (state: boolean) => void;
-};
+import React, { createContext, ReactNode, useState } from 'react';
+import { DetailPageContextProps, Attendee } from '@/types/context.types';
 
 export const DetailPageContext = createContext<DetailPageContextProps>(
   {} as DetailPageContextProps
@@ -25,8 +12,8 @@ export function DetailPageContextProvider({
   children: ReactNode;
 }) {
   const [isAlertVisible, setIsAlertVisible] = useState<boolean>(false);
-  const [attendees, setAttendees] = useState<Attendee[]>();
-  const [applied, setApplied] = useState<boolean>(false);
+  const [, setAttendees] = useState<Attendee[]>();
+  const [, setApplied] = useState<boolean>(false);
 
   return (
     <DetailPageContext.Provider

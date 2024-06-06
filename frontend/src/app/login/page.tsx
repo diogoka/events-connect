@@ -25,7 +25,8 @@ import {
   signOut,
 } from 'firebase/auth';
 import { getErrorMessage } from '@/auth/errors';
-import { UserContext, LoginStatus } from '@/context/userContext';
+import { UserContext } from '@/context/userContext';
+import { LoginStatus } from '@/types/context.types';
 import { EventContext } from '@/context/eventContext';
 import PasswordResetModal from '@/components/login/password-reset-modal';
 import { ErrorMessage } from '../../types/types';
@@ -54,8 +55,12 @@ export default function LoginPage() {
     axios
       .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${uid}`)
       .then((res: any) => {
+        console.log('res', res.data);
+
         setUser(res.data);
         setFirebaseAccount((prevState) => {
+          console.log('prevState', prevState);
+
           return {
             ...prevState!,
             studentId: res.data.student_id!,
@@ -129,6 +134,7 @@ export default function LoginPage() {
           email: result.user.email,
           providerData: result.user.providerData,
           studentId: '',
+          photoURL: result.user.photoURL,
         });
         getUserFromServer(result.user.uid);
       })

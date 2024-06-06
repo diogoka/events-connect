@@ -3,7 +3,8 @@ import { useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Stack, Button, Chip, Avatar } from '@mui/material';
 import { UserContext } from '@/context/userContext';
-import { PageContext, PageStatus } from '@/context/pageContext';
+import { PageContext } from '@/context/pageContext';
+import { PageStatus } from '@/types/context.types';
 import { BsFillPersonFill } from 'react-icons/bs';
 import { HiMail } from 'react-icons/hi';
 import { IoIosSchool } from 'react-icons/io';
@@ -18,11 +19,17 @@ export default function UserPage() {
   const { user, firebaseAccount } = useContext(UserContext);
   const { setPageStatus } = useContext(PageContext);
 
-  console.log('user', user);
+  console.log('user in the profile', user);
 
   useEffect(() => {
     setPageStatus(PageStatus.Ready);
   });
+
+  const source =
+    user?.provider === 'password' ? user.avatarURL : firebaseAccount?.photoURL;
+
+  console.log('source,', source);
+  console.log('sss', firebaseAccount);
 
   return (
     <Stack width='100%' paddingBlock='4rem'>

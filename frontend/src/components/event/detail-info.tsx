@@ -1,6 +1,7 @@
 'use client';
 import { useContext } from 'react';
-import { UserContext, LoginStatus } from '@/context/userContext';
+import { UserContext } from '@/context/userContext';
+import { LoginStatus } from '@/types/context.types';
 import { Table, TableBody, TableContainer } from '@mui/material';
 import DetailInfoRow from './detail-info-row';
 import { Attendee, Tag } from '@/types/types';

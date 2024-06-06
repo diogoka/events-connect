@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect, useContext } from 'react';
 import { PageContext } from '@/context/pageContext';
-import { EventContext, EventData, Tag } from '@/context/eventContext';
+import { EventContext } from '@/context/eventContext';
+import { EventData, Tag } from '@/types/context.types';
 import { Stack } from '@mui/material';
 import dayjs from 'dayjs';
 import CustomParseFormat from 'dayjs/plugin/customParseFormat';

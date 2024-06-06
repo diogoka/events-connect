@@ -1,6 +1,7 @@
 import React from 'react';
 import { useContext, useEffect, useState } from 'react';
-import { EventContext, Tag } from '@/context/eventContext';
+import { EventContext } from '@/context/eventContext';
+import { Tag } from '@/types/context.types';
 import axios from 'axios';
 import {
   Box,

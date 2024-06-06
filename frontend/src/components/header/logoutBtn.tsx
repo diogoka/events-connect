@@ -1,7 +1,8 @@
 import React from 'react';
 import { useContext } from 'react';
 import { getAuth, signOut } from 'firebase/auth';
-import { UserContext, LoginStatus } from '@/context/userContext';
+import { UserContext } from '@/context/userContext';
+import { LoginStatus } from '@/types/context.types';
 import { Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 

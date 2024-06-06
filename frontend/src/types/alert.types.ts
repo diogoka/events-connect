@@ -12,3 +12,7 @@ export type RegisterMessage = {
   message: string;
   severity: AlertColor;
 };
+
+export type PropsAlert = {
+  registerMessage: RegisterMessage;
+};

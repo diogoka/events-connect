@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { checkedIdResponse } from '@/types/types';
+import { checkedIdResponse } from '@/types/services.types';
 
 export const checkPasswords = (
   password: string,

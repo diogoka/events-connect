@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
 import AlertMessage from './alertMessage';
-import { RegisterMessage, PropsBackground } from '@/types/types';
+import { PropsAlert, RegisterMessage } from '@/types/alert.types';
 
-const Background = ({ registerMessage }: PropsBackground) => {
+const Background = ({ registerMessage }: PropsAlert) => {
   return (
     <Box
       width='100%'

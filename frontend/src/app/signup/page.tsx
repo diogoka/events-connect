@@ -12,7 +12,8 @@ import {
   Box,
 } from '@mui/material';
 import { FcGoogle } from 'react-icons/fc';
-import { LoginStatus, UserContext } from '@/context/userContext';
+import { UserContext } from '@/context/userContext';
+import { LoginStatus } from '@/types/context.types';
 import { getErrorMessage } from '@/auth/errors';
 import PasswordInput from '@/components/common/password-input';
 import NumberTextFieldInput from '@/components/common/noArrowsTextField';
@@ -28,7 +29,7 @@ import {
   studentValidation,
   checkPasswords,
 } from '@/services/studentValidation';
-import { RegisterMessage } from '@/types/types';
+import { RegisterMessage } from '@/types/alert.types';
 import Background from '@/components/registering/background';
 
 export default function SignUpPage() {

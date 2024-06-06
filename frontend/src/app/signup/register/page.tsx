@@ -12,11 +12,13 @@ import {
   Link,
 } from '@mui/material';
 
-import { LoginStatus, UserContext } from '@/context/userContext';
+import { UserContext } from '@/context/userContext';
+import { LoginStatus } from '@/types/context.types';
 
 import NameInput from '@/components/user/form/name-input';
 import CourseInput from '@/components/user/form/course-input';
-import { User, RegisterMessage } from '@/types/types';
+import { User } from '@/types/types';
+import { RegisterMessage } from '@/types/alert.types';
 import { updateFirstName, updateLastName } from '@/common/functions';
 
 import ModalAgreement from '@/components/login/modal-agreement';
@@ -26,7 +28,6 @@ import { studentValidation } from '@/services/studentValidation';
 import { deleteAccount } from '@/auth/auth-provider';
 import { signOut, getAuth } from 'firebase/auth';
 import Background from '@/components/registering/background';
-import AlertMessage from '@/components/registering/alertMessage';
 
 export default function SignUpPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -39,6 +40,7 @@ export default function SignUpPage() {
     loginStatus,
     setLoginStatus,
     setFirebaseAccount,
+    user,
   } = useContext(UserContext);
 
   // User Input
@@ -67,6 +69,9 @@ export default function SignUpPage() {
     firebaseAccount?.providerData?.[0]?.providerId === 'google.com';
 
   useEffect(() => {
+    console.log('Send user to server', firebaseAccount);
+    console.log('user', user);
+
     if (!firebaseAccount) {
       router.replace('/signup');
     }
@@ -149,10 +154,12 @@ export default function SignUpPage() {
     formData.append('provider', firebaseAccount!.providerData![0].providerId);
     formData.append('avatarURL', firebaseAccount!.photoURL!);
     formData.append('is_verified', 'false');
+
     formData.append(
       'student_id',
-      firebaseAccount!.studentId === '' ? studentId : firebaseAccount!.studentId
+      firebaseAccount?.studentId ? firebaseAccount.studentId : studentId
     );
+
     if (postalCode) formData.append('postalCode', postalCode);
     if (phone) formData.append('phone', phone);
 

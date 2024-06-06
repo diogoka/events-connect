@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { AlertColor } from '@mui/material';
 
 export type Attendee = {
   id: string | undefined;
@@ -46,22 +45,10 @@ export type OtherInfo = {
   id_event: number;
   id_owner: string;
 };
-
-export interface AlertState {
-  title: string;
-  message: string;
-  severity: AlertColor;
-}
-
 export interface User {
   firstName: string;
   lastName: string;
 }
-
-export type checkedIdResponse = {
-  checked: boolean;
-  message?: string;
-};
 
 export type ErrorMessage = {
   error: boolean;

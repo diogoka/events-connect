@@ -6,8 +6,9 @@ import { initializeFirebase } from '@/auth/firebase';
 
 import { getAuth, deleteUser } from 'firebase/auth';
 import { useMediaQuery, Box } from '@mui/material';
-import { UserContext, LoginStatus } from '@/context/userContext';
-import { PageContext, PageStatus } from '@/context/pageContext';
+import { UserContext } from '@/context/userContext';
+import { PageContext } from '@/context/pageContext';
+import { LoginStatus, PageStatus } from '@/types/context.types';
 import Header from '@/components/header/header';
 import Footer from '@/components/footer';
 import Loading from '@/app/loading';
@@ -118,6 +119,8 @@ export default function AuthProvider({
     getAuth().onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
 
+      console.log('fire-auth', firebaseAccount);
+
       if (loginStatus !== LoginStatus.Unknown) {
         return;
       }
@@ -128,6 +131,7 @@ export default function AuthProvider({
           email: firebaseAccount!.email,
           providerData: firebaseAccount!.providerData,
           studentId: '',
+          photoURL: firebaseAccount.photoURL,
         });
 
         // Get user data from server

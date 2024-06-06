@@ -1,7 +1,8 @@
 import React from 'react';
 import { useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserContext, LoginStatus } from '@/context/userContext';
+import { UserContext } from '@/context/userContext';
+import { LoginStatus } from '@/types/context.types';
 import { getAuth, signOut } from 'firebase/auth';
 import { Menu, MenuItem, Avatar, ListItemIcon } from '@mui/material';
 import Logout from '@mui/icons-material/Logout';
