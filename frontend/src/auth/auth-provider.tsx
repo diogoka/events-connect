@@ -5,7 +5,7 @@ import axios from 'axios';
 import { initializeFirebase } from '@/auth/firebase';
 
 import { getAuth, deleteUser } from 'firebase/auth';
-import { useMediaQuery, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import { UserContext } from '@/context/userContext';
 import { PageContext } from '@/context/pageContext';
 import { LoginStatus, PageStatus } from '@/types/context.types';
@@ -13,19 +13,7 @@ import Header from '@/components/header/header';
 import Footer from '@/components/footer';
 import Loading from '@/app/loading';
 import NotFound from '@/components/common/notFound';
-
-enum Limitation {
-  None, // Pages with no limitation
-  LoggedIn, // Pages only for logged in users
-  Organizer, // Pages only for organizers
-  Admin, // Pages only for administrators
-}
-
-type Page = {
-  path: RegExp;
-  limitation: Limitation;
-  isLoadingRequired: boolean;
-};
+import { Page, Limitation, Permission } from '@/types/auth-provider.types';
 
 const PAGES: Page[] = [
   {
@@ -169,10 +157,6 @@ export default function AuthProvider({
     });
   }, []);
 
-  type Permission = {
-    isAllowed: boolean;
-    redirection: string;
-  };
   const isAllowedPage = (): Permission => {
     const page = getPage(pathname);
     if (page === undefined) {

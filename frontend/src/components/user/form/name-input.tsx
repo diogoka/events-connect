@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormControl, TextField } from '@mui/material';
-import { User } from '@/types/types';
+import { User } from '@/types/pages.types';
 
 type Props = {
   name: string;

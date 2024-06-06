@@ -12,32 +12,8 @@ import EventList from '@/components/events/eventList';
 import SearchBar from '@/components/searchBar';
 import { UserContext } from '@/context/userContext';
 import { Tag } from '@/types/types';
-
-export type Event = {
-  capacity_event: number;
-  category_event: string;
-  date_event_end: string;
-  date_event_start: string;
-  description_event: string;
-  id_event: number;
-  id_owner: string;
-  image_event: string;
-  location_event: string;
-  name_event: string;
-  price_event: number;
-  image_url_event?: string;
-};
-
-type CurrentUser = {
-  id: string | undefined;
-  role: string | undefined;
-};
-
-interface AlertState {
-  status: boolean;
-  message: string;
-  severity: AlertColor;
-}
+import { Events as Event, CurrentUser } from '@/types/pages.types';
+import { AlertState } from '@/types/alert.types';
 
 export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -59,8 +35,8 @@ export default function EventsPage() {
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
   const currentUser: CurrentUser = {
-    id: user?.id,
-    role: user?.roleName,
+    id: user?.id!,
+    role: user?.roleName!,
   };
 
   const getEvents = async () => {

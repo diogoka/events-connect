@@ -19,17 +19,12 @@ export default function UserPage() {
   const { user, firebaseAccount } = useContext(UserContext);
   const { setPageStatus } = useContext(PageContext);
 
-  console.log('user in the profile', user);
-
   useEffect(() => {
     setPageStatus(PageStatus.Ready);
   });
 
   const source =
     user?.provider === 'password' ? user.avatarURL : firebaseAccount?.photoURL;
-
-  console.log('source,', source);
-  console.log('sss', firebaseAccount);
 
   return (
     <Stack width='100%' paddingBlock='4rem'>

@@ -1,5 +1,6 @@
 'use client';
-import { Event } from '@/app/events/page';
+
+import { Event } from '@/types/pages.types';
 import { Tag } from '@/types/types';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';

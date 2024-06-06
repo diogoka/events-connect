@@ -11,7 +11,7 @@ import NameInput from '@/components/user/form/name-input';
 import CourseInput from '@/components/user/form/course-input';
 import { storage } from '@/auth/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { User } from '@/types/types';
+import { User } from '@/types/pages.types';
 import { updateFirstName, updateLastName } from '@/common/functions';
 
 export default function UserEditPage() {
@@ -89,19 +89,6 @@ export default function UserEditPage() {
     if (!user) {
       return;
     }
-
-    // If the user wants to update his email, update the email in Firebase, too
-    // if (email !== user.email) {
-    //   const currentUser = getAuth().currentUser;
-    //   if (currentUser) {
-    //     try {
-    //       await updateEmail(currentUser, "user@example.com");
-    //     } catch (error) {
-    //       console.error(error);
-    //       return;
-    //     }
-    //   }
-    // }
 
     const formData = new FormData();
     formData.append('id', user.id);
@@ -210,10 +197,6 @@ export default function UserEditPage() {
           />
 
           <CourseInput courseId={courseId} setCourseId={setCourseId} />
-
-          {/* <FormControl required fullWidth>
-              <TextField type='email' label='Email' value={email} onChange={(event) => setEmail(event.target.value)} required />
-            </FormControl> */}
 
           <div>{warning}</div>
 

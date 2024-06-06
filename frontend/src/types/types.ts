@@ -45,10 +45,6 @@ export type OtherInfo = {
   id_event: number;
   id_owner: string;
 };
-export interface User {
-  firstName: string;
-  lastName: string;
-}
 
 export type ErrorMessage = {
   error: boolean;

@@ -1,6 +1,7 @@
 'use client';
 import { Stack } from '@mui/material';
-import { Event } from '@/app/events/page';
+
+import { Events as Event } from '@/types/pages.types';
 import { Tag } from '@/types/types';
 import EventItem from '@/components/events/eventItem';
 import Pagination from '@mui/material/Pagination';

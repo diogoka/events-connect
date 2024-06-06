@@ -1,7 +1,9 @@
 import { Box, Typography, Rating } from '@mui/material';
 import ImageHelper from '../common/image-helper';
 import { AiFillClockCircle } from 'react-icons/ai';
-import { Event } from '@/app/events/page';
+
+import { Events as Event } from '@/types/pages.types';
+
 import { Tag } from '@/types/types';
 import { StarRounded } from '@mui/icons-material';
 

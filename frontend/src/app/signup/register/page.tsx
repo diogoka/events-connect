@@ -17,7 +17,7 @@ import { LoginStatus } from '@/types/context.types';
 
 import NameInput from '@/components/user/form/name-input';
 import CourseInput from '@/components/user/form/course-input';
-import { User } from '@/types/types';
+import { User } from '@/types/pages.types';
 import { RegisterMessage } from '@/types/alert.types';
 import { updateFirstName, updateLastName } from '@/common/functions';
 
