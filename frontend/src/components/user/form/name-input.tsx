@@ -10,6 +10,7 @@ type Props = {
   ) => void;
   label: string;
   setUserName: React.Dispatch<React.SetStateAction<User>>;
+  disable: boolean;
 };
 
 export default function NameInput(props: Props) {
@@ -25,6 +26,7 @@ export default function NameInput(props: Props) {
         required
         inputProps={{ maxLength: 25 }}
         error={props.name.length >= 25 ? true : false}
+        disabled={props.disable}
       />
     </FormControl>
   );

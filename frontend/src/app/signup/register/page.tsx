@@ -74,6 +74,14 @@ export default function SignUpPage() {
     }
   }, []);
 
+  const clearState = () => {
+    setUserName({
+      firstName: '',
+      lastName: '',
+    });
+    setCourseId('');
+  };
+
   const handleChangeCheckBox = (
     event: React.ChangeEvent<HTMLInputElement>
   ): void => {
@@ -99,9 +107,7 @@ export default function SignUpPage() {
     //code 3 is email is not in the class365
 
     if (code === 3) {
-      //open modal
-
-      const deletion = await deleteAccount();
+      await deleteAccount();
       setFirebaseAccount(null);
       setLoginStatus(LoginStatus.LoggedOut);
       handleMessage(
@@ -174,6 +180,7 @@ export default function SignUpPage() {
           6,
           '/login'
         );
+        clearState();
         setFirebaseAccount(null);
         setLoginStatus(LoginStatus.LoggedOut);
         signOut(getAuth());
@@ -240,20 +247,27 @@ export default function SignUpPage() {
                   setName={updateFirstName}
                   setUserName={setUserName}
                   label='First Name'
+                  disable={registerMessage.showMessage}
                 />
                 <NameInput
                   name={userName.lastName}
                   setName={updateLastName}
                   setUserName={setUserName}
                   label='Last Name'
+                  disable={registerMessage.showMessage}
                 />
-                <CourseInput courseId={courseId} setCourseId={setCourseId} />
+                <CourseInput
+                  courseId={courseId}
+                  setCourseId={setCourseId}
+                  disable={registerMessage.showMessage}
+                />
 
                 {isGoogle && (
                   <NumberTextFieldInput
                     label={'Student ID'}
                     maxLength={6}
                     setStudentID={setStudentID}
+                    disable={registerMessage.showMessage}
                   />
                 )}
                 <Box
@@ -270,6 +284,7 @@ export default function SignUpPage() {
                     sx={{
                       padding: '0',
                     }}
+                    disabled={registerMessage.showMessage}
                   />
                   <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
                     I acknowledge that I have read and understood the
@@ -280,10 +295,14 @@ export default function SignUpPage() {
                         '&:hover': {
                           cursor: 'pointer',
                         },
+                        ':disabled:hover': {
+                          cursor: 'auto',
+                        },
                         marginLeft: '3px',
                         fontSize: '15px',
                       }}
                       onClick={handleOpen}
+                      disabled={registerMessage.showMessage}
                     >
                       {' '}
                       Terms and Conditions.

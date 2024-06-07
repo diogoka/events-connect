@@ -4,7 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 import { initializeFirebase } from '@/auth/firebase';
 
-import { getAuth, deleteUser } from 'firebase/auth';
+import { getAuth, deleteUser, signOut } from 'firebase/auth';
 import { Box } from '@mui/material';
 import { UserContext } from '@/context/userContext';
 import { PageContext } from '@/context/pageContext';
@@ -107,6 +107,8 @@ export default function AuthProvider({
     getAuth().onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
 
+      console.log('GetAuth', firebaseAccount);
+
       if (loginStatus !== LoginStatus.Unknown) {
         return;
       }
@@ -145,12 +147,15 @@ export default function AuthProvider({
           .catch((error: any) => {
             //need to handle properly
             console.log('No user in the DB');
+            console.log('loginStatus', loginStatus);
+            setLoginStatus(LoginStatus.SigningUp);
           });
       }
       // When the user logged out or doesn't have an account
       else {
         setUser(null);
         setLoginStatus(LoginStatus.LoggedOut);
+        signOut(getAuth());
       }
     });
   }, []);
@@ -198,8 +203,12 @@ export default function AuthProvider({
     // If this user is in the process of sign-up
     else if (loginStatus === LoginStatus.SigningUp) {
       // Go to the signup page, but don't redirect from sign-up page
+
+      if (pathname === '/events' || pathname === '/') {
+        return { isAllowed: true, redirection: '' };
+      }
       if (pathname !== '/signup') {
-        return { isAllowed: false, redirection: '/signup' };
+        return { isAllowed: false, redirection: '/signup/register' };
       }
     }
 
@@ -274,7 +283,6 @@ export const deleteAccount = async () => {
   getAuth().onAuthStateChanged(async (firebaseAccount) => {
     if (firebaseAccount) {
       const deleted = await deleteUser(firebaseAccount!);
-      console.log('deleted', deleted);
     } else {
       console.log('No user is authenticated.');
     }

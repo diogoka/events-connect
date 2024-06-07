@@ -22,6 +22,7 @@ type Props = {
   label: string;
   setStudentID: React.Dispatch<React.SetStateAction<string>>;
   maxLength: number;
+  disable: boolean;
 };
 
 const NumberTextFieldInput = (props: Props) => {
@@ -44,6 +45,7 @@ const NumberTextFieldInput = (props: Props) => {
       onChange={(event) => {
         props.setStudentID(event.target.value);
       }}
+      disabled={props.disable}
     />
   );
 };

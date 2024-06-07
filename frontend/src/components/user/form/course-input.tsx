@@ -7,6 +7,7 @@ import { Course } from '@/types/components.types';
 type Props = {
   courseId: string;
   setCourseId: (courseId: string) => void;
+  disable: boolean;
 };
 
 export default function CourseInput(props: Props) {
@@ -34,6 +35,7 @@ export default function CourseInput(props: Props) {
           value={props.courseId}
           defaultValue=''
           onChange={(e) => props.setCourseId(e.target.value)}
+          disabled={props.disable}
         >
           {courses.map((course: Course, index: number) => {
             return (

@@ -1,12 +1,6 @@
 'use client';
 import { useEffect, useState, useContext } from 'react';
-import {
-  Box,
-  Alert,
-  Typography,
-  AlertColor,
-  useMediaQuery,
-} from '@mui/material';
+import { Box, Alert, Typography, useMediaQuery } from '@mui/material';
 import axios from 'axios';
 import EventList from '@/components/events/eventList';
 import SearchBar from '@/components/searchBar';
