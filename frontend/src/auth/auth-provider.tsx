@@ -104,7 +104,9 @@ export default function AuthProvider({
   useEffect(() => {
     initializeFirebase;
 
-    getAuth().onAuthStateChanged(async (firebaseAccount) => {
+    const auth = getAuth();
+
+    auth.onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
 
       console.log('GetAuth', firebaseAccount);
@@ -140,7 +142,6 @@ export default function AuthProvider({
               });
               setLoginStatus(LoginStatus.LoggedIn);
             } else {
-              setUser(null);
               setLoginStatus(LoginStatus.SigningUp);
             }
           })
@@ -167,6 +168,8 @@ export default function AuthProvider({
     }
     // Wait until the login status is confirmed
     else if (loginStatus === LoginStatus.Unknown) {
+      console.log('Is unknown');
+
       return { isAllowed: false, redirection: '' };
     }
     // If user is logged in
@@ -204,7 +207,14 @@ export default function AuthProvider({
     else if (loginStatus === LoginStatus.SigningUp) {
       // Go to the signup page, but don't redirect from sign-up page
 
+      if (pathname === '/login') {
+        console.log('I WANT TO GO HERE');
+        return { isAllowed: true, redirection: '' };
+      }
+
       if (pathname === '/events' || pathname === '/') {
+        console.warn('HERE');
+
         return { isAllowed: true, redirection: '' };
       }
       if (pathname !== '/signup') {
