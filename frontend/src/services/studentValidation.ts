@@ -22,3 +22,17 @@ export const studentValidation = async (
 
   return checked;
 };
+
+export const getStudentId = async (email: string): Promise<number> => {
+  const studentId = await axios.post(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/getId`,
+    { email },
+    {
+      headers: { 'content-type': 'application/json' },
+    }
+  );
+
+  const id = await studentId.data;
+
+  return id;
+};

@@ -8,6 +8,7 @@ import {
   updateUserModel,
   checkId,
   verifyEmail,
+  getId,
 } from '../models/userModels';
 import { updateCourse } from '../models/courseModels';
 import { validateUserInput } from '../helpers/validateUser';
@@ -72,6 +73,8 @@ export const createUser = async (
 ) => {
   const userInput: UserInput = req.body;
 
+  console.log('UserInput', userInput);
+
   const { result, message } = validateUserInput(userInput);
   if (!result) {
     res.status(500).send(message);
@@ -130,5 +133,22 @@ export const validateEmail = async (
     } else {
       res.status(401).json('Unauthorized.');
     }
+  }
+};
+
+export const getStudentId = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  if (!req.body.email) {
+    res.status(400).send('Missing Parameters.');
+  }
+  try {
+    const id = await getId(req.body.email);
+    res.status(200).json(id);
+  } catch (error: any) {
+    console.log('error', error);
+
+    res.status(500).send(error);
   }
 };

@@ -39,7 +39,7 @@ export default function SignUpPage() {
 
   const theme = useTheme();
 
-  const { setFirebaseAccount, loginStatus, setLoginStatus } =
+  const { setFirebaseAccount, loginStatus, setLoginStatus, firebaseAccount } =
     useContext(UserContext);
 
   // User Input
@@ -55,12 +55,14 @@ export default function SignUpPage() {
   });
 
   useEffect(() => {
+    console.log('FirebaseAccount in Signup', firebaseAccount);
+
     if (loginStatus === 'Logged In') {
       router.replace('/events');
     }
-    if (loginStatus === 'Singing Up') {
-      router.replace('/signup/register');
-    }
+    // if (loginStatus === 'Singing Up') {
+    //   router.replace('/signup/register');
+    // }
   }, [loginStatus]);
 
   const handleMessage = (
@@ -229,6 +231,7 @@ export default function SignUpPage() {
                         label={'Student ID'}
                         maxLength={6}
                         setStudentID={setStudentID}
+                        disable={false}
                       />
                     </FormControl>
                   </Stack>

@@ -23,13 +23,13 @@ import { updateFirstName, updateLastName } from '@/common/functions';
 
 import ModalAgreement from '@/components/login/modal-agreement';
 import NumberTextFieldInput from '@/components/common/noArrowsTextField';
-import { studentValidation } from '@/services/studentValidation';
+import { studentValidation, getStudentId } from '@/services/studentValidation';
 
 import { deleteAccount } from '@/auth/auth-provider';
 import { signOut, getAuth } from 'firebase/auth';
 import Background from '@/components/registering/background';
 
-export default function SignUpPage() {
+export default function RegisterPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const router = useRouter();
@@ -158,13 +158,27 @@ export default function SignUpPage() {
     formData.append('avatarURL', firebaseAccount!.photoURL!);
     formData.append('is_verified', 'false');
 
-    formData.append(
-      'student_id',
-      firebaseAccount?.studentId ? firebaseAccount.studentId : studentId
-    );
+    console.log(firebaseAccount);
+
+    if (
+      firebaseAccount?.providerData![0].providerId === 'password' &&
+      firebaseAccount.studentId === ''
+    ) {
+      const id = await getStudentId(firebaseAccount!.email!);
+      console.log('id, ', id);
+
+      formData.append('student_id', id);
+    } else {
+      formData.append(
+        'student_id',
+        firebaseAccount?.studentId ? firebaseAccount.studentId : studentId
+      );
+    }
 
     if (postalCode) formData.append('postalCode', postalCode);
     if (phone) formData.append('phone', phone);
+
+    console.log('FOrmData', formData);
 
     await axios
       .post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users`, formData, {

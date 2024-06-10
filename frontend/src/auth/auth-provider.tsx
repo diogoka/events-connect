@@ -110,8 +110,12 @@ export default function AuthProvider({
       // Use this handler only when user accesses to our page
 
       console.log('GetAuth', firebaseAccount);
+      console.log('LoginStatus', loginStatus);
 
-      if (loginStatus !== LoginStatus.Unknown) {
+      if (
+        loginStatus === LoginStatus.LoggedIn ||
+        loginStatus === LoginStatus.LoggedOut
+      ) {
         return;
       }
 
@@ -150,6 +154,7 @@ export default function AuthProvider({
             console.log('No user in the DB');
             console.log('loginStatus', loginStatus);
             setLoginStatus(LoginStatus.SigningUp);
+            console.log('loginStatus', loginStatus);
           });
       }
       // When the user logged out or doesn't have an account

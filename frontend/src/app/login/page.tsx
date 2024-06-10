@@ -38,7 +38,7 @@ export default function LoginPage() {
 
   const theme = useTheme();
 
-  const { setUser, setFirebaseAccount, setLoginStatus } =
+  const { setUser, setFirebaseAccount, setLoginStatus, firebaseAccount } =
     useContext(UserContext);
 
   const { pathName, setShowedPage } = useContext(EventContext);
@@ -51,7 +51,7 @@ export default function LoginPage() {
     message: '',
   });
 
-  const getUserFromServer = (uid: string) => {
+  const getUserFromServer = (uid: string, provider: string) => {
     axios
       .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${uid}`)
       .then((res: any) => {
@@ -71,14 +71,34 @@ export default function LoginPage() {
         route.replace('/events');
       })
       .catch((error: any) => {
-        signOut(getAuth());
-        setFirebaseAccount(null);
-        setUser(null);
-        setLoginStatus(LoginStatus.LoggedOut);
-        handleSetUserServerError(
-          { error: true, message: error.response.data },
-          6
-        );
+        console.log('provider', provider);
+
+        if (
+          error.response.data === 'You need to finish the registration.' &&
+          provider === 'password'
+        ) {
+          console.log('I need to send the user to registration');
+
+          setUserServerError({
+            error: true,
+            message:
+              'You need to finish the registration. You are being redirected to finish it.',
+          });
+
+          setTimeout(() => {
+            setLoginStatus(LoginStatus.SigningUp);
+            route.replace('/signup/register');
+          }, 8000);
+        } else {
+          signOut(getAuth());
+          setFirebaseAccount(null);
+          setUser(null);
+          setLoginStatus(LoginStatus.LoggedOut);
+          handleSetUserServerError(
+            { error: true, message: error.response.data },
+            6
+          );
+        }
       });
   };
 
@@ -92,7 +112,10 @@ export default function LoginPage() {
           providerData: result.user.providerData,
           studentId: '',
         });
-        getUserFromServer(result.user.uid);
+        getUserFromServer(
+          result.user.uid,
+          result.user.providerData[0].providerId
+        );
       })
       .catch((error) => {
         handleSetUserServerError(
@@ -136,7 +159,10 @@ export default function LoginPage() {
           studentId: '',
           photoURL: result.user.photoURL,
         });
-        getUserFromServer(result.user.uid);
+        getUserFromServer(
+          result.user.uid,
+          result.user.providerData[0].providerId
+        );
       })
       .catch((error) => {
         handleSetUserServerError(
