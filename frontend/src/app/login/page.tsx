@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import axios from 'axios';
@@ -38,8 +38,14 @@ export default function LoginPage() {
 
   const theme = useTheme();
 
-  const { setUser, setFirebaseAccount, setLoginStatus, firebaseAccount } =
-    useContext(UserContext);
+  const {
+    setUser,
+    setFirebaseAccount,
+    setLoginStatus,
+    firebaseAccount,
+    error,
+    setError,
+  } = useContext(UserContext);
 
   const { pathName, setShowedPage } = useContext(EventContext);
 
@@ -55,12 +61,8 @@ export default function LoginPage() {
     axios
       .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${uid}`)
       .then((res: any) => {
-        console.log('res', res.data);
-
         setUser(res.data);
         setFirebaseAccount((prevState) => {
-          console.log('prevState', prevState);
-
           return {
             ...prevState!,
             studentId: res.data.student_id!,
@@ -71,14 +73,10 @@ export default function LoginPage() {
         route.replace('/events');
       })
       .catch((error: any) => {
-        console.log('provider', provider);
-
         if (
           error.response.data === 'You need to finish the registration.' &&
           provider === 'password'
         ) {
-          console.log('I need to send the user to registration');
-
           setUserServerError({
             error: true,
             message:
@@ -134,7 +132,7 @@ export default function LoginPage() {
 
   const handleSetUserServerError = (
     errorObject: ErrorMessage,
-    seconds: number
+    seconds: number = 5
   ): void => {
     setUserServerError({
       error: errorObject.error,
@@ -147,6 +145,7 @@ export default function LoginPage() {
         message: '',
       });
     }, seconds * 1000);
+    setError({ error: false, message: '' });
   };
 
   const handleGoogleLogin = async () => {
@@ -178,6 +177,12 @@ export default function LoginPage() {
       });
     }
   };
+
+  useEffect(() => {
+    if (error.error) {
+      handleSetUserServerError(error);
+    }
+  }, []);
 
   return (
     <>
@@ -268,7 +273,7 @@ export default function LoginPage() {
                 color='primary'
                 fullWidth
               >
-                Log In
+                Login
               </Button>
             </Stack>
           </form>

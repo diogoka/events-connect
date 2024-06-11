@@ -48,6 +48,8 @@ export type UserContextProps = {
   >;
   loginStatus: LoginStatus;
   setLoginStatus: (loginStatus: LoginStatus) => void;
+  error: ErrorMessage;
+  setError: React.Dispatch<React.SetStateAction<ErrorMessage>>;
 };
 
 export type Attendee = {
@@ -117,4 +119,9 @@ export type EventContextProps = {
 export type EventAction = {
   type: string;
   payload: EventData;
+};
+
+export type ErrorMessage = {
+  error: boolean;
+  message: string;
 };

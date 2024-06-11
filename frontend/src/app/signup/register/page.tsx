@@ -41,6 +41,8 @@ export default function RegisterPage() {
     setLoginStatus,
     setFirebaseAccount,
     user,
+    error,
+    setError,
   } = useContext(UserContext);
 
   // User Input
@@ -158,16 +160,12 @@ export default function RegisterPage() {
     formData.append('avatarURL', firebaseAccount!.photoURL!);
     formData.append('is_verified', 'false');
 
-    console.log(firebaseAccount);
-
     if (
       firebaseAccount?.providerData![0].providerId === 'password' &&
       firebaseAccount.studentId === ''
     ) {
       const id = await getStudentId(firebaseAccount!.email!);
-      console.log('id, ', id);
-
-      formData.append('student_id', id);
+      formData.append('student_id', id.toString());
     } else {
       formData.append(
         'student_id',
@@ -177,8 +175,6 @@ export default function RegisterPage() {
 
     if (postalCode) formData.append('postalCode', postalCode);
     if (phone) formData.append('phone', phone);
-
-    console.log('FOrmData', formData);
 
     await axios
       .post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users`, formData, {
@@ -194,6 +190,11 @@ export default function RegisterPage() {
           6,
           '/login'
         );
+        setError({
+          error: true,
+          message: 'User created. Please check your email.',
+        });
+
         clearState();
         setFirebaseAccount(null);
         setLoginStatus(LoginStatus.LoggedOut);

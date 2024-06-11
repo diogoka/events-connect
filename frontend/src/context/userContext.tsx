@@ -5,6 +5,7 @@ import {
   User,
   FirebaseAccount,
   LoginStatus,
+  ErrorMessage,
 } from '@/types/context.types';
 
 export const UserContext = createContext<UserContextProps>(
@@ -19,6 +20,11 @@ export function UserContextProvider({ children }: { children: ReactNode }) {
   const [loginStatus, setLoginStatus] = useState<LoginStatus>(
     LoginStatus.Unknown
   );
+  const [error, setError] = useState<ErrorMessage>({
+    error: false,
+    message: '',
+  });
+
   return (
     <UserContext.Provider
       value={{
@@ -28,6 +34,8 @@ export function UserContextProvider({ children }: { children: ReactNode }) {
         setFirebaseAccount,
         loginStatus,
         setLoginStatus,
+        error,
+        setError,
       }}
     >
       {children}

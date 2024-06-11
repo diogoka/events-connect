@@ -55,10 +55,14 @@ export default function SignUpPage() {
   });
 
   useEffect(() => {
-    console.log('FirebaseAccount in Signup', firebaseAccount);
-
     if (loginStatus === 'Logged In') {
       router.replace('/events');
+    }
+
+    if (firebaseAccount) {
+      if (firebaseAccount?.providerData![0].providerId === 'password') {
+        router.replace('/signup/register');
+      }
     }
     // if (loginStatus === 'Singing Up') {
     //   router.replace('/signup/register');

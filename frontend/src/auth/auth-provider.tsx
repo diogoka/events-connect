@@ -99,6 +99,7 @@ export default function AuthProvider({
     loginStatus,
     setLoginStatus,
     firebaseAccount: firebaseAccountContext,
+    setError,
   } = useContext(UserContext);
 
   useEffect(() => {
@@ -108,9 +109,6 @@ export default function AuthProvider({
 
     auth.onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
-
-      console.log('GetAuth', firebaseAccount);
-      console.log('LoginStatus', loginStatus);
 
       if (
         loginStatus === LoginStatus.LoggedIn ||
@@ -150,16 +148,19 @@ export default function AuthProvider({
             }
           })
           .catch((error: any) => {
+            // need to have the message here
             //need to handle properly
-            console.log('No user in the DB');
-            console.log('loginStatus', loginStatus);
-            setLoginStatus(LoginStatus.SigningUp);
-            console.log('loginStatus', loginStatus);
+            if (error.response.data === 'Email is not verified.') {
+              setLoginStatus(LoginStatus.LoggedOut);
+              signOut(getAuth());
+              setError({ error: true, message: 'Please verify your email.' });
+            } else {
+              setLoginStatus(LoginStatus.SigningUp);
+            }
           });
       }
       // When the user logged out or doesn't have an account
       else {
-        setUser(null);
         setLoginStatus(LoginStatus.LoggedOut);
         signOut(getAuth());
       }
@@ -168,13 +169,19 @@ export default function AuthProvider({
 
   const isAllowedPage = (): Permission => {
     const page = getPage(pathname);
+
+    if (
+      loginStatus === LoginStatus.LoggedOut &&
+      pathname === '/signup/register'
+    ) {
+      return { isAllowed: false, redirection: '/login' };
+    }
+
     if (page === undefined) {
       return { isAllowed: true, redirection: '' };
     }
     // Wait until the login status is confirmed
     else if (loginStatus === LoginStatus.Unknown) {
-      console.log('Is unknown');
-
       return { isAllowed: false, redirection: '' };
     }
     // If user is logged in
@@ -213,13 +220,10 @@ export default function AuthProvider({
       // Go to the signup page, but don't redirect from sign-up page
 
       if (pathname === '/login') {
-        console.log('I WANT TO GO HERE');
         return { isAllowed: true, redirection: '' };
       }
 
       if (pathname === '/events' || pathname === '/') {
-        console.warn('HERE');
-
         return { isAllowed: true, redirection: '' };
       }
       if (pathname !== '/signup') {
@@ -233,6 +237,7 @@ export default function AuthProvider({
   // When the user switches the page, check the page restriction
   useEffect(() => {
     const result: Permission = isAllowedPage();
+
     if (!result.isAllowed && result.redirection) {
       router.replace(result.redirection);
     }
