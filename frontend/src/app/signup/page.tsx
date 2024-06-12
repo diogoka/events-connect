@@ -23,8 +23,6 @@ import { deleteAccount } from '@/auth/auth-provider';
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
   signOut,
 } from 'firebase/auth';
 
@@ -221,11 +219,12 @@ export default function SignUpPage() {
             });
             signOut(getAuth());
             setLoginStatus(LoginStatus.LoggedOut);
+            router.replace('/login');
           }, 6000);
         } catch (error: any) {
           setRegisterMessage({
             showMessage: true,
-            message: 'Internal Error, please try again.',
+            message: 'Internal Error. Please try again later.',
             severity: 'error',
           });
 
@@ -310,6 +309,11 @@ export default function SignUpPage() {
           marginTop={isMobile ? '2rem' : 0}
           marginInline='auto'
           padding={isMobile ? 'none' : '0 6rem 2rem 6rem'}
+          sx={{
+            height: isMobile ? 'auto' : '100vh',
+            maxHeight: '100vh',
+            overflowY: 'auto',
+          }}
         >
           {!isMobile && (
             <Typography
@@ -322,159 +326,170 @@ export default function SignUpPage() {
           )}
 
           {loginStatus === LoginStatus.LoggedOut || isGoogle ? (
-            <Stack rowGap={'20px'}>
-              <form onSubmit={handleFormSubmit}>
-                <Stack rowGap={'20px'}>
-                  <Stack rowGap={'10px'}>
-                    <NameInput
-                      name={userInputForm.firstName}
-                      type={'firstName'}
-                      setUserName={updateUserInputForm}
-                      label='First Name'
-                      disabled={registerMessage.showMessage}
-                    />
-                    <NameInput
-                      name={userInputForm.lastName}
-                      type={'lastName'}
-                      setUserName={updateUserInputForm}
-                      label='Last Name'
-                      disabled={registerMessage.showMessage}
-                    />
-                    <CourseInput
-                      courseId={userInputForm.courseId}
-                      type={'courseId'}
-                      setCourse={updateUserInputForm}
-                      disabled={registerMessage.showMessage}
-                    />
+            <form onSubmit={handleFormSubmit}>
+              <Stack rowGap={'10px'}>
+                <NameInput
+                  name={userInputForm.firstName}
+                  type={'firstName'}
+                  setUserName={updateUserInputForm}
+                  label='First Name'
+                  disabled={registerMessage.showMessage}
+                />
+                <NameInput
+                  name={userInputForm.lastName}
+                  type={'lastName'}
+                  setUserName={updateUserInputForm}
+                  label='Last Name'
+                  disabled={registerMessage.showMessage}
+                />
+                <CourseInput
+                  courseId={userInputForm.courseId}
+                  type={'courseId'}
+                  setCourse={updateUserInputForm}
+                  disabled={registerMessage.showMessage}
+                />
+                <FormControl required>
+                  <TextField
+                    type='email'
+                    label={isGoogle ? firebaseAccount?.email : 'Email'}
+                    onChange={(event) =>
+                      updateUserInputForm('email', event.target.value)
+                    }
+                    required
+                    disabled={registerMessage.showMessage || isGoogle}
+                    InputProps={
+                      isGoogle
+                        ? {
+                            endAdornment: (
+                              <InputAdornment position='end'>
+                                <Button
+                                  sx={{
+                                    fontSize: '0.8rem',
+                                    height: '2rem',
+                                    padding: '0 0.5rem',
+                                  }}
+                                  variant='contained'
+                                  color='primary'
+                                  onClick={() => {
+                                    setRegisterMessage({
+                                      showMessage: true,
+                                      message:
+                                        'You are being redirected. Select another email.',
+                                      severity: 'info',
+                                    });
+
+                                    setTimeout(() => {
+                                      setRegisterMessage({
+                                        showMessage: false,
+                                        message: '',
+                                        severity: 'info',
+                                      });
+                                      setUser(null);
+                                      setFirebaseAccount(null);
+                                      setLoginStatus(LoginStatus.LoggedOut);
+                                      router.replace('/login');
+                                    }, 6000);
+                                  }}
+                                  disabled={registerMessage.showMessage}
+                                >
+                                  Change Email
+                                </Button>
+                              </InputAdornment>
+                            ),
+                          }
+                        : {}
+                    }
+                  />
+                </FormControl>
+
+                {!isGoogle && (
+                  <>
                     <FormControl required>
-                      <TextField
-                        type='email'
-                        label={isGoogle ? firebaseAccount?.email : 'Email'}
-                        onChange={(event) =>
-                          updateUserInputForm('email', event.target.value)
-                        }
-                        required
+                      <PasswordInput
+                        label='Password'
+                        setter={updateUserInputForm}
+                        type={'password'}
                         disabled={registerMessage.showMessage || isGoogle}
-                        InputProps={
-                          isGoogle
-                            ? {
-                                endAdornment: (
-                                  <InputAdornment position='end'>
-                                    <Button
-                                      sx={{
-                                        fontSize: '0.8rem',
-                                        height: '2rem',
-                                        padding: '0 0.5rem',
-                                      }}
-                                      variant='contained'
-                                      color='primary'
-                                      onClick={() => {
-                                        setUser(null);
-                                        setFirebaseAccount(null);
-                                        setLoginStatus(LoginStatus.LoggedOut);
-                                        router.replace('/login');
-                                      }}
-                                    >
-                                      Change Email
-                                    </Button>
-                                  </InputAdornment>
-                                ),
-                              }
-                            : {}
-                        }
                       />
                     </FormControl>
-
-                    {!isGoogle && (
-                      <>
-                        <FormControl required>
-                          <PasswordInput
-                            label='Password'
-                            setter={updateUserInputForm}
-                            type={'password'}
-                            disabled={registerMessage.showMessage || isGoogle}
-                          />
-                        </FormControl>
-                        <FormControl required>
-                          <PasswordInput
-                            label='Confirm Password'
-                            setter={updateUserInputForm}
-                            type={'confirmPassword'}
-                            disabled={registerMessage.showMessage || isGoogle}
-                          />
-                        </FormControl>
-                      </>
-                    )}
                     <FormControl required>
-                      <NumberTextFieldInput
-                        label={'Student ID'}
-                        maxLength={6}
-                        setStudentID={updateUserInputForm}
-                        type={'student_id'}
-                        disabled={registerMessage.showMessage}
+                      <PasswordInput
+                        label='Confirm Password'
+                        setter={updateUserInputForm}
+                        type={'confirmPassword'}
+                        disabled={registerMessage.showMessage || isGoogle}
                       />
                     </FormControl>
+                  </>
+                )}
+                <FormControl required>
+                  <NumberTextFieldInput
+                    label={'Student ID'}
+                    maxLength={6}
+                    setStudentID={updateUserInputForm}
+                    type={'student_id'}
+                    disabled={registerMessage.showMessage}
+                  />
+                </FormControl>
 
-                    <Box
-                      sx={{
-                        display: 'inline-flex',
-                        alignItems: 'flex-start',
-                        gap: '10px',
-                      }}
-                    >
-                      <Checkbox
-                        checked={checked}
-                        onClick={() => handleChangeCheckBox()}
-                        sx={{
-                          padding: '0',
-                        }}
-                      />
-                      <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
-                        I acknowledge that I have read and understood the
-                        <Link
-                          type='button'
-                          component='button'
-                          sx={{
-                            '&:hover': {
-                              cursor: 'pointer',
-                            },
-                            ':disabled:hover': {
-                              cursor: 'auto',
-                            },
-                            marginLeft: '3px',
-                            fontSize: '15px',
-                          }}
-                          onClick={openModal}
-                        >
-                          {' '}
-                          Terms and Conditions.
-                        </Link>
-                      </Typography>
-                    </Box>
-                  </Stack>
-                  <Button
-                    type='submit'
-                    variant='contained'
-                    color='primary'
-                    fullWidth
-                    disabled={!checked}
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'flex-start',
+                    gap: '10px',
+                  }}
+                >
+                  <Checkbox
+                    checked={checked}
+                    onClick={() => handleChangeCheckBox()}
                     sx={{
-                      '&:disabled': {
-                        cursor: 'not-allowed',
-                        pointerEvents: 'auto',
-                      },
+                      padding: '0',
                     }}
-                  >
-                    Register
-                  </Button>
-
-                  <Typography variant='body2' align='center'>
-                    If you are an organizer, please contact admin:{' '}
-                    head.tech@ciccc.ca
+                  />
+                  <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
+                    I acknowledge that I have read and understood the
+                    <Link
+                      type='button'
+                      component='button'
+                      sx={{
+                        '&:hover': {
+                          cursor: 'pointer',
+                        },
+                        ':disabled:hover': {
+                          cursor: 'auto',
+                        },
+                        marginLeft: '3px',
+                        fontSize: '15px',
+                      }}
+                      onClick={openModal}
+                    >
+                      {' '}
+                      Terms and Conditions.
+                    </Link>
                   </Typography>
-                </Stack>
-              </form>
-            </Stack>
+                </Box>
+              </Stack>
+              <Button
+                type='submit'
+                variant='contained'
+                color='primary'
+                fullWidth
+                disabled={!checked || registerMessage.showMessage}
+                sx={{
+                  '&:disabled': {
+                    cursor: 'not-allowed',
+                    pointerEvents: 'auto',
+                  },
+                }}
+              >
+                Register
+              </Button>
+
+              <Typography variant='body2' align='center'>
+                If you are an organizer, please contact admin:{' '}
+                head.tech@ciccc.ca
+              </Typography>
+            </form>
           ) : (
             <></>
           )}

@@ -198,12 +198,12 @@ export default function LoginPage() {
     }
   };
 
-  useEffect(() => {
-    if (firebaseAccount && loginStatus !== 'Logged In') {
-      signOut(getAuth());
-      setLoginStatus(LoginStatus.LoggedOut);
-    }
-  }, [firebaseAccount, loginStatus]);
+  // useEffect(() => {
+  //   if (firebaseAccount && loginStatus === 'Signing up') {
+  //     signOut(getAuth());
+  //     setLoginStatus(LoginStatus.LoggedOut);
+  //   }
+  // }, [firebaseAccount, loginStatus]);
 
   return (
     <>

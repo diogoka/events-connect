@@ -11,8 +11,7 @@ import NameInput from '@/components/user/form/name-input';
 import CourseInput from '@/components/user/form/course-input';
 import { storage } from '@/auth/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { User } from '@/types/pages.types';
-import { updateFirstName, updateLastName } from '@/common/functions';
+import { User, UserEditInfo, UserInputForm } from '@/types/pages.types';
 
 export default function UserEditPage() {
   const router = useRouter();
@@ -33,19 +32,32 @@ export default function UserEditPage() {
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/img/users/${user?.id}`
   );
 
-  const [userName, setUserName] = useState<User>({
+  const [userName, setUserName] = useState<UserEditInfo>({
     firstName: '',
     lastName: '',
+    courseId: '',
   });
+
+  const updateUserInfo = <K extends keyof UserInputForm>(
+    key: K,
+    value: UserInputForm[K]
+  ) => {
+    setUserName((prevState) => ({
+      ...prevState,
+      [key]: value,
+    }));
+  };
 
   let url = firebaseAccount?.photoURL;
 
   useEffect(() => {
     if (user) {
-      updateFirstName(user.firstName, setUserName);
-      updateLastName(user.lastName, setUserName);
+      updateUserInfo('firstName', user.firstName);
+      updateUserInfo('lastName', user.lastName);
+      console.log('course ID', user.courseId);
+
+      updateUserInfo('courseId', user.courseId.toString());
       setEmail(user.email);
-      setCourseId(user.courseId.toString());
       setPostalCode(user.postalCode);
       setPhone(user.phone);
     }
@@ -60,8 +72,6 @@ export default function UserEditPage() {
   const uploadAvatar = async (image: Blob) => {
     try {
       let url = '';
-
-      let reference: any = '';
 
       const imageRef = ref(storage, `users/${user?.id}`);
       const imageToUpload = image!;
@@ -93,13 +103,14 @@ export default function UserEditPage() {
     const formData = new FormData();
     formData.append('id', user.id);
     formData.append('type', user.roleId.toString());
-    formData.append('courseId', courseId.toString());
+    formData.append('courseId', userName.courseId.toString());
     formData.append('email', email);
     formData.append('firstName', userName.firstName);
     formData.append('lastName', userName.lastName);
 
     if (postalCode) formData.append('postalCode', postalCode);
     if (phone) formData.append('phone', phone);
+    if (user.avatarURL) formData.append('avatarURL', user.avatarURL);
     if (image) formData.append('avatarURL', url);
 
     axios
@@ -114,6 +125,8 @@ export default function UserEditPage() {
         console.error(error.response.data);
       });
   };
+
+  console.log('User', user);
 
   return (
     <Stack
@@ -185,18 +198,25 @@ export default function UserEditPage() {
 
           <NameInput
             name={userName.firstName}
-            setName={updateFirstName}
-            setUserName={setUserName}
             label=''
+            type='firstName'
+            setUserName={updateUserInfo}
+            disabled={false}
           />
           <NameInput
             name={userName.lastName}
-            setName={updateLastName}
-            setUserName={setUserName}
             label=''
+            type='lastName'
+            setUserName={updateUserInfo}
+            disabled={false}
           />
 
-          <CourseInput courseId={courseId} setCourseId={setCourseId} />
+          <CourseInput
+            courseId={userName.courseId}
+            setCourse={updateUserInfo}
+            type='courseId'
+            disabled={false}
+          />
 
           <div>{warning}</div>
 

@@ -94,3 +94,7 @@ export interface UserInputDTO extends UserInputForm {
   avatarURL: string;
   is_verified: boolean;
 }
+
+export interface UserEditInfo extends User {
+  courseId: string;
+}
