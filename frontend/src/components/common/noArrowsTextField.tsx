@@ -1,6 +1,7 @@
 import React, { ChangeEvent } from 'react';
 import { TextField } from '@mui/material';
 import { styled } from '@mui/system';
+import { UserInputForm } from '@/types/pages.types';
 
 const NoArrowsTextField = styled(TextField)(({ theme }) => ({
   '& input[type=number]': {
@@ -20,9 +21,13 @@ const NoArrowsTextField = styled(TextField)(({ theme }) => ({
 
 type Props = {
   label: string;
-  setStudentID: React.Dispatch<React.SetStateAction<string>>;
+  setStudentID: <K extends keyof UserInputForm>(
+    key: K,
+    value: UserInputForm[K]
+  ) => void;
   maxLength: number;
-  disable: boolean;
+  disabled: boolean;
+  type: keyof UserInputForm;
 };
 
 const NumberTextFieldInput = (props: Props) => {
@@ -43,9 +48,9 @@ const NumberTextFieldInput = (props: Props) => {
         onInput: handleInput,
       }}
       onChange={(event) => {
-        props.setStudentID(event.target.value);
+        props.setStudentID(props.type, parseInt(event.target.value));
       }}
-      disabled={props.disable}
+      disabled={props.disabled}
     />
   );
 };

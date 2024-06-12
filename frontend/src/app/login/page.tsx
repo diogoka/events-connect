@@ -45,6 +45,7 @@ export default function LoginPage() {
     firebaseAccount,
     error,
     setError,
+    loginStatus,
   } = useContext(UserContext);
 
   const { pathName, setShowedPage } = useContext(EventContext);
@@ -100,6 +101,25 @@ export default function LoginPage() {
       });
   };
 
+  const handleSignUpGoogle = async () => {
+    signInWithPopup(getAuth(), new GoogleAuthProvider())
+      .then((result) => {
+        setFirebaseAccount({
+          uid: result.user.uid,
+          email: result.user.email,
+          providerData: result.user.providerData,
+          studentId: 0,
+          photoURL: result.user.photoURL,
+        });
+        setLoginStatus(LoginStatus.LoggedOut);
+        route.replace('/signup/');
+      })
+      .catch((error: any) => {
+        setFirebaseAccount(null);
+        setUserServerError({ error: true, message: error });
+      });
+  };
+
   const handleEmailLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     signInWithEmailAndPassword(getAuth(), email, password)
@@ -108,7 +128,7 @@ export default function LoginPage() {
           uid: result.user.uid,
           email: result.user.email,
           providerData: result.user.providerData,
-          studentId: '',
+          studentId: 0,
         });
         getUserFromServer(
           result.user.uid,
@@ -155,7 +175,7 @@ export default function LoginPage() {
           uid: result.user.uid,
           email: result.user.email,
           providerData: result.user.providerData,
-          studentId: '',
+          studentId: 0,
           photoURL: result.user.photoURL,
         });
         getUserFromServer(
@@ -179,10 +199,11 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (error.error) {
-      handleSetUserServerError(error);
+    if (firebaseAccount && loginStatus !== 'Logged In') {
+      signOut(getAuth());
+      setLoginStatus(LoginStatus.LoggedOut);
     }
-  }, []);
+  }, [firebaseAccount, loginStatus]);
 
   return (
     <>
@@ -247,7 +268,14 @@ export default function LoginPage() {
                   />
                 </FormControl>
                 <FormControl required>
-                  <PasswordInput label='Password' setter={setPassword} />
+                  <PasswordInput
+                    label='Password'
+                    setPassword={setPassword}
+                    setter={setPassword}
+                    type='password'
+                    local='login'
+                    disabled={false}
+                  />
                 </FormControl>
                 <Typography
                   onClick={() => {
@@ -292,14 +320,25 @@ export default function LoginPage() {
 
           <Typography align='center'>or</Typography>
 
-          <Button
-            onClick={() => route.push('/signup')}
-            variant='contained'
-            color='primary'
-            fullWidth
-          >
-            Sign Up
-          </Button>
+          <Box sx={{ display: 'flex', gap: '1.1rem' }}>
+            <Button
+              onClick={handleSignUpGoogle}
+              variant='outlined'
+              color='secondary'
+              endIcon={<FcGoogle />}
+              fullWidth
+            >
+              Sign Up
+            </Button>
+            <Button
+              onClick={() => route.push('/signup')}
+              variant='contained'
+              color='primary'
+              fullWidth
+            >
+              Sign Up
+            </Button>
+          </Box>
         </Stack>
       </Stack>
     </>

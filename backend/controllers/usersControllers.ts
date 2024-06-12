@@ -72,6 +72,9 @@ export const createUser = async (
   res: express.Response
 ) => {
   const userInput: UserInput = req.body;
+
+  console.log('UserInput', userInput);
+
   const { result, message } = validateUserInput(userInput);
   if (!result) {
     res.status(500).send(message);

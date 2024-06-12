@@ -105,10 +105,16 @@ export default function AuthProvider({
   useEffect(() => {
     initializeFirebase;
 
+    console.log('firebase,', firebaseAccountContext);
+    console.log('user', userContext);
+
     const auth = getAuth();
 
     auth.onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
+
+      console.log('fire', firebaseAccount);
+      console.log('status', loginStatus);
 
       if (
         loginStatus === LoginStatus.LoggedIn ||
@@ -122,7 +128,7 @@ export default function AuthProvider({
           uid: firebaseAccount!.uid,
           email: firebaseAccount!.email,
           providerData: firebaseAccount!.providerData,
-          studentId: '',
+          studentId: 0,
           photoURL: firebaseAccount.photoURL,
         });
 
@@ -169,13 +175,6 @@ export default function AuthProvider({
 
   const isAllowedPage = (): Permission => {
     const page = getPage(pathname);
-
-    if (
-      loginStatus === LoginStatus.LoggedOut &&
-      pathname === '/signup/register'
-    ) {
-      return { isAllowed: false, redirection: '/login' };
-    }
 
     if (page === undefined) {
       return { isAllowed: true, redirection: '' };
@@ -227,7 +226,7 @@ export default function AuthProvider({
         return { isAllowed: true, redirection: '' };
       }
       if (pathname !== '/signup') {
-        return { isAllowed: false, redirection: '/signup/register' };
+        return { isAllowed: false, redirection: '/signup' };
       }
     }
 

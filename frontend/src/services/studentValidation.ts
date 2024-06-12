@@ -8,7 +8,7 @@ export const checkPasswords = (
 
 export const studentValidation = async (
   email: string,
-  studentId: string
+  studentId: number
 ): Promise<checkedIdResponse> => {
   const getCheck = await axios.post(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/checkStudentId`,

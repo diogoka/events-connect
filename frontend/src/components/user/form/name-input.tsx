@@ -1,16 +1,16 @@
 import React from 'react';
 import { FormControl, TextField } from '@mui/material';
-import { User } from '@/types/pages.types';
+import { User, UserInputForm } from '@/types/pages.types';
 
 type Props = {
   name: string;
-  setName: (
-    name: string,
-    setUserName: React.Dispatch<React.SetStateAction<User>>
-  ) => void;
   label: string;
-  setUserName: React.Dispatch<React.SetStateAction<User>>;
-  disable: boolean;
+  setUserName: <K extends keyof UserInputForm>(
+    key: K,
+    value: UserInputForm[K]
+  ) => void;
+  type: keyof UserInputForm;
+  disabled: boolean;
 };
 
 export default function NameInput(props: Props) {
@@ -20,13 +20,11 @@ export default function NameInput(props: Props) {
         type='text'
         label={props.label}
         value={props.name}
-        onChange={(event) =>
-          props.setName(event.target.value, props.setUserName)
-        }
+        onChange={(event) => props.setUserName(props.type, event.target.value)}
         required
         inputProps={{ maxLength: 25 }}
         error={props.name.length >= 25 ? true : false}
-        disabled={props.disable}
+        disabled={props.disabled}
       />
     </FormControl>
   );

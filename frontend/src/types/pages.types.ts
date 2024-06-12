@@ -76,3 +76,21 @@ export type Params = {
     id: number;
   };
 };
+
+export type UserInputForm = {
+  firstName: string;
+  lastName: string;
+  courseId: string;
+  email: string;
+  password?: string;
+  confirmPassword?: string;
+  student_id: number;
+};
+
+export interface UserInputDTO extends UserInputForm {
+  id: string;
+  type: number;
+  provider: string;
+  avatarURL: string;
+  is_verified: boolean;
+}

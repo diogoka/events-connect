@@ -32,7 +32,7 @@ export type FirebaseAccount = {
   displayName?: string | null;
   photoURL?: string | null;
   providerData?: Array<ProviderData>;
-  studentId: string;
+  studentId: number;
 };
 
 type ProviderData = {

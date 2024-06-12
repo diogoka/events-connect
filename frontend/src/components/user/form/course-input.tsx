@@ -3,11 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import axios from 'axios';
 import { Course } from '@/types/components.types';
+import { UserInputForm } from '@/types/pages.types';
 
 type Props = {
   courseId: string;
-  setCourseId: (courseId: string) => void;
-  disable: boolean;
+  setCourse: <K extends keyof UserInputForm>(
+    key: K,
+    value: UserInputForm[K]
+  ) => void;
+  disabled: boolean;
+  type: keyof UserInputForm;
 };
 
 export default function CourseInput(props: Props) {
@@ -34,8 +39,8 @@ export default function CourseInput(props: Props) {
           label='Course'
           value={props.courseId}
           defaultValue=''
-          onChange={(e) => props.setCourseId(e.target.value)}
-          disabled={props.disable}
+          onChange={(e) => props.setCourse(props.type, e.target.value)}
+          disabled={props.disabled}
         >
           {courses.map((course: Course, index: number) => {
             return (
