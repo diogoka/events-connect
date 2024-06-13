@@ -9,51 +9,17 @@ import React, {
 import { usePathname } from 'next/navigation';
 import dayjs from 'dayjs';
 
-interface Page {
-  label: string;
-  path: string;
-}
+import {
+  EventData,
+  Tag,
+  EventAction,
+  EventContextProps,
+  Page,
+} from '@/types/context.types';
 
-export interface DateRange {
-  dateStart: dayjs.Dayjs;
-  dateEnd: dayjs.Dayjs;
-}
 export const today = dayjs();
 export const hourOfToday = today.add(1, 'hour');
 export const endHourOfToday = hourOfToday.add(30, 'minute');
-
-export type Tag = {
-  id_tag: number;
-  name_tag: string;
-};
-export type EventData = {
-  name_event: string;
-  description_event: string;
-  dates: DateRange[];
-  capacity_event: number;
-  location_event: string;
-  price_event: number;
-  selectedTags: Array<Tag>;
-  modality: Tag;
-  category_event: string;
-  image_event: string;
-};
-
-type EventContextProps = {
-  image: File | null;
-  setImage: (image: File | null) => void;
-  createdEvent: EventData;
-  dispatch: Dispatch<EventAction>;
-  initialState: EventData;
-  showedPage: Page | null;
-  setShowedPage: (showedPage: Page | null) => void;
-  pathName: string;
-};
-
-type EventAction = {
-  type: string;
-  payload: EventData;
-};
 
 export const initialState: EventData = {
   name_event: '',

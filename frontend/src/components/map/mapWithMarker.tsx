@@ -1,18 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
 import { setKey, fromAddress } from 'react-geocode';
+import { Coordinate } from '@/types/components.types';
 
-type Coordinate = {
-  lat: number;
-  lng: number;
-};
-
-type Props = {
-  location: string;
-}
-
-export default function MapWithMarker({ location }: Props) {
-
+export default function MapWithMarker({ location }: { location: string }) {
   const [coordinate, setCoordinate] = useState<Coordinate>();
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -29,20 +20,22 @@ export default function MapWithMarker({ location }: Props) {
         })
         .catch(console.error);
     }
+  }, [location]);
 
-  }, [location])
-
-  return (isLoaded && coordinate) && (
-    <GoogleMap
-      mapContainerStyle={{
-        width: '100%',
-        height: '250px',
-        borderRadius: '7px',
-      }}
-      center={coordinate}
-      zoom={14}
-    >
-      <MarkerF position={coordinate} />
-    </GoogleMap>
-  )
+  return (
+    isLoaded &&
+    coordinate && (
+      <GoogleMap
+        mapContainerStyle={{
+          width: '100%',
+          height: '250px',
+          borderRadius: '7px',
+        }}
+        center={coordinate}
+        zoom={14}
+      >
+        <MarkerF position={coordinate} />
+      </GoogleMap>
+    )
+  );
 }

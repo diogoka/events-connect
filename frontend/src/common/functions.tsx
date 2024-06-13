@@ -1,5 +1,5 @@
 import { Review } from '../components/event/review/review';
-import { User } from '../types/types';
+import { User } from '../types/pages.types';
 
 export const getDayName = (num: number): string => {
   switch (num) {

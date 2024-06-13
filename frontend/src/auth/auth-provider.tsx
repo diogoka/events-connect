@@ -4,27 +4,16 @@ import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 import { initializeFirebase } from '@/auth/firebase';
 
-import { getAuth } from 'firebase/auth';
-import { useMediaQuery, Box } from '@mui/material';
-import { UserContext, LoginStatus } from '@/context/userContext';
-import { PageContext, PageStatus } from '@/context/pageContext';
+import { getAuth, deleteUser, signOut } from 'firebase/auth';
+import { Box } from '@mui/material';
+import { UserContext } from '@/context/userContext';
+import { PageContext } from '@/context/pageContext';
+import { LoginStatus, PageStatus } from '@/types/context.types';
 import Header from '@/components/header/header';
 import Footer from '@/components/footer';
 import Loading from '@/app/loading';
 import NotFound from '@/components/common/notFound';
-
-enum Limitation {
-  None, // Pages with no limitation
-  LoggedIn, // Pages only for logged in users
-  Organizer, // Pages only for organizers
-  Admin, // Pages only for administrators
-}
-
-type Page = {
-  path: RegExp;
-  limitation: Limitation;
-  isLoadingRequired: boolean;
-};
+import { Page, Limitation, Permission } from '@/types/auth-provider.types';
 
 const PAGES: Page[] = [
   {
@@ -103,54 +92,90 @@ export default function AuthProvider({
   const pathname = usePathname();
 
   const { pageStatus, setPageStatus } = useContext(PageContext);
-  const { user, setUser, setFirebaseAccount, loginStatus, setLoginStatus } =
-    useContext(UserContext);
+  const {
+    user: userContext,
+    setUser,
+    setFirebaseAccount,
+    loginStatus,
+    setLoginStatus,
+    firebaseAccount: firebaseAccountContext,
+    setError,
+  } = useContext(UserContext);
 
   useEffect(() => {
     initializeFirebase;
 
-    getAuth().onAuthStateChanged(async (firebaseAccount) => {
+    console.log('firebase,', firebaseAccountContext);
+    console.log('user', userContext);
+
+    const auth = getAuth();
+
+    auth.onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
-      if (loginStatus !== LoginStatus.Unknown) {
+
+      console.log('fire', firebaseAccount);
+      console.log('status', loginStatus);
+
+      if (
+        loginStatus === LoginStatus.LoggedIn ||
+        loginStatus === LoginStatus.LoggedOut
+      ) {
         return;
       }
 
       if (firebaseAccount) {
-        setFirebaseAccount(firebaseAccount);
+        setFirebaseAccount({
+          uid: firebaseAccount!.uid,
+          email: firebaseAccount!.email,
+          providerData: firebaseAccount!.providerData,
+          studentId: 0,
+          photoURL: firebaseAccount.photoURL,
+        });
 
         // Get user data from server
         axios
           .get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${firebaseAccount.uid}`
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${
+              firebaseAccount!.uid
+            }`
           )
           .then((res: any) => {
             if (res.data) {
               setUser(res.data);
+              setFirebaseAccount((prevState) => {
+                return {
+                  ...prevState!,
+                  studentId: res.data.student_id!,
+                };
+              });
               setLoginStatus(LoginStatus.LoggedIn);
             } else {
-              setUser(null);
               setLoginStatus(LoginStatus.SigningUp);
             }
           })
           .catch((error: any) => {
+            // need to have the message here
             //need to handle properly
-            console.log('No user in the DB');
+            if (error.response.data === 'Email is not verified.') {
+              setLoginStatus(LoginStatus.LoggedOut);
+              signOut(getAuth());
+              setError({ error: true, message: 'Please verify your email.' });
+            } else {
+              setLoginStatus(LoginStatus.SigningUp);
+            }
           });
       }
       // When the user logged out or doesn't have an account
       else {
-        setUser(null);
         setLoginStatus(LoginStatus.LoggedOut);
+        signOut(getAuth());
       }
     });
   }, []);
 
-  type Permission = {
-    isAllowed: boolean;
-    redirection: string;
-  };
   const isAllowedPage = (): Permission => {
     const page = getPage(pathname);
+
     if (page === undefined) {
       return { isAllowed: true, redirection: '' };
     }
@@ -161,8 +186,8 @@ export default function AuthProvider({
     // If user is logged in
     else if (loginStatus === LoginStatus.LoggedIn) {
       // If this user is a student
-      if (user) {
-        if (user.roleName === 'student') {
+      if (userContext) {
+        if (userContext.roleName === 'student') {
           // Give permission only to allowed pages
           if (
             !(
@@ -192,6 +217,14 @@ export default function AuthProvider({
     // If this user is in the process of sign-up
     else if (loginStatus === LoginStatus.SigningUp) {
       // Go to the signup page, but don't redirect from sign-up page
+
+      if (pathname === '/login') {
+        return { isAllowed: true, redirection: '' };
+      }
+
+      if (pathname === '/events' || pathname === '/') {
+        return { isAllowed: true, redirection: '' };
+      }
       if (pathname !== '/signup') {
         return { isAllowed: false, redirection: '/signup' };
       }
@@ -203,6 +236,7 @@ export default function AuthProvider({
   // When the user switches the page, check the page restriction
   useEffect(() => {
     const result: Permission = isAllowedPage();
+
     if (!result.isAllowed && result.redirection) {
       router.replace(result.redirection);
     }
@@ -263,6 +297,16 @@ export default function AuthProvider({
     </>
   );
 }
+
+export const deleteAccount = async () => {
+  getAuth().onAuthStateChanged(async (firebaseAccount) => {
+    if (firebaseAccount) {
+      const deleted = await deleteUser(firebaseAccount!);
+    } else {
+      console.log('No user is authenticated.');
+    }
+  });
+};
 
 function getPage(pathname: string): Page | undefined {
   return PAGES.find((PAGE: Page) => {

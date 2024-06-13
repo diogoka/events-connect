@@ -24,14 +24,9 @@ import ImageHelper from '@/components/common/image-helper';
 import IconsContainer from '@/components/icons/iconsContainer';
 import dayjs from 'dayjs';
 import MapWithMarker from '@/components/map/mapWithMarker';
-import {
-  Attendee,
-  EventDate,
-  Tag,
-  Event,
-  OtherInfo,
-  AlertState,
-} from '@/types/types';
+import { Attendee, Event, OtherInfo } from '@/types/types';
+
+import { AlertState } from '@/types/alert.types';
 
 export default function EventPage() {
   const { notFound } = useContext(PageContext);
@@ -168,7 +163,7 @@ export default function EventPage() {
       <Stack>
         {isAlertVisible &&
           alertFn(
-            alertMessage.title,
+            alertMessage.title!,
             alertMessage.message,
             alertMessage.severity
           )}
@@ -220,7 +215,7 @@ export default function EventPage() {
       <>
         {isAlertVisible &&
           alertFn(
-            alertMessage.title,
+            alertMessage.title!,
             alertMessage.message,
             alertMessage.severity
           )}

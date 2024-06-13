@@ -6,31 +6,7 @@ import EventList from '@/components/events/eventList';
 import SearchBar from '@/components/searchBar';
 import { UserContext } from '@/context/userContext';
 import SwitchButton from '@/components/events/switchButton';
-
-type Event = {
-  attendees?: any;
-  capacity_event: number;
-  category_event: string;
-  date_event_end: string;
-  date_event_start: string;
-  description_event: string;
-  id_event: number;
-  id_owner: string;
-  image_event: string;
-  location_event: string;
-  name_event: string;
-  price_event: number;
-};
-
-type Tag = {
-  id_event: number;
-  name_tag: string;
-};
-
-type CurrentUser = {
-  id: string;
-  role: string;
-};
+import { Tag, CurrentUser, HistoryEvent as Event } from '@/types/pages.types';
 
 export default function PastEvent() {
   const { user } = useContext(UserContext);

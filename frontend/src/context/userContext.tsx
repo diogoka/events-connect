@@ -1,49 +1,12 @@
 'use client';
 import React, { createContext, ReactNode, useState } from 'react';
-
-export enum LoginStatus {
-  Unknown = 'Unknown',
-  LoggedIn = 'Logged In',
-  LoggedOut = 'Logged Out',
-  SigningUp = 'Singing Up',
-}
-
-export type User = {
-  id: string;
-  roleId: number;
-  roleName: string;
-  courseId: number;
-  courseName: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  postalCode: string;
-  phone: string;
-  profilePhoto?: string;
-  provider?: string;
-  avatarURL: string;
-};
-
-export type FirebaseAccount = {
-  uid: string;
-  email: string | null;
-  displayName?: string | null;
-  photoURL?: string | null;
-  providerData?: Array<ProviderData>;
-};
-
-type ProviderData = {
-  providerId: string;
-};
-
-type UserContextProps = {
-  user: User | null;
-  setUser: (userStatus: User | null) => void;
-  firebaseAccount: FirebaseAccount | null;
-  setFirebaseAccount: (firebaseAccount: FirebaseAccount | null) => void;
-  loginStatus: LoginStatus;
-  setLoginStatus: (loginStatus: LoginStatus) => void;
-};
+import {
+  UserContextProps,
+  User,
+  FirebaseAccount,
+  LoginStatus,
+  ErrorMessage,
+} from '@/types/context.types';
 
 export const UserContext = createContext<UserContextProps>(
   {} as UserContextProps
@@ -51,9 +14,16 @@ export const UserContext = createContext<UserContextProps>(
 
 export function UserContextProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+
   const [firebaseAccount, setFirebaseAccount] =
     useState<FirebaseAccount | null>(null);
-  const [loginStatus, setLoginStatus] = useState(LoginStatus.Unknown);
+  const [loginStatus, setLoginStatus] = useState<LoginStatus>(
+    LoginStatus.Unknown
+  );
+  const [error, setError] = useState<ErrorMessage>({
+    error: false,
+    message: '',
+  });
 
   return (
     <UserContext.Provider
@@ -64,6 +34,8 @@ export function UserContextProvider({ children }: { children: ReactNode }) {
         setFirebaseAccount,
         loginStatus,
         setLoginStatus,
+        error,
+        setError,
       }}
     >
       {children}

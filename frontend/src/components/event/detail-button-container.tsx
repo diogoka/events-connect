@@ -6,7 +6,7 @@ import { UserContext } from '@/context/userContext';
 import { EventContext } from '@/context/eventContext';
 import ModalAttendParticipation from './modal-attend-participation';
 import ModalCancelParticipation from './modal-cancel-participation';
-import { OtherInfo, Attendee, Event, AlertState } from '@/types/types';
+import { OtherInfo, Attendee, Event } from '@/types/types';
 import DownloadAttendees from './download-attendees';
 
 type Props = {

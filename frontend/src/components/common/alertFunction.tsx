@@ -1,4 +1,3 @@
-'use client';
 import { AlertTitle, Alert, AlertColor } from '@mui/material';
 
 const alertFn = (

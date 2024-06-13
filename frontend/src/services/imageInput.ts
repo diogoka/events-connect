@@ -1,11 +1,6 @@
 import imageCompression from 'browser-image-compression';
 import { useState } from 'react';
-
-type UseUploadImageType = {
-  image: File | null;
-  warning: string;
-  onFileInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-};
+import { UseUploadImageType } from '@/types/services.types';
 
 export default function useUploadImage(
   maxAcceptedSizeMB: number,

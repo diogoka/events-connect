@@ -7,35 +7,7 @@ import SearchBar from '@/components/searchBar';
 import { UserContext } from '@/context/userContext';
 import { useRouter } from 'next/navigation';
 import SwitchButton from '@/components/events/switchButton';
-
-type Event = {
-  id_event: number;
-  id_owner: string;
-  name_event: string;
-  description_event: string;
-  date_event_start: string;
-  date_event_end: string;
-  location_event: string;
-  capacity_event: number;
-  price_event: number;
-  image_event: string;
-  category_event: string;
-};
-
-type Tag = {
-  id_event: number;
-  name_tag: string;
-};
-
-type CurrentUser = {
-  id: string;
-  role: string;
-};
-
-interface HasEvents {
-  eventFound: boolean;
-  message: string;
-}
+import { Tag, HasEvents, CurrentUser, Event } from '@/types/pages.types';
 
 export default function OrganizerEventsPage() {
   const { user } = useContext(UserContext);

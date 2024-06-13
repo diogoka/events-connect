@@ -2,7 +2,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { EventContext } from '@/context/eventContext';
 import { useMediaQuery, Box, Stack, Typography, Link } from '@mui/material';
-import dayjs from 'dayjs'; // Remove
 import DetailContainer from '@/components/event/detail-container';
 import DetailInfo from '@/components/event/detail-info';
 import DetailIconContainer from '@/components/event/detail-icon-container';
@@ -15,37 +14,9 @@ import alertFn from '@/components/common/alertFunction';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { UserContext } from '@/context/userContext';
-import { storage } from '@/auth/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
-
-export interface DateRange {
-  date_event_start: dayjs.Dayjs;
-  date_event_end: dayjs.Dayjs;
-}
-
-type Tag = {
-  id_tag: number;
-  name_tag: string;
-};
-
-export type ShowAlert = {
-  show: boolean;
-  title: string;
-  message: string;
-};
-
-export type EventData = {
-  name_event: string;
-  description_event: string;
-  dates_event: DateRange[];
-  capacity_event: number;
-  location_event: string;
-  price_event: number;
-  tags: Tag[];
-  category_event: string;
-  image_url_event: string;
-};
+import { ShowAlert } from '@/types/alert.types';
+import { EventData } from '@/types/pages.types';
+import { uploadImage } from '@/services/imageUpload';
 
 export default function PreviewEventPage() {
   const searchParams = useSearchParams();
@@ -60,7 +31,7 @@ export default function PreviewEventPage() {
     setImage,
   } = useContext(EventContext);
   const [tempState, setTempState] = useState<EventData>();
-  const [forPreview, setForPreview] = useState<boolean>(true);
+  const [forPreview] = useState<boolean>(true);
   const [eventId, setEventId] = useState<number>();
   const forMobile = useMediaQuery('(max-width: 768px)');
   const [tempImage, setTempImage] = useState('');
@@ -74,45 +45,8 @@ export default function PreviewEventPage() {
 
   const router = useRouter();
 
-  const uploadImage = async (image: Blob) => {
-    try {
-      let url = '';
-      if (image != null) {
-        let reference: any = '';
-
-        const imageRef = ref(
-          storage,
-          `events/${createdEvent.name_event}+${uuidv4()}`
-        );
-        const imageToUpload = image!;
-
-        await uploadBytes(imageRef, imageToUpload).then((response) => {
-          return getDownloadURL(response.ref).then((res) => {
-            return (url = res);
-          });
-        });
-        return url;
-      } else {
-        return (url = `${process.env.NEXT_PUBLIC_URL_EVENT_IMAGE_DEFAULT}`);
-      }
-    } catch (error) {
-      throw error;
-    }
-  };
-
   const submitEventHandler = async (id: number) => {
-    const url = await uploadImage(image!);
-
-    const newEvent = {
-      owner: user!.id,
-      title: createdEvent.name_event,
-      description: createdEvent.description_event,
-      spots: createdEvent.capacity_event.toString(),
-      location: createdEvent.location_event,
-      price: createdEvent.price_event.toString(),
-      category: createdEvent.category_event,
-      imageURL: url,
-    };
+    const url = await uploadImage(image!, createdEvent.name_event);
 
     const formData = new FormData();
 
@@ -126,7 +60,7 @@ export default function PreviewEventPage() {
     formData.append('imageURL', url);
 
     tempState!.tags.forEach((tag, key) => {
-      formData.append(`tagId[${key}]`, tag.id_tag.toString());
+      formData.append(`tagId[${key}]`, tag.id_tag!.toString());
     });
 
     tempState!.dates_event.forEach((date, key) => {
@@ -178,7 +112,7 @@ export default function PreviewEventPage() {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/new`,
           formData,
           {
-            headers: { 'Content-Type': 'multipart/form-data' },
+            headers: { 'Content-Type': 'application/json' },
           }
         )
         .then((res) => {

@@ -9,10 +9,11 @@ import {
   InputAdornment,
 } from '@mui/material';
 
-type Props = {
+export default function DescriptionContainer({
+  isMobile,
+}: {
   isMobile: boolean;
-};
-export default function DescriptionContainer({ isMobile }: Props) {
+}) {
   const { createdEvent, dispatch } = useContext(EventContext);
   const [countedDesc, setCountedDesc] = useState<number>(1200);
 

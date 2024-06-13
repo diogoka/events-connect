@@ -7,6 +7,7 @@ import {
 } from '../../common/functions';
 import { Event, OtherInfo, EventDate } from '@/types/types';
 import IconsContainer from '../icons/iconsContainer';
+import { EventDateString } from '@/types/components.types';
 
 type Props = {
   event: Event;
@@ -14,11 +15,6 @@ type Props = {
   organizerEvent: boolean;
   otherInfo: OtherInfo;
   forMobile: boolean;
-};
-
-export type EventDateString = {
-  date_event_start: string;
-  date_event_end: string;
 };
 
 const DetailTimeContainer = ({ event, otherInfo, forMobile }: Props) => {

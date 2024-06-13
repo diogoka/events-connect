@@ -22,6 +22,7 @@ const ModalAgreement = ({ openModal, handleClose }: Props) => {
     width: '700px',
     borderRadius: '5px',
     overflowY: 'auto',
+    overflowX: 'hidden',
     maxHeight: '80vh',
   };
 

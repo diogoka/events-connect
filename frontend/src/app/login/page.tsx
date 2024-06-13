@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import axios from 'axios';
@@ -11,6 +11,9 @@ import {
   Button,
   FormControl,
   Container,
+  Box,
+  useMediaQuery,
+  Alert,
 } from '@mui/material';
 import { FcGoogle } from 'react-icons/fc';
 import PasswordInput from '@/components/common/password-input';
@@ -19,13 +22,14 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  signOut,
 } from 'firebase/auth';
 import { getErrorMessage } from '@/auth/errors';
-import { UserContext, LoginStatus } from '@/context/userContext';
+import { UserContext } from '@/context/userContext';
+import { LoginStatus } from '@/types/context.types';
 import { EventContext } from '@/context/eventContext';
 import PasswordResetModal from '@/components/login/password-reset-modal';
-import { useMediaQuery } from '@mui/material';
-import { Box } from '@mui/system';
+import { ErrorMessage } from '../../types/types';
 
 export default function LoginPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -34,30 +38,85 @@ export default function LoginPage() {
 
   const theme = useTheme();
 
-  const { setUser, setFirebaseAccount, setLoginStatus } =
-    useContext(UserContext);
+  const {
+    setUser,
+    setFirebaseAccount,
+    setLoginStatus,
+    firebaseAccount,
+    error,
+    setError,
+    loginStatus,
+  } = useContext(UserContext);
 
   const { pathName, setShowedPage } = useContext(EventContext);
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isPasswordReset, setIsPasswordReset] = useState<boolean>(false);
+  const [userServerError, setUserServerError] = useState<ErrorMessage>({
+    error: false,
+    message: '',
+  });
 
-  // Alert Message
-  const [alertMessage, setAlertMessage] = useState('');
-
-  const [isPasswordReset, setIsPasswordReset] = useState(false);
-
-  const getUserFromServer = (uid: string) => {
+  const getUserFromServer = (uid: string, provider: string) => {
     axios
       .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${uid}`)
       .then((res: any) => {
         setUser(res.data);
+        setFirebaseAccount((prevState) => {
+          return {
+            ...prevState!,
+            studentId: res.data.student_id!,
+          };
+        });
+
         setLoginStatus(LoginStatus.LoggedIn);
         route.replace('/events');
       })
       .catch((error: any) => {
-        setUser(null);
-        setLoginStatus(LoginStatus.SigningUp);
+        if (
+          error.response.data === 'You need to finish the registration.' &&
+          provider === 'password'
+        ) {
+          setUserServerError({
+            error: true,
+            message:
+              'You need to finish the registration. You are being redirected to finish it.',
+          });
+
+          setTimeout(() => {
+            setLoginStatus(LoginStatus.SigningUp);
+            route.replace('/signup/register');
+          }, 8000);
+        } else {
+          signOut(getAuth());
+          setFirebaseAccount(null);
+          setUser(null);
+          setLoginStatus(LoginStatus.LoggedOut);
+          handleSetUserServerError(
+            { error: true, message: error.response.data },
+            6
+          );
+        }
+      });
+  };
+
+  const handleSignUpGoogle = async () => {
+    signInWithPopup(getAuth(), new GoogleAuthProvider())
+      .then((result) => {
+        setFirebaseAccount({
+          uid: result.user.uid,
+          email: result.user.email,
+          providerData: result.user.providerData,
+          studentId: 0,
+          photoURL: result.user.photoURL,
+        });
+        setLoginStatus(LoginStatus.LoggedOut);
+        route.replace('/signup/');
+      })
+      .catch((error: any) => {
+        setFirebaseAccount(null);
+        setUserServerError({ error: true, message: error });
       });
   };
 
@@ -65,11 +124,22 @@ export default function LoginPage() {
     event.preventDefault();
     signInWithEmailAndPassword(getAuth(), email, password)
       .then((result) => {
-        setFirebaseAccount(result.user);
-        getUserFromServer(result.user.uid);
+        setFirebaseAccount({
+          uid: result.user.uid,
+          email: result.user.email,
+          providerData: result.user.providerData,
+          studentId: 0,
+        });
+        getUserFromServer(
+          result.user.uid,
+          result.user.providerData[0].providerId
+        );
       })
       .catch((error) => {
-        setAlertMessage(getErrorMessage(error.code));
+        handleSetUserServerError(
+          { error: true, message: getErrorMessage(error.code) },
+          6
+        );
       });
 
     if (pathName === '/login') {
@@ -78,16 +148,46 @@ export default function LoginPage() {
         path: '/',
       });
     }
+  };
+
+  const handleSetUserServerError = (
+    errorObject: ErrorMessage,
+    seconds: number = 5
+  ): void => {
+    setUserServerError({
+      error: errorObject.error,
+      message: errorObject.message,
+    });
+
+    setTimeout(() => {
+      setUserServerError({
+        error: false,
+        message: '',
+      });
+    }, seconds * 1000);
+    setError({ error: false, message: '' });
   };
 
   const handleGoogleLogin = async () => {
     signInWithPopup(getAuth(), new GoogleAuthProvider())
       .then((result) => {
-        setFirebaseAccount(result.user);
-        getUserFromServer(result.user.uid);
+        setFirebaseAccount({
+          uid: result.user.uid,
+          email: result.user.email,
+          providerData: result.user.providerData,
+          studentId: 0,
+          photoURL: result.user.photoURL,
+        });
+        getUserFromServer(
+          result.user.uid,
+          result.user.providerData[0].providerId
+        );
       })
       .catch((error) => {
-        setAlertMessage(getErrorMessage(error.code));
+        handleSetUserServerError(
+          { error: true, message: getErrorMessage(error.code) },
+          6
+        );
       });
 
     if (pathName === '/login') {
@@ -97,6 +197,13 @@ export default function LoginPage() {
       });
     }
   };
+
+  // useEffect(() => {
+  //   if (firebaseAccount && loginStatus === 'Signing up') {
+  //     signOut(getAuth());
+  //     setLoginStatus(LoginStatus.LoggedOut);
+  //   }
+  // }, [firebaseAccount, loginStatus]);
 
   return (
     <>
@@ -110,8 +217,15 @@ export default function LoginPage() {
             backgroundImage: 'url("/auth-bg.png")',
             backgroundSize: 'cover',
           }}
-        ></Box>
+        >
+          {userServerError.error && (
+            <Alert sx={{ width: '28%', margin: '5%' }} severity='error'>
+              {userServerError.message}
+            </Alert>
+          )}
+        </Box>
       )}
+
       <Stack
         width={isMobile ? 'auto' : '600px'}
         maxWidth={isMobile ? '345px' : 'auto'}
@@ -154,8 +268,14 @@ export default function LoginPage() {
                   />
                 </FormControl>
                 <FormControl required>
-                  <PasswordInput label='Password' setter={setPassword} />
-                  <Typography color='error'>{alertMessage}</Typography>
+                  <PasswordInput
+                    label='Password'
+                    setPassword={setPassword}
+                    setter={setPassword}
+                    type='password'
+                    local='login'
+                    disabled={false}
+                  />
                 </FormControl>
                 <Typography
                   onClick={() => {
@@ -181,7 +301,7 @@ export default function LoginPage() {
                 color='primary'
                 fullWidth
               >
-                Log In
+                Login
               </Button>
             </Stack>
           </form>
@@ -200,14 +320,25 @@ export default function LoginPage() {
 
           <Typography align='center'>or</Typography>
 
-          <Button
-            onClick={() => route.push('/signup')}
-            variant='contained'
-            color='primary'
-            fullWidth
-          >
-            Sign Up
-          </Button>
+          <Box sx={{ display: 'flex', gap: '1.1rem' }}>
+            <Button
+              onClick={handleSignUpGoogle}
+              variant='outlined'
+              color='secondary'
+              endIcon={<FcGoogle />}
+              fullWidth
+            >
+              Sign Up
+            </Button>
+            <Button
+              onClick={() => route.push('/signup')}
+              variant='contained'
+              color='primary'
+              fullWidth
+            >
+              Sign Up
+            </Button>
+          </Box>
         </Stack>
       </Stack>
     </>

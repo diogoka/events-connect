@@ -1,37 +1,23 @@
-import pool from '../db/db';
+import { addingCourse } from './../models/courseModels';
 import express from 'express';
-
-type UserInput = {
-  id: string;
-  type: number;
-  courseId: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  postalCode: string;
-  phone: string;
-  provider: string;
-  avatarURL: string;
-};
-
-type UserResponse = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string | null;
-  provider: string;
-  avatarURL: string | null;
-  roleId: number;
-  roleName: string;
-  postalCode: string | null;
-  courseId: number;
-  courseName: string;
-};
+import { UserInput } from '../types/types';
+import {
+  getAllUsers,
+  createUserModel,
+  getUserById,
+  updateUserModel,
+  checkId,
+  verifyEmail,
+  getId,
+} from '../models/userModels';
+import { updateCourse } from '../models/courseModels';
+import { validateUserInput } from '../helpers/validateUser';
+import { sendEmail, sendConfirmationEmail } from '../helpers/mail';
+import { generateToken, checkToken } from '../helpers/tokenHandler';
 
 export const getUsers = async (req: express.Request, res: express.Response) => {
   try {
-    const users = await pool.query('SELECT * FROM users');
+    const users = await getAllUsers();
     res.status(200).json(users.rows);
   } catch (err: any) {
     res.status(500).send(err.message);
@@ -42,8 +28,16 @@ export const getUser = async (req: express.Request, res: express.Response) => {
   const userId = req.params.id;
 
   try {
-    const user = await getUserResponse(userId);
-    res.status(200).json(user);
+    const user = await getUserById(userId);
+    if (user) {
+      if (!user?.is_verified) {
+        return res.status(401).send('Email is not verified.');
+      } else {
+        res.status(200).json(user);
+      }
+    } else {
+      res.status(401).json('You need to finish the registration.');
+    }
   } catch (err: any) {
     res.status(500).send(err.message);
   }
@@ -52,6 +46,8 @@ export const getUser = async (req: express.Request, res: express.Response) => {
 export const editUser = async (req: express.Request, res: express.Response) => {
   const userInput: UserInput = req.body;
 
+  console.log('userINput', userInput);
+
   const { result, message } = validateUserInput(userInput);
   if (!result) {
     res.status(500).send(message);
@@ -59,51 +55,15 @@ export const editUser = async (req: express.Request, res: express.Response) => {
   }
 
   try {
-    // Add a new user to DB
-    await pool.query(
-      `
-            UPDATE
-                users
-            SET
-                id_user_type = $1, first_name_user = $2, last_name_user = $3, email_user = $4, postal_code_user = $5, phone_user = $6, avatar_url = $7
-            WHERE
-                id_user = $8
-            RETURNING
-                *;
-            `,
-      [
-        userInput.type,
-        userInput.firstName,
-        userInput.lastName,
-        userInput.email,
-        userInput.postalCode,
-        userInput.phone,
-        userInput.avatarURL,
-        userInput.id,
-      ]
-    );
+    // Update User
+    const updatedUser = await updateUserModel(userInput);
 
-    // Add user's course to DB
-    await pool.query(
-      `
-            UPDATE
-                users_courses
-            SET
-                id_course = $1
-            WHERE
-                id_user = $2
-            RETURNING
-                *;
-        `,
-      [userInput.courseId, userInput.id]
-    );
+    // Update Course
+    const updatedCourse = await updateCourse(userInput);
 
-    const user = await getUserResponse(userInput.id);
-    if (user) {
-      res.status(200).json(user);
-    } else {
-      res.status(500).send('Failed to edit user');
-    }
+    const fullUpdated = { ...updatedUser, ...updatedCourse };
+
+    res.status(200).json(fullUpdated);
   } catch (err: any) {
     res.status(500).send(err.message);
   }
@@ -114,6 +74,9 @@ export const createUser = async (
   res: express.Response
 ) => {
   const userInput: UserInput = req.body;
+
+  console.log('UserInput', userInput);
+
   const { result, message } = validateUserInput(userInput);
   if (!result) {
     res.status(500).send(message);
@@ -121,145 +84,73 @@ export const createUser = async (
   }
 
   try {
-    // Add a new user to DB
-    await pool.query(
-      `
-            INSERT INTO
-                users (id_user, id_user_type, first_name_user, last_name_user, email_user, postal_code_user, phone_user, avatar_url, provider)
-            VALUES
-                ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            RETURNING
-                *;
-            `,
-      [
-        userInput.id,
-        userInput.type,
-        userInput.firstName,
-        userInput.lastName,
-        userInput.email,
-        userInput.postalCode,
-        userInput.phone,
-        userInput.avatarURL,
-        userInput.provider,
-      ]
-    );
+    await createUserModel(userInput);
+    await addingCourse(userInput);
+    const token = generateToken(userInput.id, userInput.email);
 
-    // Add user's course to DB
-    await pool.query(
-      `
-            INSERT INTO
-                users_courses (id_user, id_course)
-            VALUES
-                ($1, $2)
-            RETURNING
-                *;
-        `,
-      [userInput.id, userInput.courseId]
-    );
+    await sendConfirmationEmail(userInput.email, token);
 
-    const user = await getUserResponse(userInput.id);
-    res.status(200).json(user);
+    res.status(200).send('User Created.');
   } catch (err: any) {
     res.status(500).send(err.message);
   }
 };
 
-function validateUserInput(userInput: UserInput): {
-  result: boolean;
-  message: string;
-} {
-  let result = false;
-  let message = '';
+export const matchStudentId = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { email, studentId } = req.body;
+  const checked = await checkId(email, studentId);
+  res.status(200).json(checked);
+};
 
-  if (!userInput.id) {
-    message = 'Invalid user ID';
-  } else if (isNaN(userInput.type)) {
-    message = 'Invalid User Type';
-  } else if (isNaN(userInput.courseId)) {
-    message = 'Invalid Course ID';
-  } else if (!/^[^@]+@[^.]+\..+$/.test(userInput.email)) {
-    message = 'Invalid Email';
-  } else if (
-    userInput.postalCode &&
-    !/^[A-Za-z0-9]{3}[-\s]?[A-Za-z0-9]{3}$/.test(userInput.postalCode)
-  ) {
-    message = 'Invalid Postal Code';
-  } else if (userInput.phone && !/^[0-9-]+$/.test(userInput.phone)) {
-    message = 'Invalid Phone Number';
-  } else {
-    result = true;
-  }
+export const validateEmail = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { token } = req.params;
 
-  return {
-    result,
-    message,
-  };
-}
+  const tokenValidation = checkToken(token);
 
-async function getUserResponse(userId: string) {
-  try {
-    const userResult = await pool.query(
-      `
-        SELECT
-            users.id_user AS id,
-            users.id_user_type AS role_id,
-            users_type.role_user AS role_name,
-            users.first_name_user AS first_name,
-            users.last_name_user AS last_name,
-            users.email_user AS email,
-            users.postal_code_user AS postal_code,
-            users.phone_user AS phone,
-            users.provider AS provider,
-            users.avatar_url AS avatar_url
-        FROM
-            users
-        JOIN
-            users_type ON users.id_user_type = users_type.id_user_type
-        WHERE
-            users.id_user = $1
-        `,
-      [userId]
-    );
+  if (tokenValidation.valid) {
+    const isVerified = await verifyEmail(tokenValidation.payload as string);
 
-    if (userResult.rows[0]) {
-      const user: UserResponse = {
-        id: userResult.rows[0].id,
-        roleId: userResult.rows[0].role_id,
-        roleName: userResult.rows[0].role_name,
-        firstName: userResult.rows[0].first_name,
-        lastName: userResult.rows[0].last_name,
-        email: userResult.rows[0].email,
-        postalCode: userResult.rows[0].postal_code,
-        phone: userResult.rows[0].phone,
-        provider: userResult.rows[0].provider,
-        avatarURL: userResult.rows[0].avatar_url,
-        courseId: 0,
-        courseName: '',
-      };
-      const courseResult = await pool.query(
-        `
-        SELECT
-            courses.id_course AS course_id,
-            courses.name_course AS course_name
-        FROM
-            users_courses
-        JOIN
-            courses ON users_courses.id_course = courses.id_course
-        WHERE
-            users_courses.id_user = $1
-        `,
-        [userId]
-      );
-
-      user.courseId = courseResult.rows[0].course_id;
-      user.courseName = courseResult.rows[0].course_name;
-
-      return user;
+    if (isVerified.verified) {
+      res
+        .status(200)
+        .json(`${isVerified.message} You can close this window now.`);
     } else {
-      return null;
+      res.status(400).json(`${isVerified.message}`);
     }
-  } catch (err: any) {
-    console.error(err);
-    return null;
+  } else {
+    if (tokenValidation.message === 'jwt expired') {
+      const tokenChecked = tokenValidation!.payload!;
+
+      const newToken = generateToken(tokenChecked.id, tokenChecked.email);
+      await sendConfirmationEmail(tokenChecked.email, newToken);
+      res
+        .status(400)
+        .json('Token expired. A new one was generated. Check your email');
+    } else {
+      res.status(401).json('Unauthorized.');
+    }
   }
-}
+};
+
+export const getStudentId = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  if (!req.body.email) {
+    res.status(400).send('Missing Parameters.');
+  }
+  try {
+    const id = await getId(req.body.email);
+    res.status(200).json(id);
+  } catch (error: any) {
+    console.log('error', error);
+
+    res.status(500).send(error);
+  }
+};

@@ -2,31 +2,7 @@ import pool from '../db/db';
 import express from 'express';
 import { sendEmail, EmailOption } from '../helpers/mail';
 import moment from 'moment-timezone';
-
-type Attendee = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  course: string;
-  email: string;
-};
-
-type EventInput = {
-  owner: string;
-  title: string;
-  description: string;
-  dates: Array<Date>;
-  location: string;
-  spots: number;
-  price: number;
-  image: string;
-  tag: number;
-};
-
-type Date = {
-  dateStart: string;
-  dateEnd: string;
-};
+import { Attendee, EventInput, Date } from '../types/types';
 
 export const getEvents = async (
   req: express.Request,

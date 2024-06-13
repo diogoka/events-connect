@@ -2,7 +2,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  useTheme,
   useMediaQuery,
   Stack,
   TextField,
@@ -10,93 +9,288 @@ import {
   Button,
   FormControl,
   Box,
+  Link,
+  Checkbox,
+  InputAdornment,
 } from '@mui/material';
-import { FcGoogle } from 'react-icons/fc';
-import { LoginStatus, UserContext } from '@/context/userContext';
+import { UserContext } from '@/context/userContext';
+import { LoginStatus } from '@/types/context.types';
 import { getErrorMessage } from '@/auth/errors';
 import PasswordInput from '@/components/common/password-input';
+import NumberTextFieldInput from '@/components/common/noArrowsTextField';
+import { deleteAccount } from '@/auth/auth-provider';
 
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
+  signOut,
 } from 'firebase/auth';
+
+import {
+  studentValidation,
+  checkPasswords,
+} from '@/services/studentValidation';
+import { RegisterMessage } from '@/types/alert.types';
+import Background from '@/components/registering/background';
+import NameInput from '@/components/user/form/name-input';
+import { UserInputForm } from '@/types/pages.types';
+import CourseInput from '@/components/user/form/course-input';
+import ModalAgreement from '@/components/login/modal-agreement';
+import { sendUserToServer } from '@/services/sendUserToServer';
 
 export default function SignUpPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
-
   const router = useRouter();
 
-  const theme = useTheme();
+  const {
+    setFirebaseAccount,
+    loginStatus,
+    setLoginStatus,
+    firebaseAccount,
+    setUser,
+  } = useContext(UserContext);
 
-  const { setFirebaseAccount, loginStatus, setLoginStatus } =
-    useContext(UserContext);
+  const [isGoogle, setIsGoogle] = useState<boolean>(false);
 
-  // User Input
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [userInputForm, setUserInputForm] = useState<UserInputForm>({
+    firstName: '',
+    lastName: '',
+    courseId: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    student_id: 0,
+  });
 
-  // Alert Message
-  const [alertMessage, setAlertMessage] = useState('');
+  const [registerMessage, setRegisterMessage] = useState<RegisterMessage>({
+    showMessage: false,
+    message: '',
+    severity: 'info',
+  });
+
+  const [checked, setChecked] = useState<boolean>(false);
+
+  //Modal
+  const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const openModal = () => setModalOpen(true);
+  const closeModal = () => setModalOpen(false);
 
   useEffect(() => {
     if (loginStatus === 'Logged In') {
       router.replace('/events');
     }
-    if (loginStatus === 'Singing Up') {
-      router.replace('/signup/register');
+
+    if (firebaseAccount) {
+      setIsGoogle(true);
+      updateUserInputForm('email', firebaseAccount?.email!);
     }
   }, [loginStatus]);
 
-  const handleEmailAuth = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const updateUserInputForm = <K extends keyof UserInputForm>(
+    key: K,
+    value: UserInputForm[K]
+  ) => {
+    setUserInputForm((prevForm) => ({
+      ...prevForm,
+      [key]: value,
+    }));
+  };
 
-    if (password === confirmPassword) {
-      createUserWithEmailAndPassword(getAuth(), email, password)
-        .then((result) => {
-          setFirebaseAccount(result.user);
-          setLoginStatus(LoginStatus.SigningUp);
-          router.replace('/signup/register');
-        })
-        .catch((error: any) => {
-          setAlertMessage(getErrorMessage(error.code));
-        });
+  const handleMessage = async (
+    messageToShow: RegisterMessage,
+    time: number,
+    navigate?: string
+  ) => {
+    setRegisterMessage({
+      showMessage: messageToShow.showMessage,
+      message: messageToShow.message,
+      severity: messageToShow.severity,
+    });
+
+    setTimeout(() => {
+      setRegisterMessage({
+        showMessage: false,
+        message: '',
+        severity: 'info',
+      });
+      if (navigate) {
+        router.replace(navigate);
+      }
+    }, time * 1000);
+  };
+
+  const handleChangeCheckBox = (): void => {
+    checked ? setChecked(false) : setChecked(true);
+  };
+
+  const handleCheckError = async (code: number, message: string) => {
+    //code 3 is email is not in the class365
+
+    if (code === 3) {
+      await deleteAccount();
+      setFirebaseAccount(null);
+      setLoginStatus(LoginStatus.LoggedOut);
+      handleMessage(
+        {
+          showMessage: true,
+          message: `${message}. You are being redirected to Log in. \n Please, select a different email.`,
+          severity: 'error',
+        },
+        7,
+        '/login'
+      );
     } else {
-      //eslint-disable-next-line
-      setAlertMessage("Password and Confirm Password doesn't match");
+      handleMessage(
+        { showMessage: true, message: message, severity: 'error' },
+        5
+      );
     }
   };
 
-  const handleGoogleAuth = async () => {
-    signInWithPopup(getAuth(), new GoogleAuthProvider())
-      .then((result) => {
-        setFirebaseAccount(result.user);
-        setLoginStatus(LoginStatus.SigningUp);
-        router.replace('/signup/register');
-      })
-      .catch((error: any) => {
-        setFirebaseAccount(null);
-        setAlertMessage(getErrorMessage(error.code));
-      });
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!isGoogle) {
+      const isPasswordMatch = checkPasswords(
+        userInputForm.password!,
+        userInputForm.confirmPassword!
+      );
+
+      if (!isPasswordMatch) {
+        handleMessage(
+          {
+            showMessage: true,
+            message: 'Passwords does not match.',
+            severity: 'error',
+          },
+          6
+        );
+
+        return;
+      }
+    }
+
+    const checkStudentID = await studentValidation(
+      userInputForm.email,
+      userInputForm.student_id
+    );
+
+    if (!checkStudentID.checked) {
+      handleMessage(
+        {
+          showMessage: true,
+          message: `${checkStudentID.message}`,
+          severity: 'error',
+        },
+        6
+      );
+      if (isGoogle) {
+        handleCheckError(checkStudentID.code!, checkStudentID.message!);
+      }
+
+      return;
+    } else {
+      if (isGoogle) {
+        const { password, confirmPassword, ...rest }: UserInputForm =
+          userInputForm;
+
+        const newUser = {
+          ...rest,
+          id: firebaseAccount?.uid!,
+          type: 2,
+          provider: firebaseAccount?.providerData![0].providerId!,
+          is_verified: false,
+          avatarURL: firebaseAccount?.photoURL!,
+        };
+
+        try {
+          const response = await sendUserToServer(newUser);
+          setRegisterMessage({
+            showMessage: true,
+            message: `${response} Please verify your email. You are being redirected `,
+            severity: 'success',
+          });
+
+          setTimeout(() => {
+            setRegisterMessage({
+              showMessage: false,
+              message: '',
+              severity: 'info',
+            });
+            signOut(getAuth());
+            setLoginStatus(LoginStatus.LoggedOut);
+            router.replace('/login');
+          }, 6000);
+        } catch (error: any) {
+          setRegisterMessage({
+            showMessage: true,
+            message: 'Internal Error. Please try again later.',
+            severity: 'error',
+          });
+
+          setTimeout(() => {
+            setRegisterMessage({
+              showMessage: false,
+              message: '',
+              severity: 'info',
+            });
+          }, 6000);
+        }
+      } else {
+        createUserWithEmailAndPassword(
+          getAuth(),
+          userInputForm.email,
+          userInputForm.password!
+        )
+          .then(async (result) => {
+            const { password, confirmPassword, ...rest }: UserInputForm =
+              userInputForm;
+
+            const newUser = {
+              ...rest,
+              id: result.user.uid,
+              type: 2,
+              provider: result.user.providerData[0].providerId,
+              is_verified: false,
+              avatarURL: result.user.photoURL!,
+            };
+
+            const response = await sendUserToServer(newUser);
+
+            setRegisterMessage({
+              showMessage: true,
+              message: `${response} Please verify your email. You are being redirected `,
+              severity: 'success',
+            });
+
+            setTimeout(() => {
+              setRegisterMessage({
+                showMessage: false,
+                message: '',
+                severity: 'info',
+              });
+              signOut(getAuth());
+              setLoginStatus(LoginStatus.LoggedOut);
+              router.replace('/login');
+            }, 6000);
+          })
+          .catch((error: any) => {
+            handleMessage(
+              {
+                showMessage: true,
+                message: `${getErrorMessage(error.code)}`,
+                severity: 'error',
+              },
+              5
+            );
+          });
+      }
+    }
   };
 
   return (
     <>
-      {!isMobile && (
-        <Box
-          width='100%'
-          height='calc(100vh - 4rem)'
-          position='absolute'
-          sx={{
-            inset: '4rem auto auto 0',
-            backgroundImage: 'url("/auth-bg.png")',
-            backgroundSize: 'cover',
-            backgroundPositionX: '50%',
-          }}
-        ></Box>
-      )}
+      {!isMobile && <Background registerMessage={registerMessage} />}
 
       <Box
         bgcolor='white'
@@ -115,6 +309,11 @@ export default function SignUpPage() {
           marginTop={isMobile ? '2rem' : 0}
           marginInline='auto'
           padding={isMobile ? 'none' : '0 6rem 2rem 6rem'}
+          sx={{
+            height: isMobile ? 'auto' : '100vh',
+            maxHeight: '100vh',
+            overflowY: 'auto',
+          }}
         >
           {!isMobile && (
             <Typography
@@ -126,59 +325,177 @@ export default function SignUpPage() {
             </Typography>
           )}
 
-          {/* Step1: Firebase Authentication */}
-          {loginStatus === LoginStatus.LoggedOut && (
-            <Stack rowGap={'20px'}>
-              <form onSubmit={handleEmailAuth}>
-                <Stack rowGap={'20px'}>
-                  <Stack rowGap={'10px'}>
+          {loginStatus === LoginStatus.LoggedOut || isGoogle ? (
+            <form onSubmit={handleFormSubmit}>
+              <Stack rowGap={'10px'}>
+                <NameInput
+                  name={userInputForm.firstName}
+                  type={'firstName'}
+                  setUserName={updateUserInputForm}
+                  label='First Name'
+                  disabled={registerMessage.showMessage}
+                />
+                <NameInput
+                  name={userInputForm.lastName}
+                  type={'lastName'}
+                  setUserName={updateUserInputForm}
+                  label='Last Name'
+                  disabled={registerMessage.showMessage}
+                />
+                <CourseInput
+                  courseId={userInputForm.courseId}
+                  type={'courseId'}
+                  setCourse={updateUserInputForm}
+                  disabled={registerMessage.showMessage}
+                />
+                <FormControl required>
+                  <TextField
+                    type='email'
+                    label={isGoogle ? firebaseAccount?.email : 'Email'}
+                    onChange={(event) =>
+                      updateUserInputForm('email', event.target.value)
+                    }
+                    required
+                    disabled={registerMessage.showMessage || isGoogle}
+                    InputProps={
+                      isGoogle
+                        ? {
+                            endAdornment: (
+                              <InputAdornment position='end'>
+                                <Button
+                                  sx={{
+                                    fontSize: '0.8rem',
+                                    height: '2rem',
+                                    padding: '0 0.5rem',
+                                  }}
+                                  variant='contained'
+                                  color='primary'
+                                  onClick={() => {
+                                    setRegisterMessage({
+                                      showMessage: true,
+                                      message:
+                                        'You are being redirected. Select another email.',
+                                      severity: 'info',
+                                    });
+
+                                    setTimeout(() => {
+                                      setRegisterMessage({
+                                        showMessage: false,
+                                        message: '',
+                                        severity: 'info',
+                                      });
+                                      setUser(null);
+                                      setFirebaseAccount(null);
+                                      setLoginStatus(LoginStatus.LoggedOut);
+                                      router.replace('/login');
+                                    }, 6000);
+                                  }}
+                                  disabled={registerMessage.showMessage}
+                                >
+                                  Change Email
+                                </Button>
+                              </InputAdornment>
+                            ),
+                          }
+                        : {}
+                    }
+                  />
+                </FormControl>
+
+                {!isGoogle && (
+                  <>
                     <FormControl required>
-                      <TextField
-                        type='email'
-                        label='Email'
-                        onChange={(event) => setEmail(event.target.value)}
-                        required
+                      <PasswordInput
+                        label='Password'
+                        setter={updateUserInputForm}
+                        type={'password'}
+                        disabled={registerMessage.showMessage || isGoogle}
                       />
-                    </FormControl>
-                    <FormControl required>
-                      <PasswordInput label='Password' setter={setPassword} />
                     </FormControl>
                     <FormControl required>
                       <PasswordInput
                         label='Confirm Password'
-                        setter={setConfirmPassword}
+                        setter={updateUserInputForm}
+                        type={'confirmPassword'}
+                        disabled={registerMessage.showMessage || isGoogle}
                       />
                     </FormControl>
-                    <Typography color='error'>{alertMessage}</Typography>
-                  </Stack>
+                  </>
+                )}
+                <FormControl required>
+                  <NumberTextFieldInput
+                    label={'Student ID'}
+                    maxLength={6}
+                    setStudentID={updateUserInputForm}
+                    type={'student_id'}
+                    disabled={registerMessage.showMessage}
+                  />
+                </FormControl>
 
-                  <Button
-                    type='submit'
-                    variant='contained'
-                    color='primary'
-                    fullWidth
-                  >
-                    Next
-                  </Button>
-                </Stack>
-              </form>
-
-              <Typography align='center'>or</Typography>
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'flex-start',
+                    gap: '10px',
+                  }}
+                >
+                  <Checkbox
+                    checked={checked}
+                    onClick={() => handleChangeCheckBox()}
+                    sx={{
+                      padding: '0',
+                    }}
+                  />
+                  <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
+                    I acknowledge that I have read and understood the
+                    <Link
+                      type='button'
+                      component='button'
+                      sx={{
+                        '&:hover': {
+                          cursor: 'pointer',
+                        },
+                        ':disabled:hover': {
+                          cursor: 'auto',
+                        },
+                        marginLeft: '3px',
+                        fontSize: '15px',
+                      }}
+                      onClick={openModal}
+                    >
+                      {' '}
+                      Terms and Conditions.
+                    </Link>
+                  </Typography>
+                </Box>
+              </Stack>
               <Button
-                variant='outlined'
-                color='secondary'
-                startIcon={<FcGoogle />}
-                onClick={handleGoogleAuth}
+                type='submit'
+                variant='contained'
+                color='primary'
+                fullWidth
+                disabled={!checked || registerMessage.showMessage}
                 sx={{
-                  borderColor: theme.palette.secondary.light,
+                  '&:disabled': {
+                    cursor: 'not-allowed',
+                    pointerEvents: 'auto',
+                  },
                 }}
               >
-                Sign up with Google
+                Register
               </Button>
-            </Stack>
+
+              <Typography variant='body2' align='center'>
+                If you are an organizer, please contact admin:{' '}
+                head.tech@ciccc.ca
+              </Typography>
+            </form>
+          ) : (
+            <></>
           )}
         </Stack>
       </Box>
+      <ModalAgreement openModal={isModalOpen} handleClose={closeModal} />
     </>
   );
 }

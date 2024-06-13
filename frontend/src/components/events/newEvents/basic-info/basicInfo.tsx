@@ -3,11 +3,7 @@ import TitleContainer from './titleContainer';
 import DescriptionContainer from './descriptionContainer';
 import { Stack, Box } from '@mui/material';
 
-type Props = {
-  isMobile: boolean;
-};
-
-export default function BasicInfo({ isMobile }: Props) {
+export default function BasicInfo({ isMobile }: { isMobile: boolean }) {
   return (
     <Stack
       direction='column'
