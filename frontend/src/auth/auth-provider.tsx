@@ -174,9 +174,6 @@ export default function AuthProvider({
 
   const isAllowedPage = (): Permission => {
     const page = getPage(pathname);
-
-    console.log('Page', page);
-
     if (page === undefined) {
       return { isAllowed: true, redirection: '' };
     }
@@ -256,6 +253,7 @@ export default function AuthProvider({
       pathname.length > 0 &&
       pathname !== '/login' &&
       pathname !== '/verification' &&
+      pathname !== '/' &&
       pageStatus === PageStatus.Ready
     ) {
       return true;

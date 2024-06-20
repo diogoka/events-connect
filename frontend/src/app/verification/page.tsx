@@ -1,4 +1,4 @@
-import { Box, Typography, Alert, AlertColor } from '@mui/material';
+import { Box, Alert, AlertColor } from '@mui/material';
 import React from 'react';
 
 type Props = {
