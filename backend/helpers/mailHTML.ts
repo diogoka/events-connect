@@ -10,6 +10,7 @@ export const generateEmail = async (link: string): Promise<string> => {
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
       rel="stylesheet"
     />
+
     <style type="text/css" rel="stylesheet" media="all">
       /* Base ------------------------------ */
       *:not(br):not(tr):not(html) {
@@ -244,7 +245,7 @@ export const generateEmail = async (link: string): Promise<string> => {
                         <tr>
                           <td align="center">
                             <div>
-                              <a
+                              <a style="color:#fff; text-decoration:none;" 
                                 href="${link}"
                                 class="button button--blue"
                                 >Verify Email</a
@@ -262,7 +263,7 @@ export const generateEmail = async (link: string): Promise<string> => {
                               and paste the URL below into your web browser.
                             </p>
                             <p class="sub">
-                              <a href="${link}">Link</a>
+                              <a style="color:"blue"; text-decoration:none;" href="${link}">Link</a>
                             </p>
                           </td>
                         </tr>
