@@ -26,7 +26,7 @@ const defaultCallBack = (error: any, info: any) => {
 
 export const sendEmail = (option: EmailOption, cb = defaultCallBack) => {
   const mailOptions = {
-    from: 'eventllege.info@gmail.com',
+    from: 'noreply@ciccc-connect.ca',
     to: option.to,
     subject: option.subject,
     text: option.text,

@@ -96,47 +96,6 @@ export default function Home() {
           backgroundPosition: 'top',
         }}
       ></Box>
-
-      {/* <Stack>
-        <Container
-          sx={{
-            width: 'auto',
-            margin: 'auto',
-            padding: '0rem 2rem 2rem',
-          }}
-        >
-          <Image
-            src='/cornestone-connect-logo-blue-wide.png'
-            width={305.6}
-            height={80}
-            alt='logo'
-            priority
-          />
-        </Container>
-        <Typography sx={{ width: '50%' }}>
-          Discover the best events in Vancouver with Cornerstone Connect, your
-          all-access pass to life on and off campus. Stay engaged, make new
-          friends, and find exciting things to do in your free time. With a
-          simple sign-up process, centralized event listings, and exclusive
-          access for our students, you’ll have everything you need to make the
-          most of your time here. Join us and enrich your college experience!
-        </Typography>
-        <Box>
-          <Button>Login</Button>
-          <Button>Events</Button>
-        </Box>
-      </Stack>
-      <Box
-        width='50%'
-        height='100vh'
-        position='absolute'
-        sx={{
-          inset: '0 auto auto 0',
-          backgroundImage: 'url("/landingImage.jpeg")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'top',
-        }}
-      ></Box> */}
     </Box>
   );
 }

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 const buttonStyle = {
   width: '9rem',
   '&:hover': {
+    transform: 'translateY(-0.5px)',
     boxShadow: '3px 3px 6px 0px rgba(0, 0, 0, 0.5)',
   },
   '&: active': {
