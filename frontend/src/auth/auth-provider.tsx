@@ -81,6 +81,11 @@ const PAGES: Page[] = [
     limitation: Limitation.Organizer,
     isLoadingRequired: true,
   },
+  {
+    path: /^\/verification$/,
+    limitation: Limitation.None,
+    isLoadingRequired: true,
+  },
 ];
 
 export default function AuthProvider({
@@ -105,16 +110,10 @@ export default function AuthProvider({
   useEffect(() => {
     initializeFirebase;
 
-    console.log('firebase,', firebaseAccountContext);
-    console.log('user', userContext);
-
     const auth = getAuth();
 
     auth.onAuthStateChanged(async (firebaseAccount) => {
       // Use this handler only when user accesses to our page
-
-      console.log('fire', firebaseAccount);
-      console.log('status', loginStatus);
 
       if (
         loginStatus === LoginStatus.LoggedIn ||
@@ -175,6 +174,8 @@ export default function AuthProvider({
 
   const isAllowedPage = (): Permission => {
     const page = getPage(pathname);
+
+    console.log('Page', page);
 
     if (page === undefined) {
       return { isAllowed: true, redirection: '' };
@@ -254,6 +255,7 @@ export default function AuthProvider({
     if (
       pathname.length > 0 &&
       pathname !== '/login' &&
+      pathname !== '/verification' &&
       pageStatus === PageStatus.Ready
     ) {
       return true;

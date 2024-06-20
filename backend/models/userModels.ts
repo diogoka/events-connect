@@ -196,11 +196,11 @@ export const checkId = async (
 ): Promise<CheckData> => {
   try {
     const fetchThirdService = await axios.post(
-      `${process.env.CHECK_URL}/check`,
+      `${process.env.CHECK_URL}`,
       { email, studentId },
       {
         headers: {
-          Authorization: `bearer ${process.env.TOKEN_CHECK_URL}`,
+          Authorization: `Bearer ${process.env.TOKEN_CHECK_URL}`,
           'Content-type': 'application/json',
         },
       }
@@ -212,33 +212,10 @@ export const checkId = async (
       checked: response,
     };
   } catch (error: any) {
-    console.log(error);
-
     return {
       checked: false,
       message: error.response.data.message,
       code: error.response.data.code,
     };
-  }
-};
-
-export const getId = async (email: string): Promise<CheckData> => {
-  try {
-    const fetchThirdService = await axios.post(
-      `${process.env.CHECK_URL}/id`,
-      { email },
-      {
-        headers: {
-          Authorization: `bearer ${process.env.TOKEN_CHECK_URL}`,
-          'Content-type': 'application/json',
-        },
-      }
-    );
-
-    const response = await fetchThirdService.data;
-
-    return response;
-  } catch (error: any) {
-    return error;
   }
 };

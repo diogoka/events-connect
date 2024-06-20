@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
+import { generateEmail } from './mailHTML';
 
 export type EmailOption = {
   to: string[];
@@ -37,13 +38,15 @@ export const sendEmail = (option: EmailOption, cb = defaultCallBack) => {
 
 export const sendConfirmationEmail = async (email: string, token: string) => {
   const sender = 'Cornerstone Connect';
-  const link = `${process.env.BACKEND_URL_CHECK + token}`;
+  const link = `${process.env.FRONTEND_URL + token}`;
+
+  const emailHTML = await generateEmail(link);
 
   const mailOptions = {
     from: sender,
     to: email,
-    subject: 'Email confirmation',
-    html: `Press <a href="wwww.google.com/${link}">here</a> to verify your email. Thanks`,
+    subject: 'Email Verification',
+    html: emailHTML,
   };
   transporter.sendMail(mailOptions, function (error, response) {
     if (error) {
