@@ -50,6 +50,7 @@ export default function Home() {
         <Stack
           sx={{
             width: '79%',
+
             height: '100%',
             display: 'flex',
             justifyContent: 'center',
@@ -63,7 +64,7 @@ export default function Home() {
               padding: '4rem 3rem',
               borderRadius: '15px',
               gap: '3rem',
-              minWidth: '300px',
+              minWidth: '450px',
               maxWidth: '680px',
             }}
           >
@@ -71,31 +72,28 @@ export default function Home() {
               sx={{
                 width: 'auto',
                 margin: '0 auto',
+                display: 'flex',
               }}
             >
               <Image
                 src='/cornestone-connect-logo-blue-wide.png'
-                width={305.6}
-                height={70}
+                width={744} //4.86
+                height={153}
                 alt='logo'
                 priority
+                style={{ width: '80%', height: 'auto', margin: 'auto' }}
               />
             </Container>
 
             <Typography sx={{ textAlign: 'justify' }}>
               Discover the best events in Vancouver with Cornerstone Connect,
-              your all-access pass to life on and off campus. Stay engaged, make
-              new friends, and find exciting things to do in your free time.
+              your all-access pass to life on and off campus, exclusive for our
+              students. Stay engaged, make new friends, and find exciting things
+              to do in your free time.
               <br />
               <br />
-              With a simple sign-up process, centralized event listings, and
-              exclusive access for our students, you’ll have everything you need
-              to make the most of your time here. Join us and enrich your
-              college experience!
-              <br />
-              <br />
-              Use your <strong>Class365 email</strong> to create your account
-              and take advantage of these amazing events!
+              Use the <strong>same email registered on Classe365</strong> to
+              create your account and take advantage of these amazing events!
             </Typography>
             <ButtonsHomePage />
           </Paper>

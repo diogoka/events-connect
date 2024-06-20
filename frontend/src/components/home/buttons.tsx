@@ -24,6 +24,7 @@ const ButtonsHomePage = () => {
         width: '100%',
         display: 'flex',
         justifyContent: 'space-evenly',
+        gap: '9px',
       }}
     >
       <Button

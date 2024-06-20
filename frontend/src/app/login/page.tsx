@@ -245,14 +245,16 @@ export default function LoginPage() {
             width: 'auto',
             margin: 'auto',
             padding: '0rem 2rem 2rem',
+            display: 'flex',
           }}
         >
           <Image
             src='/cornestone-connect-logo-blue-wide.png'
-            width={isMobile ? 267.4 : 305.6}
-            height={isMobile ? 70 : 80}
+            width={744}
+            height={153}
             alt='logo'
             priority
+            style={{ width: '80%', height: 'auto', margin: 'auto' }}
           />
         </Container>
         <Stack rowGap={'20px'}>
