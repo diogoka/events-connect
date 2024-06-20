@@ -37,15 +37,14 @@ export const sendEmail = (option: EmailOption, cb = defaultCallBack) => {
 };
 
 export const sendConfirmationEmail = async (email: string, token: string) => {
-  const sender = 'Cornerstone Connect';
   const link = `${process.env.FRONTEND_URL + token}`;
 
   const emailHTML = await generateEmail(link);
 
   const mailOptions = {
-    from: sender,
+    from: 'noreply@ciccc-connect.ca',
     to: email,
-    subject: 'Email Verification',
+    subject: 'Email Verification - Cornerstone Connect',
     html: emailHTML,
   };
   transporter.sendMail(mailOptions, function (error, response) {

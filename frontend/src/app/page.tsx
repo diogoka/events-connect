@@ -29,11 +29,27 @@ export default function Home() {
             sm: '100%',
             lg: '50%',
           },
+
+          backgroundImage: {
+            sm: 'url("/landingImage.jpeg")',
+            lg: 'none',
+          },
+
+          backgroundSize: {
+            sm: 'cover',
+          },
+
+          backgroundPosition: {
+            sm: 'center',
+          },
           padding: '0 6.5rem',
+          display: 'flex',
+          justifyContent: 'center',
         }}
       >
         <Stack
           sx={{
+            width: '79%',
             height: '100%',
             display: 'flex',
             justifyContent: 'center',
@@ -46,7 +62,7 @@ export default function Home() {
               flexDirection: 'column',
               padding: '4rem 3rem',
               borderRadius: '15px',
-              gap: '4rem',
+              gap: '3rem',
               minWidth: '300px',
               maxWidth: '680px',
             }}
@@ -60,7 +76,7 @@ export default function Home() {
               <Image
                 src='/cornestone-connect-logo-blue-wide.png'
                 width={305.6}
-                height={80}
+                height={70}
                 alt='logo'
                 priority
               />
@@ -93,7 +109,7 @@ export default function Home() {
           },
           backgroundImage: 'url("/landingImage.jpeg")',
           backgroundSize: 'cover',
-          backgroundPosition: 'top',
+          backgroundPosition: 'center',
         }}
       ></Box>
     </Box>
