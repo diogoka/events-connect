@@ -7,6 +7,7 @@ export type Attendee = {
   course: string;
   email: string;
   avatarURL?: string;
+  studentId: string;
 };
 
 export type EventDate = {

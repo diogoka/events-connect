@@ -216,6 +216,7 @@ export default function PreviewEventPage() {
                 lastName: '',
                 course: '',
                 email: '',
+                studentId: '',
               },
             ]}
             tags={tempState.tags}
@@ -279,6 +280,7 @@ export default function PreviewEventPage() {
                     lastName: '',
                     course: '',
                     email: '',
+                    studentId: '',
                   },
                 ]}
                 tags={tempState.tags}

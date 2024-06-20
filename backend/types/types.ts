@@ -6,6 +6,7 @@ export type Attendee = {
   lastName: string;
   course: string;
   email: string;
+  studentId: string;
 };
 
 export type EventInput = {

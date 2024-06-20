@@ -5,7 +5,6 @@ import { AlertColor, Box, Rating, Typography } from '@mui/material';
 import { useRouter, usePathname } from 'next/navigation';
 import { EventContext } from '@/context/eventContext';
 import { StarRounded } from '@mui/icons-material';
-import DownloadAttendees from '@/components/event/download-attendees';
 
 type Props = {
   role?: string;
