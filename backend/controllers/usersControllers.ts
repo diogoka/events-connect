@@ -106,6 +106,8 @@ export const validateEmail = async (
 ) => {
   const { token } = req.params;
 
+  console.warn('NOT WORKING.');
+
   const tokenValidation = checkToken(token);
 
   if (tokenValidation.valid) {

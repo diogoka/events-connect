@@ -47,11 +47,12 @@ export const generateEmail = async (link: string): Promise<string> => {
       .email-masthead {
         padding: 25px 0;
         display: flex;
-        justify-content: center;
+        margin: 0 auto;
       }
       .email-masthead_logo {
         max-width: 400px;
         border: 0;
+        justify-content: center;
       }
       .email-masthead_name {
         font-size: 16px;
@@ -167,12 +168,13 @@ export const generateEmail = async (link: string): Promise<string> => {
       .button--blue {
         color: #ffffff;
         background-color: #141d4f;
+        text-decoration: none;
       }
 
       #logo {
         display: flex;
-        justify-content: center;
-        width: 30%;
+        margin: 0 auto;
+        width: 60%;
       }
 
       /*Media Queries ------------------------------ */
@@ -200,10 +202,16 @@ export const generateEmail = async (link: string): Promise<string> => {
             cellspacing="0"
           >
             <!-- Logo -->
-            <tr>
+            <tr style="display: flex">
               <td class="email-masthead">
                 <div id="logo">
-                  <img src="cid:logo"/>
+                  <img
+                    src="https://firebasestorage.googleapis.com/v0/b/enventllege.appspot.com/o/assets%2FLogo_Cornerstone%20Connect_blue_horizontal.png?alt=media&token=ae5b5768-74ee-4582-a4d0-4f7e8b752537"
+                    alt="logo ciccc-connect"
+                    width="60%"
+                    style="margin: 0 auto"
+                    
+                  />
                 </div>
               </td>
             </tr>
