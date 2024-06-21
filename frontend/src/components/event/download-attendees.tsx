@@ -13,6 +13,7 @@ function DownloadAttendees({ eventData }: Props) {
   const [eventToDownload, setEventToDownload] = useState<Array<Array<string>>>(
     []
   );
+
   const [eventName, setEventName] = useState(
     eventData ? eventData.name_event : ''
   );
@@ -26,7 +27,7 @@ function DownloadAttendees({ eventData }: Props) {
       ['Event name: ', data.name_event],
       ['Event Location: ', data.location_event],
       ['Date: ', `${weekDay}, ${month}, ${time}`],
-      ['First Name', 'Last Name', 'Course', 'Email'],
+      ['First Name', 'Last Name', 'Course', 'Email', 'Student ID'],
     ];
 
     await data.attendees?.forEach((attendee) => {
@@ -35,6 +36,7 @@ function DownloadAttendees({ eventData }: Props) {
         attendee.lastName,
         attendee.course,
         attendee.email,
+        attendee.studentId,
       ]);
     });
 

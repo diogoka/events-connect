@@ -207,7 +207,7 @@ export default function SignUpPage() {
           const response = await sendUserToServer(newUser);
           setRegisterMessage({
             showMessage: true,
-            message: `${response} Please verify your email. You are being redirected `,
+            message: `${response} Please verify your email. You are being redirected. `,
             severity: 'success',
           });
 

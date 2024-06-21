@@ -168,7 +168,7 @@ export const getUserById = async (userId: string) => {
   }
 };
 
-export const verifyEmail = async (
+export const isUserVerifiedModel = async (
   id: string
 ): Promise<{ verified: boolean; message: string }> => {
   try {
@@ -176,15 +176,29 @@ export const verifyEmail = async (
       `SELECT is_verified_user FROM users WHERE id_user = $1`,
       [id]
     );
-    if (!isVerified.rows[0].is_verified_user) {
-      await pool.query(
-        `UPDATE users SET is_verified_user = true WHERE id_user = $1`,
-        [id]
-      );
-      return { verified: true, message: 'User verified.' };
-    } else {
-      return { verified: false, message: 'User already verified.' };
-    }
+    const user = isVerified.rows[0].is_verified_user;
+    const message: string = user
+      ? 'User already Verified'
+      : 'User not verified';
+
+    return { verified: user, message: message };
+  } catch (error) {
+    return { verified: false, message: `Error: ${error}` };
+  }
+};
+
+export const verifyUserModel = async (
+  id: string
+): Promise<{ verified: boolean; message: string }> => {
+  try {
+    const verifying = await pool.query(
+      `UPDATE users SET is_verified_user = true WHERE id_user = $1 RETURNING *`,
+      [id]
+    );
+    const user = verifying.rows[0].is_verified_user;
+    const message: string = user ? 'User verified.' : 'User not verified';
+
+    return { verified: user, message: message };
   } catch (error) {
     return { verified: false, message: `Error: ${error}` };
   }
@@ -196,11 +210,11 @@ export const checkId = async (
 ): Promise<CheckData> => {
   try {
     const fetchThirdService = await axios.post(
-      `${process.env.CHECK_URL}/check`,
+      `${process.env.CHECK_URL}`,
       { email, studentId },
       {
         headers: {
-          Authorization: `bearer ${process.env.TOKEN_CHECK_URL}`,
+          Authorization: `Bearer ${process.env.TOKEN_CHECK_URL}`,
           'Content-type': 'application/json',
         },
       }
@@ -212,33 +226,10 @@ export const checkId = async (
       checked: response,
     };
   } catch (error: any) {
-    console.log(error);
-
     return {
       checked: false,
       message: error.response.data.message,
       code: error.response.data.code,
     };
-  }
-};
-
-export const getId = async (email: string): Promise<CheckData> => {
-  try {
-    const fetchThirdService = await axios.post(
-      `${process.env.CHECK_URL}/id`,
-      { email },
-      {
-        headers: {
-          Authorization: `bearer ${process.env.TOKEN_CHECK_URL}`,
-          'Content-type': 'application/json',
-        },
-      }
-    );
-
-    const response = await fetchThirdService.data;
-
-    return response;
-  } catch (error: any) {
-    return error;
   }
 };

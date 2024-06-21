@@ -399,7 +399,7 @@ export const getEvent = async (req: express.Request, res: express.Response) => {
 
     const attendees = await pool.query(
       `
-      SELECT users.id_user, users.first_name_user, users.last_name_user, users.email_user, users.avatar_url
+      SELECT users.id_user, users.first_name_user, users.last_name_user, users.email_user, users.avatar_url, users.student_id_user
       FROM events
       INNER JOIN attendees ON events.id_event = attendees.id_event
       INNER JOIN users ON attendees.id_user = users.id_user
@@ -411,6 +411,7 @@ export const getEvent = async (req: express.Request, res: express.Response) => {
     const attendeesArray: Attendee[] = await Promise.all(
       attendees.rows.map(async (attendee) => {
         const course = await getCourse(attendee.id_user);
+
         return {
           id: attendee.id_user,
           firstName: attendee.first_name_user,
@@ -418,6 +419,7 @@ export const getEvent = async (req: express.Request, res: express.Response) => {
           email: attendee.email_user,
           course: course,
           avatarURL: attendee.avatar_url,
+          studentId: attendee.student_id_user,
         };
       })
     );

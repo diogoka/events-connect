@@ -54,7 +54,6 @@ export default function UserEditPage() {
     if (user) {
       updateUserInfo('firstName', user.firstName);
       updateUserInfo('lastName', user.lastName);
-      console.log('course ID', user.courseId);
 
       updateUserInfo('courseId', user.courseId.toString());
       setEmail(user.email);
@@ -125,8 +124,6 @@ export default function UserEditPage() {
         console.error(error.response.data);
       });
   };
-
-  console.log('User', user);
 
   return (
     <Stack

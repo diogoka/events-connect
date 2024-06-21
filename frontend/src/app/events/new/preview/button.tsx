@@ -1,18 +1,32 @@
 import { Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { Dispatch, SetStateAction } from 'react';
+import ThreeDots from '@/components/animation/theeDots';
+
+type Props = {
+  forMobile: boolean;
+  eventId: number;
+  submitEventHandler: (id: number) => void;
+  isDisabled: boolean;
+};
 
 export default function ButtonsForPreview({
   forMobile,
   eventId,
   submitEventHandler,
-}: {
-  forMobile: boolean;
-  eventId: number;
-  submitEventHandler: (id: number) => void;
-}) {
+  isDisabled,
+}: Props) {
   const router = useRouter();
-
   const buttonWidth = { width: forMobile ? '47%' : '200px' };
+  const message: string =
+    eventId > 0
+      ? isDisabled
+        ? 'Updating'
+        : 'Update'
+      : isDisabled
+      ? 'Creating'
+      : 'Create';
+
   return (
     <Box
       display='flex'
@@ -43,9 +57,14 @@ export default function ButtonsForPreview({
           variant='contained'
           color='primary'
           fullWidth
+          disabled={isDisabled}
           onClick={() => submitEventHandler(eventId)}
         >
-          {eventId > 0 ? 'Update' : 'Create'}
+          <Box sx={{ display: 'flex', alignItems: 'baseline' }}>
+            {message}
+
+            {isDisabled && <ThreeDots />}
+          </Box>
         </Button>
       </Box>
     </Box>

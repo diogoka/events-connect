@@ -13,17 +13,18 @@ export default function Logo() {
           onClick={() => router.push('/')}
           sx={{
             '&:hover': { background: 'none' },
+            width: '30%',
           }}
           disableRipple
           disableTouchRipple
         >
-          {/* height * 3.72 (w/h) = weight */}
           <Image
             src='/cornestone-connect-logo-blue-wide.png'
             alt='cornerstone-connect logo'
-            width={111.6}
-            height={30}
+            width={744}
+            height={153}
             priority={true}
+            style={{ width: '100%', height: 'auto' }}
           />
         </Button>
       }
@@ -33,6 +34,7 @@ export default function Logo() {
           sx={{
             minWidth: '223.20px',
             '&:hover': { background: 'none' },
+            justifyContent: 'flex-start',
           }}
           disableRipple
           disableTouchRipple
@@ -40,10 +42,10 @@ export default function Logo() {
           <Image
             src='/cornestone-connect-logo-blue-wide.png'
             alt='cornerstone-connect logo'
-            width={223.2}
-            height={60}
+            width={744}
+            height={153}
             priority={true}
-            style={{ minWidth: '223.20px' }}
+            style={{ minWidth: '223.20px', width: '15%', height: 'auto' }}
           />
         </Button>
       }

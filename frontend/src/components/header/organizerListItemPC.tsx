@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 import { Page } from '@/types/components.types';
 
 const organizerBtns: Page[] = [
-  { label: 'Events', path: '/' || '/events?isPublished=true' },
+  { label: 'Events', path: '/events' || '/events?isPublished=true' },
   { label: 'My Events', path: '/user/my-events' },
   { label: 'History', path: '/history' },
   { label: 'Created Events', path: '/organizer-events' },

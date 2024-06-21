@@ -17,13 +17,20 @@ export const checkToken = (token: string): JwtPayload => {
   } catch (err: any) {
     const decoded = jwt.decode(token) as JwtPayload;
 
-    return {
-      valid: false,
-      message: err.message,
-      payload: {
-        id: decoded!.id,
-        email: decoded!.email,
-      },
-    };
+    if (err.message !== 'jwt expired') {
+      return {
+        valid: false,
+        message: err.message,
+      };
+    } else {
+      return {
+        valid: false,
+        message: err.message,
+        payload: {
+          id: decoded!.id,
+          email: decoded!.email,
+        },
+      };
+    }
   }
 };

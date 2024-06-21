@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 import { Page } from '@/types/components.types';
 
 const usersBtns: Page[] = [
-  { label: 'Events', path: '/' },
+  { label: 'Events', path: '/events' },
   { label: 'My Events', path: '/user/my-events' },
   { label: 'History', path: '/history' },
 ];

@@ -7,8 +7,8 @@ import {
   getUserById,
   updateUserModel,
   checkId,
-  verifyEmail,
-  getId,
+  isUserVerifiedModel,
+  verifyUserModel,
 } from '../models/userModels';
 import { updateCourse } from '../models/courseModels';
 import { validateUserInput } from '../helpers/validateUser';
@@ -46,8 +46,6 @@ export const getUser = async (req: express.Request, res: express.Response) => {
 export const editUser = async (req: express.Request, res: express.Response) => {
   const userInput: UserInput = req.body;
 
-  console.log('userINput', userInput);
-
   const { result, message } = validateUserInput(userInput);
   if (!result) {
     res.status(500).send(message);
@@ -74,8 +72,6 @@ export const createUser = async (
   res: express.Response
 ) => {
   const userInput: UserInput = req.body;
-
-  console.log('UserInput', userInput);
 
   const { result, message } = validateUserInput(userInput);
   if (!result) {
@@ -114,43 +110,34 @@ export const validateEmail = async (
   const tokenValidation = checkToken(token);
 
   if (tokenValidation.valid) {
-    const isVerified = await verifyEmail(tokenValidation.payload as string);
+    const isUserVerified = await isUserVerifiedModel(
+      tokenValidation.payload.email
+    );
 
-    if (isVerified.verified) {
+    if (isUserVerified.verified) {
+      res.status(400).json(`${isUserVerified.message}`);
+    } else {
+      const isBeingVerified = await verifyUserModel(tokenValidation.payload);
       res
         .status(200)
-        .json(`${isVerified.message} You can close this window now.`);
-    } else {
-      res.status(400).json(`${isVerified.message}`);
+        .json(`${isBeingVerified.message} You can close this window now.`);
     }
   } else {
     if (tokenValidation.message === 'jwt expired') {
-      const tokenChecked = tokenValidation!.payload!;
+      const tokenInfo = tokenValidation!.payload!;
+      const isVerified = await isUserVerifiedModel(tokenInfo.id);
 
-      const newToken = generateToken(tokenChecked.id, tokenChecked.email);
-      await sendConfirmationEmail(tokenChecked.email, newToken);
-      res
-        .status(400)
-        .json('Token expired. A new one was generated. Check your email');
+      if (isVerified.verified) {
+        res.status(400).json('User already verified.');
+      } else {
+        const newToken = generateToken(tokenInfo.id, tokenInfo.email);
+        await sendConfirmationEmail(tokenInfo.email, newToken);
+        res
+          .status(400)
+          .json('Token expired. A new one was generated. Check your email.');
+      }
     } else {
-      res.status(401).json('Unauthorized.');
+      res.status(401).json('Invalid Token.');
     }
-  }
-};
-
-export const getStudentId = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  if (!req.body.email) {
-    res.status(400).send('Missing Parameters.');
-  }
-  try {
-    const id = await getId(req.body.email);
-    res.status(200).json(id);
-  } catch (error: any) {
-    console.log('error', error);
-
-    res.status(500).send(error);
   }
 };

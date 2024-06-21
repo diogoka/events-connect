@@ -14,7 +14,7 @@ type Props = {
 };
 
 export default function Dropdown({ anchorEl, open, handleClose }: Props) {
-  const { user, setUser, setLoginStatus, firebaseAccount } =
+  const { user, setUser, setLoginStatus, firebaseAccount, setFirebaseAccount } =
     useContext(UserContext);
 
   const router = useRouter();
@@ -25,6 +25,7 @@ export default function Dropdown({ anchorEl, open, handleClose }: Props) {
   const handleLogout = async () => {
     signOut(getAuth())
       .then(() => {
+        setFirebaseAccount(null);
         setUser(null);
         setLoginStatus(LoginStatus.LoggedOut);
       })
