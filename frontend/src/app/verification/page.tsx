@@ -10,7 +10,7 @@ type Props = {
 const verificationPage = async ({ searchParams }: Props) => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL_CHECK}${searchParams.t}`,
-    { method: 'POST' }
+    { cache: 'no-store', method: 'POST' }
   );
   const status = response.status;
   const data = await response.json();

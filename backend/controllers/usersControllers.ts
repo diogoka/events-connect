@@ -7,7 +7,8 @@ import {
   getUserById,
   updateUserModel,
   checkId,
-  verifyEmail,
+  isUserVerifiedModel,
+  verifyUserModel,
 } from '../models/userModels';
 import { updateCourse } from '../models/courseModels';
 import { validateUserInput } from '../helpers/validateUser';
@@ -106,28 +107,31 @@ export const validateEmail = async (
 ) => {
   const { token } = req.params;
 
-  console.warn('NOT WORKING.');
-
   const tokenValidation = checkToken(token);
 
   if (tokenValidation.valid) {
-    const isVerified = await verifyEmail(tokenValidation.payload as string);
-    if (isVerified.verified) {
+    const isUserVerified = await isUserVerifiedModel(
+      tokenValidation.payload.email
+    );
+
+    if (isUserVerified.verified) {
+      res.status(400).json(`${isUserVerified.message}`);
+    } else {
+      const isBeingVerified = await verifyUserModel(tokenValidation.payload);
       res
         .status(200)
-        .json(`${isVerified.message} You can close this window now.`);
-    } else {
-      res.status(400).json(`${isVerified.message}`);
+        .json(`${isBeingVerified.message} You can close this window now.`);
     }
   } else {
     if (tokenValidation.message === 'jwt expired') {
-      const tokenChecked = tokenValidation!.payload!;
-      const isVerified = await verifyEmail(tokenChecked.id as string);
-      if (!isVerified.verified) {
-        res.status(400).json(`${isVerified.message}`);
+      const tokenInfo = tokenValidation!.payload!;
+      const isVerified = await isUserVerifiedModel(tokenInfo.id);
+
+      if (isVerified.verified) {
+        res.status(400).json('User already verified.');
       } else {
-        const newToken = generateToken(tokenChecked.id, tokenChecked.email);
-        await sendConfirmationEmail(tokenChecked.email, newToken);
+        const newToken = generateToken(tokenInfo.id, tokenInfo.email);
+        await sendConfirmationEmail(tokenInfo.email, newToken);
         res
           .status(400)
           .json('Token expired. A new one was generated. Check your email.');
