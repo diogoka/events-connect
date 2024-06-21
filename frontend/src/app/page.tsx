@@ -1,16 +1,12 @@
-import {
-  Box,
-  Typography,
-  Stack,
-  Button,
-  Container,
-  Theme,
-  Paper,
-} from '@mui/material';
+import { Box, Typography, Stack, Container, Paper } from '@mui/material';
 import ButtonsHomePage from '@/components/home/buttons';
 import Image from 'next/image';
 
 export default function Home() {
+  const randomBackground = (): number => {
+    return Math.floor(Math.random() * (10 - 1 + 1) + 1);
+  };
+
   return (
     <Box
       sx={{
@@ -31,7 +27,7 @@ export default function Home() {
           },
 
           backgroundImage: {
-            sm: 'url("/landingImage.jpeg")',
+            sm: `url("/homeBackground${randomBackground()}.jpg")`,
             lg: 'none',
           },
 
@@ -105,7 +101,7 @@ export default function Home() {
             sm: '0',
             lg: '50%',
           },
-          backgroundImage: 'url("/landingImage.jpeg")',
+          backgroundImage: `url("/homeBackground${randomBackground()}.jpg")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

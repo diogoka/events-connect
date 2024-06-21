@@ -7,7 +7,8 @@ import { Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 export default function LogoutBtn() {
-  const { setUser, setLoginStatus } = useContext(UserContext);
+  const { setUser, setLoginStatus, setFirebaseAccount } =
+    useContext(UserContext);
 
   const router = useRouter();
 
@@ -15,6 +16,7 @@ export default function LogoutBtn() {
     signOut(getAuth())
       .then(() => {
         setUser(null);
+        setFirebaseAccount(null);
         setLoginStatus(LoginStatus.LoggedOut);
         router.push('/login');
       })
