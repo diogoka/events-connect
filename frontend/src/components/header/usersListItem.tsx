@@ -7,7 +7,7 @@ type Props = {
 };
 
 const UsersBtns = [
-  { label: 'Home', path: '/' },
+  { label: 'Home', path: '/events' },
   { label: 'My Events', path: '/user/my-events' },
   { label: 'History', path: '/history' },
   { label: 'My Profile', path: '/user' },
