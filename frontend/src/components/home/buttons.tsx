@@ -1,8 +1,9 @@
 'use client';
 
 import { Button, Box } from '@mui/material';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useRouter } from 'next/navigation';
+import { UserContext } from '@/context/userContext';
 
 const buttonStyle = {
   width: '9rem',
@@ -16,6 +17,7 @@ const buttonStyle = {
 };
 
 const ButtonsHomePage = () => {
+  const { user } = useContext(UserContext);
   const router = useRouter();
 
   return (
@@ -32,7 +34,7 @@ const ButtonsHomePage = () => {
         color='primary'
         sx={buttonStyle}
         onClick={() => {
-          router.push('/login');
+          !user ? router.push('/login') : router.push('/events');
         }}
       >
         Sign Up

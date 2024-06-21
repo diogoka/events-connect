@@ -8,10 +8,9 @@ import DetailIconContainer from '@/components/event/detail-icon-container';
 import ImageHelper from '@/components/common/image-helper';
 import IconsContainer from '@/components/icons/iconsContainer';
 import ButtonsForPreview from './button';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import MapWithMarker from '@/components/map/mapWithMarker';
 import alertFn from '@/components/common/alertFunction';
-import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { UserContext } from '@/context/userContext';
 import { ShowAlert } from '@/types/alert.types';
@@ -42,6 +41,7 @@ export default function PreviewEventPage() {
   });
   const [isAlertVisible, setIsAlertVisible] = useState<boolean>(false);
   const { user } = useContext(UserContext);
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
   const router = useRouter();
 
@@ -70,31 +70,32 @@ export default function PreviewEventPage() {
       );
       formData.append(`dates[${key}][dateEnd]`, date.date_event_end.toString());
     });
-
+    setIsSubmitted(true);
     if (id > 0) {
       axios
         .put(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/${id}`,
           formData,
           {
-            headers: { 'Content-Type': 'multipart/form-data' },
+            headers: { 'Content-Type': 'application/json' },
           }
         )
-        .then((res) => {
+        .then(() => {
           if (pathName === '/events/new/preview') {
             setShowedPage({
               label: 'Events',
               path: '/',
             });
           }
+          setIsSubmitted(false);
           setShowAlert({
             show: true,
             title: 'Updated',
             message: 'Event was updated successfully!',
           });
+
           setTimeout(() => {
             router.replace('/events');
-            setShowAlert({ show: false, title: '', message: '' });
           }, 2500);
           dispatch({
             type: 'RESET',
@@ -122,6 +123,7 @@ export default function PreviewEventPage() {
               path: '/',
             });
           }
+          setIsSubmitted(false);
           setShowAlert({
             show: true,
             title: 'Created',
@@ -129,7 +131,6 @@ export default function PreviewEventPage() {
           });
           setTimeout(() => {
             router.replace('/events');
-            setShowAlert({ show: false, title: '', message: '' });
           }, 2500);
           dispatch({
             type: 'RESET',
@@ -229,6 +230,7 @@ export default function PreviewEventPage() {
           forMobile={forMobile}
           eventId={eventId!}
           submitEventHandler={submitEventHandler}
+          isDisabled={isSubmitted}
         />
       </Stack>
     );
@@ -349,6 +351,7 @@ export default function PreviewEventPage() {
           forMobile={forMobile!}
           eventId={eventId!}
           submitEventHandler={submitEventHandler}
+          isDisabled={isSubmitted}
         />
       </Stack>
     );

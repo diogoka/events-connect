@@ -1,6 +1,7 @@
 import { Box, Typography, Stack, Container, Paper } from '@mui/material';
 import ButtonsHomePage from '@/components/home/buttons';
 import Image from 'next/image';
+import ThreeDots from '@/components/animation/theeDots';
 
 export default function Home() {
   const randomBackground = (): number => {
