@@ -190,8 +190,6 @@ export const isUserVerifiedModel = async (
 export const verifyUserModel = async (
   id: string
 ): Promise<{ verified: boolean; message: string }> => {
-  console.log('id', id);
-
   try {
     const verifying = await pool.query(
       `UPDATE users SET is_verified_user = true WHERE id_user = $1 RETURNING *`,
