@@ -13,7 +13,7 @@ export default function Logo() {
           onClick={() => router.push('/')}
           sx={{
             '&:hover': { background: 'none' },
-            width: '30%',
+            width: '111.59px',
           }}
           disableRipple
           disableTouchRipple

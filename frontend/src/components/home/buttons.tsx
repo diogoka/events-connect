@@ -17,8 +17,10 @@ const buttonStyle = {
 };
 
 const ButtonsHomePage = () => {
-  const { user } = useContext(UserContext);
+  const { user, loginStatus } = useContext(UserContext);
   const router = useRouter();
+
+  console.log('loginStatus', loginStatus);
 
   return (
     <Box
@@ -29,16 +31,18 @@ const ButtonsHomePage = () => {
         gap: '9px',
       }}
     >
-      <Button
-        variant='contained'
-        color='primary'
-        sx={buttonStyle}
-        onClick={() => {
-          !user ? router.push('/login') : router.push('/events');
-        }}
-      >
-        Sign Up
-      </Button>
+      {loginStatus !== 'Logged In' && (
+        <Button
+          variant='contained'
+          color='primary'
+          sx={buttonStyle}
+          onClick={() => {
+            !user ? router.push('/login') : router.push('/events');
+          }}
+        >
+          Sign Up
+        </Button>
+      )}
       <Button
         variant='contained'
         color='primary'

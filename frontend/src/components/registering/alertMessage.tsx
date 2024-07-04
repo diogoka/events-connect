@@ -1,12 +1,18 @@
 import { PropsAlert } from '@/types/alert.types';
 import { Alert } from '@mui/material';
 
-const AlertMessage = ({ registerMessage }: PropsAlert) => {
+type Props = PropsAlert & { isMobile: boolean };
+
+const AlertMessage = ({ registerMessage, isMobile }: Props) => {
   return (
     <>
       {registerMessage.showMessage && (
         <Alert
-          sx={{ width: '28%', margin: '2%' }}
+          sx={{
+            width: isMobile ? '80%' : '28%',
+            margin: isMobile ? '0' : '2%',
+            position: 'absolute',
+          }}
           severity={registerMessage.severity}
         >
           {registerMessage.message}

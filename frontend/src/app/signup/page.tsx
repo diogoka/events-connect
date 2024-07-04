@@ -37,6 +37,7 @@ import { UserInputForm } from '@/types/pages.types';
 import CourseInput from '@/components/user/form/course-input';
 import ModalAgreement from '@/components/login/modal-agreement';
 import { sendUserToServer } from '@/services/sendUserToServer';
+import AlertMessage from '@/components/registering/alertMessage';
 
 export default function SignUpPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -136,13 +137,13 @@ export default function SignUpPage() {
           message: `${message}. You are being redirected to Log in. \n Please, select a different email.`,
           severity: 'error',
         },
-        7,
+        3.5,
         '/login'
       );
     } else {
       handleMessage(
         { showMessage: true, message: message, severity: 'error' },
-        5
+        2.5
       );
     }
   };
@@ -163,7 +164,7 @@ export default function SignUpPage() {
             message: 'Passwords does not match.',
             severity: 'error',
           },
-          6
+          2.5
         );
 
         return;
@@ -182,7 +183,7 @@ export default function SignUpPage() {
           message: `${checkStudentID.message}`,
           severity: 'error',
         },
-        6
+        2.5
       );
       if (isGoogle) {
         handleCheckError(checkStudentID.code!, checkStudentID.message!);
@@ -281,7 +282,7 @@ export default function SignUpPage() {
                 message: `${getErrorMessage(error.code)}`,
                 severity: 'error',
               },
-              5
+              2.5
             );
           });
       }
@@ -290,7 +291,9 @@ export default function SignUpPage() {
 
   return (
     <>
-      {!isMobile && <Background registerMessage={registerMessage} />}
+      {!isMobile && (
+        <Background registerMessage={registerMessage} isMobile={isMobile} />
+      )}
 
       <Box
         bgcolor='white'
@@ -315,14 +318,18 @@ export default function SignUpPage() {
             overflowY: 'auto',
           }}
         >
-          {!isMobile && (
-            <Typography
-              marginBlock={isMobile ? 'none' : '2rem'}
-              variant='h1'
-              fontWeight='bold'
-            >
-              Sign Up
-            </Typography>
+          <Typography
+            marginBlock={isMobile ? 'none' : '2rem'}
+            variant='h1'
+            fontWeight='bold'
+          >
+            Sign Up
+          </Typography>
+          {isMobile && (
+            <AlertMessage
+              registerMessage={registerMessage}
+              isMobile={isMobile}
+            />
           )}
 
           {loginStatus === LoginStatus.LoggedOut || isGoogle ? (

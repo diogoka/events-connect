@@ -226,11 +226,16 @@ export default function LoginPage() {
         </Box>
       )}
 
+      {userServerError.error && (
+        <Alert sx={{ width: '80%', position: 'absolute' }} severity='error'>
+          {userServerError.message}
+        </Alert>
+      )}
       <Stack
         width={isMobile ? 'auto' : '600px'}
         maxWidth={isMobile ? '345px' : 'auto'}
         marginInline='auto'
-        padding={isMobile ? 'none' : '2rem 6rem'}
+        padding={isMobile ? '5rem 0' : '3rem 6rem'}
         borderRadius='0.75rem'
         bgcolor='white'
         zIndex={100}

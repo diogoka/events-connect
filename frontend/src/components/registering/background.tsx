@@ -2,7 +2,9 @@ import { Box } from '@mui/material';
 import AlertMessage from './alertMessage';
 import { PropsAlert } from '@/types/alert.types';
 
-const Background = ({ registerMessage }: PropsAlert) => {
+type Props = PropsAlert & { isMobile: boolean };
+
+const Background = ({ registerMessage, isMobile }: Props) => {
   return (
     <Box
       width='100%'
@@ -15,7 +17,7 @@ const Background = ({ registerMessage }: PropsAlert) => {
         backgroundPositionX: '50%',
       }}
     >
-      <AlertMessage registerMessage={registerMessage} />
+      <AlertMessage registerMessage={registerMessage} isMobile={isMobile} />
     </Box>
   );
 };
