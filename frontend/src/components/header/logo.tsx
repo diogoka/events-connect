@@ -19,12 +19,12 @@ export default function Logo() {
           disableTouchRipple
         >
           <Image
-            src='/cornestone-connect-logo-blue-wide.png'
+            src='/justLogoBlue.svg'
             alt='cornerstone-connect logo'
-            width={744}
-            height={153}
+            width={445}
+            height={445}
             priority={true}
-            style={{ width: '100%', height: 'auto' }}
+            style={{ width: '38%', height: 'auto' }}
           />
         </Button>
       }
