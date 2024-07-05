@@ -9,7 +9,7 @@ import cors from 'cors';
 import 'dotenv/config';
 
 const corsOptions = {
-  origin: '*',
+  origin: 'https://cornerstone-connect.onrender.com/',
   methods: 'GET, POST, PUT, DELETE',
 };
 
@@ -21,11 +21,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Origin',
+    'https://cornerstone-connect.onrender.com/'
+  );
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Headers', 'application/json');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization');
-  res.setHeader('Access-Control-Allow-Methods', '*');
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'https://cornerstone-connect.onrender.com/'
+  );
   next();
 });
 

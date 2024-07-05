@@ -226,7 +226,7 @@ export default function LoginPage() {
         </Box>
       )}
 
-      {userServerError.error && (
+      {userServerError.error && isMobile && (
         <Alert sx={{ width: '80%', position: 'absolute' }} severity='error'>
           {userServerError.message}
         </Alert>
