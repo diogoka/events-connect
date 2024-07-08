@@ -9,7 +9,7 @@ import cors from 'cors';
 import 'dotenv/config';
 
 const corsOptions = {
-  origin: 'https://cornerstone-connect.onrender.com/',
+  origin: '*/',
   methods: 'GET, POST, PUT, DELETE',
 };
 
