@@ -9,7 +9,7 @@ import cors from 'cors';
 import 'dotenv/config';
 
 const corsOptions = {
-  origin: '*/',
+  origin: '*',
   methods: 'GET, POST, PUT, DELETE',
 };
 
