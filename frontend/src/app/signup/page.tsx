@@ -19,6 +19,7 @@ import { getErrorMessage } from '@/auth/errors';
 import PasswordInput from '@/components/common/password-input';
 import NumberTextFieldInput from '@/components/common/noArrowsTextField';
 import { deleteAccount } from '@/auth/auth-provider';
+import ThreeDots from '@/components/animation/theeDots';
 
 import {
   getAuth,
@@ -70,6 +71,7 @@ export default function SignUpPage() {
   });
 
   const [checked, setChecked] = useState<boolean>(false);
+  const [load, setLoad] = useState<boolean>(false);
 
   //Modal
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
@@ -114,6 +116,7 @@ export default function SignUpPage() {
         message: '',
         severity: 'info',
       });
+      setLoad(false);
       if (navigate) {
         router.replace(navigate);
       }
@@ -137,13 +140,13 @@ export default function SignUpPage() {
           message: `${message}. You are being redirected to Log in. \n Please, select a different email.`,
           severity: 'error',
         },
-        3.5,
+        5,
         '/login'
       );
     } else {
       handleMessage(
         { showMessage: true, message: message, severity: 'error' },
-        2.5
+        4
       );
     }
   };
@@ -151,6 +154,7 @@ export default function SignUpPage() {
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    setLoad(true);
     if (!isGoogle) {
       const isPasswordMatch = checkPasswords(
         userInputForm.password!,
@@ -164,7 +168,7 @@ export default function SignUpPage() {
             message: 'Passwords does not match.',
             severity: 'error',
           },
-          2.5
+          4
         );
 
         return;
@@ -183,7 +187,7 @@ export default function SignUpPage() {
           message: `${checkStudentID.message}`,
           severity: 'error',
         },
-        2.5
+        4
       );
       if (isGoogle) {
         handleCheckError(checkStudentID.code!, checkStudentID.message!);
@@ -218,6 +222,7 @@ export default function SignUpPage() {
               message: '',
               severity: 'info',
             });
+            setLoad(false);
             signOut(getAuth());
             setLoginStatus(LoginStatus.LoggedOut);
             router.replace('/login');
@@ -235,6 +240,7 @@ export default function SignUpPage() {
               message: '',
               severity: 'info',
             });
+            setLoad(false);
           }, 6000);
         }
       } else {
@@ -270,6 +276,7 @@ export default function SignUpPage() {
                 message: '',
                 severity: 'info',
               });
+              setLoad(false);
               signOut(getAuth());
               setLoginStatus(LoginStatus.LoggedOut);
               router.replace('/login');
@@ -282,7 +289,7 @@ export default function SignUpPage() {
                 message: `${getErrorMessage(error.code)}`,
                 severity: 'error',
               },
-              2.5
+              4
             );
           });
       }
@@ -489,7 +496,7 @@ export default function SignUpPage() {
                   },
                 }}
               >
-                Register
+                {load ? <ThreeDots color='white' /> : 'Register'}
               </Button>
 
               <Typography variant='body2' align='center'>
