@@ -9,7 +9,7 @@ export const uploadImage = async (image: Blob, eventName: string) => {
       const imageRef = ref(storage, `events/${eventName}+${uuidv4()}`);
       const imageToUpload = image!;
 
-      await uploadBytes(imageRef, imageToUpload).then((response) => {
+      await uploadBytes(imageRef, imageToUpload).then(async (response) => {
         return getDownloadURL(response.ref).then((res) => {
           return (url = res);
         });

@@ -439,7 +439,7 @@ export default function SignUpPage() {
                 <FormControl required>
                   <NumberTextFieldInput
                     label={'Student ID'}
-                    maxLength={6}
+                    maxLength={10}
                     setStudentID={updateUserInputForm}
                     type={'student_id'}
                     disabled={registerMessage.showMessage}

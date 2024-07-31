@@ -42,11 +42,15 @@ const DetailContainer = ({
   const h1Style = !forMobile
     ? { textAlign: 'left', fontWeight: 'bold', fontSize: '2.5rem' }
     : null;
+
   const timeContainerStyle = { margin: forMobile ? '10px auto' : '40px auto' };
 
   return (
     <>
-      <Typography variant='h1' sx={h1Style}>
+      <Typography
+        variant='h1'
+        sx={{ ...h1Style, paddingTop: forMobile ? '1rem' : 'none' }}
+      >
         {event?.name_event}
       </Typography>
 
