@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model attendees {
+  id_attendee Int    @id @default(autoincrement())
+  id_user     String @db.VarChar(100)
+  id_event    Int
+  events      events @relation(fields: [id_event], references: [id_event], onDelete: Cascade, onUpdate: NoAction)
+  users       users  @relation(fields: [id_user], references: [id_user], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model courses {
+  id_course       Int             @id @default(autoincrement())
+  name_course     String          @db.VarChar(500)
+  category_course String          @db.VarChar(500)
+  users_courses   users_courses[]
+}
+
+model events {
+  id_event          Int              @id @default(autoincrement())
+  id_owner          String           @db.VarChar(100)
+  name_event        String           @db.VarChar(500)
+  description_event String
+  date_event_start  DateTime         @db.Timestamp(6)
+  date_event_end    DateTime         @db.Timestamp(6)
+  location_event    String           @db.VarChar(500)
+  capacity_event    Int
+  price_event       Int
+  image_url_event   String?          @db.VarChar(500)
+  category_event    String           @db.VarChar(500)
+  attendees         attendees[]
+  users             users            @relation(fields: [id_owner], references: [id_user], onDelete: Cascade, onUpdate: NoAction)
+  events_reviews    events_reviews[]
+  events_tags       events_tags[]
+}
+
+model events_reviews {
+  id_event_review Int     @id @default(autoincrement())
+  id_event        Int
+  id_review       Int
+  events          events  @relation(fields: [id_event], references: [id_event], onDelete: Cascade, onUpdate: NoAction)
+  reviews         reviews @relation(fields: [id_review], references: [id_review], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model events_tags {
+  id_event_tag Int    @id @default(autoincrement())
+  id_event     Int
+  id_tag       Int
+  events       events @relation(fields: [id_event], references: [id_event], onDelete: Cascade, onUpdate: NoAction)
+  tags         tags   @relation(fields: [id_tag], references: [id_tag], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model pgmigrations {
+  id     Int      @id @default(autoincrement())
+  name   String   @db.VarChar(255)
+  run_on DateTime @db.Timestamp(6)
+}
+
+model reviews {
+  id_review          Int              @id @default(autoincrement())
+  id_user            String           @db.VarChar(100)
+  description_review String           @db.VarChar(500)
+  rating             Decimal          @db.Decimal(2, 1)
+  date_review        DateTime         @db.Timestamp(6)
+  events_reviews     events_reviews[]
+  users              users            @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model tags {
+  id_tag      Int           @id @default(autoincrement())
+  name_tag    String        @db.VarChar(500)
+  events_tags events_tags[]
+}
+
+model users {
+  id_user          String          @id @db.VarChar(100)
+  id_user_type     Int
+  first_name_user  String          @db.VarChar(500)
+  last_name_user   String          @db.VarChar(500)
+  email_user       String          @unique(map: "unique_email_user") @db.VarChar(500)
+  postal_code_user String?         @db.VarChar(500)
+  phone_user       String?         @db.VarChar(500)
+  provider         String?         @db.VarChar(500)
+  avatar_url       String?         @db.VarChar(500)
+  is_verified_user Boolean         @default(false)
+  student_id_user  Int             @unique(map: "unique_student_id_user") @default(0)
+  created_at       DateTime        @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'America/Vancouver'::text)")) @db.Timestamptz(6)
+  updated_at       DateTime        @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'America/Vancouver'::text)")) @db.Timestamptz(6)
+  attendees        attendees[]
+  events           events[]
+  reviews          reviews[]
+  users_type       users_type      @relation(fields: [id_user_type], references: [id_user_type], onDelete: Cascade, onUpdate: NoAction)
+  users_courses    users_courses[]
+}
+
+model users_courses {
+  id_user_course Int     @id @default(autoincrement())
+  id_user        String  @db.VarChar(100)
+  id_course      Int
+  courses        courses @relation(fields: [id_course], references: [id_course], onDelete: Cascade, onUpdate: NoAction)
+  users          users   @relation(fields: [id_user], references: [id_user], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model users_type {
+  id_user_type Int     @id @default(autoincrement())
+  role_user    String  @db.VarChar(100)
+  users        users[]
+}
