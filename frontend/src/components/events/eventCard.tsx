@@ -137,8 +137,8 @@ function EventCard({
             fontWeight: '500',
           }}
         >
-          {event.name_event.length > 32
-            ? `${event.name_event.slice(0, 32)}...`
+          {event.name_event.length > 25
+            ? `${event.name_event.slice(0, 25)}...`
             : event.name_event}
         </Typography>
         <Box
