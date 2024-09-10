@@ -155,7 +155,7 @@ export default function EventsPage() {
           tags={tags}
           user={currentUser}
           attendance={eventsOfUser}
-        ></EventList>
+        />
       )}
     </Box>
   );
