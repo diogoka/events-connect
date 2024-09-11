@@ -228,9 +228,10 @@ export default function SignUpPage() {
             router.replace('/login');
           }, 6000);
         } catch (error: any) {
+          console.log(error);
           setRegisterMessage({
             showMessage: true,
-            message: 'Internal Error. Please try again later.',
+            message: `${error?.response?.data?.message}.`,
             severity: 'error',
           });
 
