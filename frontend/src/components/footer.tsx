@@ -27,7 +27,7 @@ export default function Footer() {
         fontSize='.75rem'
         align='center'
       >
-        ©️ 2023 Cornerstone Connect All Rights Reserved.
+        ©️ 2024 Cornerstone Connect All Rights Reserved.
       </Typography>
     </Box>
   );
