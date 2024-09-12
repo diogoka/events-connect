@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { useContext, useState } from 'react';
 import { EventContext } from '@/context/eventContext';
@@ -11,6 +12,8 @@ import {
 
 import ReactQuillEditor from './reactQuillEditor';
 
+import dynamic from 'next/dynamic';
+
 export default function DescriptionContainer({
   isMobile,
 }: {
@@ -18,6 +21,10 @@ export default function DescriptionContainer({
 }) {
   const { createdEvent, dispatch } = useContext(EventContext);
   const [countedDesc, setCountedDesc] = useState<number>(1200);
+
+  const ReactQuillEditor = dynamic(() => import('./reactQuillEditor'), {
+    ssr: false,
+  });
 
   const changeDesc = (description: string) => {
     setCountedDesc(1200 - description.length);
