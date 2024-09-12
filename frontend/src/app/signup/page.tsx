@@ -230,9 +230,10 @@ export default function SignUpPage() {
           await sendUserToServer(newUser);
           setIsUserCreated(true);
         } catch (error: any) {
+          console.log(error);
           setRegisterMessage({
             showMessage: true,
-            message: 'Internal Error. Please try again later.',
+            message: `${error?.response?.data?.message}.`,
             severity: 'error',
           });
 
