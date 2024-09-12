@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css'; // import styles
-import './tiptapStyles.css';
+import 'react-quill/dist/quill.snow.css';
+import './reactQuillEditorStyles.css';
 
 const modules = {
   toolbar: [
@@ -22,20 +22,12 @@ type Props = {
   rows: number;
 };
 
-const EventDescription = ({ counter, value, onChange, rows }: Props) => {
+const ReactQuillEditor = ({ counter, value, onChange, rows }: Props) => {
   const [createdEvent, setCreatedEvent] = useState<EventProps>({
     description_event: '',
   });
 
-  const changeDesc = (
-    value: string,
-    delta: any,
-    source: string,
-    editor: any
-  ) => {
-    console.log(delta);
-    console.log(source);
-    console.log(editor);
+  const changeDesc = (value: string) => {
     setCreatedEvent({ ...createdEvent, description_event: value });
     onChange(value);
   };
@@ -45,10 +37,16 @@ const EventDescription = ({ counter, value, onChange, rows }: Props) => {
       value={createdEvent.description_event}
       onChange={changeDesc}
       modules={modules}
-      placeholder='Please enter description'
-      style={{ height: '300px', width: '100%', marginBottom: '45px' }}
+      placeholder='Please enter the event description'
+      style={{
+        height: '300px',
+        width: '100%',
+        marginBottom: '45px',
+        fontStyle: 'normal',
+        fontSize: '16px',
+      }}
     />
   );
 };
 
-export default EventDescription;
+export default ReactQuillEditor;

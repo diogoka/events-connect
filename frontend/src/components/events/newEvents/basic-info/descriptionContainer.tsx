@@ -9,7 +9,7 @@ import {
   InputAdornment,
 } from '@mui/material';
 
-import Tiptap from './tiptap';
+import ReactQuillEditor from './reactQuillEditor';
 
 export default function DescriptionContainer({
   isMobile,
@@ -47,13 +47,14 @@ export default function DescriptionContainer({
         </Box>
       </InputLabel>
 
-      <Tiptap
+      <ReactQuillEditor
         counter={countedDesc}
         value={createdEvent.description_event}
         onChange={changeDesc}
         rows={isMobile ? 5 : 8}
       />
 
+      {/* Old TextField: */}
       {/* <TextField
         id='description'
         variant='outlined'
