@@ -9,6 +9,8 @@ import { Tag } from '@/types/types';
 import { Events as Event, CurrentUser } from '@/types/pages.types';
 import { AlertState } from '@/types/alert.types';
 
+import SwitchViews from '@/components/events/switchViews';
+
 export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(UserContext);
@@ -130,6 +132,7 @@ export default function EventsPage() {
         </Alert>
       )}
       <SearchBar searchEvents={searchEvents} isDisabled={noEvents} />
+      <SwitchViews />
       {events.length === 0 ? (
         <Typography
           sx={{

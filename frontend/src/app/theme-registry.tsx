@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 'use client';
 import { useState } from 'react';
 import createCache from '@emotion/cache';
@@ -12,7 +13,7 @@ let theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: `
       @font-face {
-        font-family: 'Roboto';
+        font-family: 'Space Grotesk';
       }
       `,
     },
@@ -51,6 +52,21 @@ let theme = createTheme({
           textTransform: 'none',
         },
       },
+    },
+  },
+  typography: {
+    fontFamily: `'Space Grotesk', 'Roboto', sans-serif`,
+    h1: {
+      fontFamily: `'Space Grotesk', sans-serif`,
+    },
+    h2: {
+      fontFamily: `'Space Grotesk', sans-serif`,
+    },
+    body1: {
+      fontFamily: `'Space Grotesk', sans-serif`,
+    },
+    body2: {
+      fontFamily: `'Space Grotesk', sans-serif`,
     },
   },
   palette: {
@@ -98,6 +114,7 @@ theme.typography.h1.textAlign = 'center';
 theme.typography.h2.fontSize = '18px';
 theme.typography.body1.color = theme.palette.secondary.main;
 theme.typography.body2.fontSize = '14px';
+theme.typography.fontFamily = 'Space Grotesk';
 
 export default function ThemeRegistry(props: any) {
   const { options, children } = props;
