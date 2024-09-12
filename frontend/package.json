@@ -20,6 +20,7 @@
     "axios": "1.5.1",
     "browser-image-compression": "2.0.2",
     "dayjs": "1.11.10",
+    "dompurify": "^3.1.6",
     "encoding": "0.1.13",
     "firebase": "10.5.0",
     "mui-image": "^1.0.7",
@@ -33,6 +34,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.5",
     "@types/node": "20",
     "@types/react": "18",
     "@types/react-csv": "^1.1.10",
