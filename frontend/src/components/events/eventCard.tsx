@@ -198,6 +198,7 @@ function EventCard({
                   : event.description_event || '',
             }}
           />
+          {/* Old way to display the description: */}
           {/* {event.description_event.length > 100
             ? `${event.description_event.slice(0, 100)}...`
             : event.description_event} */}
