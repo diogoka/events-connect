@@ -5,7 +5,6 @@ import { Event, OtherInfo } from '@/types/types';
 import IconsContainer from '../icons/iconsContainer';
 import DetailIconContainer from './detail-icon-container';
 import DetailTimeContainer from './detail-time-container';
-import DOMPurify from 'dompurify';
 
 export type Props = {
   event: Event;
@@ -45,8 +44,6 @@ const DetailContainer = ({
     : null;
 
   const timeContainerStyle = { margin: forMobile ? '10px auto' : '40px auto' };
-
-  const sanitizedDescriptionEvent = DOMPurify.sanitize(event.description_event);
 
   return (
     <>
@@ -124,7 +121,7 @@ const DetailContainer = ({
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
           }}
-          dangerouslySetInnerHTML={{ __html: sanitizedDescriptionEvent || '' }}
+          dangerouslySetInnerHTML={{ __html: event?.description_event || '' }}
         />
       </Box>
     </>
