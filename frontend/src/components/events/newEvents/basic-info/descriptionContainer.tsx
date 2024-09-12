@@ -9,6 +9,8 @@ import {
   InputAdornment,
 } from '@mui/material';
 
+import Tiptap from './tiptap';
+
 export default function DescriptionContainer({
   isMobile,
 }: {
@@ -17,11 +19,11 @@ export default function DescriptionContainer({
   const { createdEvent, dispatch } = useContext(EventContext);
   const [countedDesc, setCountedDesc] = useState<number>(1200);
 
-  const changeDesc = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCountedDesc(1200 - event.target.value.length);
+  const changeDesc = (description: string) => {
+    setCountedDesc(1200 - description.length);
     dispatch({
       type: 'UPDATE_DESCRIPTION',
-      payload: { ...createdEvent, description_event: event.target.value },
+      payload: { ...createdEvent, description_event: description },
     });
   };
   return (
@@ -44,7 +46,15 @@ export default function DescriptionContainer({
           *
         </Box>
       </InputLabel>
-      <TextField
+
+      <Tiptap
+        counter={countedDesc}
+        value={createdEvent.description_event}
+        onChange={changeDesc}
+        rows={isMobile ? 5 : 8}
+      />
+
+      {/* <TextField
         id='description'
         variant='outlined'
         placeholder='Please enter description'
@@ -71,7 +81,7 @@ export default function DescriptionContainer({
             </InputAdornment>
           ),
         }}
-      />
+      /> */}
     </Stack>
   );
 }
