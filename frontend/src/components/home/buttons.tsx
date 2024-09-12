@@ -19,9 +19,6 @@ const buttonStyle = {
 const ButtonsHomePage = () => {
   const { user, loginStatus } = useContext(UserContext);
   const router = useRouter();
-
-  console.log('loginStatus', loginStatus);
-
   return (
     <Box
       sx={{
