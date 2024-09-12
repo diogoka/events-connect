@@ -16,13 +16,10 @@ interface EventProps {
 }
 
 type Props = {
-  counter: number;
-  value: string;
   onChange: (value: string) => void;
-  rows: number;
 };
 
-const ReactQuillEditor = ({ counter, value, onChange, rows }: Props) => {
+const ReactQuillEditor = ({ onChange }: Props) => {
   const [createdEvent, setCreatedEvent] = useState<EventProps>({
     description_event: '',
   });

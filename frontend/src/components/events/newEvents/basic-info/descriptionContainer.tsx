@@ -47,12 +47,7 @@ export default function DescriptionContainer({
         </Box>
       </InputLabel>
 
-      <ReactQuillEditor
-        counter={countedDesc}
-        value={createdEvent.description_event}
-        onChange={changeDesc}
-        rows={isMobile ? 5 : 8}
-      />
+      <ReactQuillEditor onChange={changeDesc} />
 
       {/* Old TextField: */}
       {/* <TextField
