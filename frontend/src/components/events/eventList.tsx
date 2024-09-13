@@ -55,7 +55,6 @@ function EventList({
         spacing={2}
         sx={{
           display: 'flex',
-          justifyContent: 'center',
           alignItems: 'center',
           marginTop: '0',
           width: '100%',

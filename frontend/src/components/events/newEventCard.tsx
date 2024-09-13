@@ -44,7 +44,7 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
   };
 
   return (
-    <Card sx={{ width: laptopQuery ? '30%' : '100%', boxShadow: 'none' }}>
+    <Card sx={{ width: laptopQuery ? '32.1%' : '100%', boxShadow: 'none' }}>
       <Box sx={{ position: 'relative' }}>
         {!imageLoaded && (
           <Skeleton
