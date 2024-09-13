@@ -14,18 +14,18 @@ export default function Logo() {
           onClick={() => router.push('/events')}
           sx={{
             '&:hover': { background: 'none' },
-            width: '111.59px',
+            width: '40%',
           }}
           disableRipple
           disableTouchRipple
         >
           <Image
-            src='/justLogoBlue.svg'
+            src='/cornerstone-connect-logo-blue-bg-white.svg'
             alt='cornerstone-connect logo'
-            width={445}
-            height={445}
+            width={600}
+            height={600}
             priority={true}
-            style={{ width: '38%', height: 'auto' }}
+            style={{ width: '100%', height: 'auto' }}
           />
         </Button>
       }

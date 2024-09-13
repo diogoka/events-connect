@@ -25,26 +25,15 @@ export default function AvatarIcon() {
   return (
     <Switcher
       sp={
-        <Box
-          sx={{ width: '111.59px', display: 'flex', justifyContent: 'center' }}
-        >
-          <IconButton onClick={() => toggleMenu(true)} sx={{ p: 0 }}>
-            <Avatar
-              alt={user?.firstName}
-              src={`${
-                user?.provider === 'password'
-                  ? user.avatarURL
-                  : firebaseAccount?.photoURL
-              }`}
-            ></Avatar>
-          </IconButton>
-          <Drawer
-            anchor='right'
-            open={isMenuOpen}
-            onClose={() => toggleMenu(false)}
-          >
-            <Hamburger toggleMenu={toggleMenu} />
-          </Drawer>
+        <Box sx={{ minWidth: '40px', maxWidth: '40px' }}>
+          <Avatar
+            alt={user?.firstName}
+            src={`${
+              user?.provider === 'password'
+                ? user.avatarURL
+                : firebaseAccount?.photoURL
+            }`}
+          ></Avatar>
         </Box>
       }
       pc={
