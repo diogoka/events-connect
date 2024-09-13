@@ -25,9 +25,10 @@ type Props = {
     role: string | undefined;
   };
   attending?: boolean;
+  laptopQuery: boolean;
 };
 
-const NewEventCard = ({ event, user, attending }: Props) => {
+const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
   const startTime = TimeFn(event.date_event_start);
   const endTime = TimeFn(event.date_event_end);
   const monthAndDay = monthDayFn(event.date_event_start);
@@ -38,8 +39,12 @@ const NewEventCard = ({ event, user, attending }: Props) => {
 
   const handleJoinEvent = () => router.push(`/events/${event.id_event}`);
 
+  const handleShareEvent = () => {
+    console.log('COPIED');
+  };
+
   return (
-    <Card sx={{ width: '100%', boxShadow: 'none' }}>
+    <Card sx={{ width: laptopQuery ? '30%' : '100%', boxShadow: 'none' }}>
       <Box sx={{ position: 'relative' }}>
         {!imageLoaded && (
           <Skeleton
@@ -112,6 +117,15 @@ const NewEventCard = ({ event, user, attending }: Props) => {
               justifyContent: 'center',
               alignItems: 'center',
               marginRight: '1.5rem',
+              background: 'transparent',
+              backgroundColor: 'transparent',
+              padding: 0,
+              border: 0,
+              cursor: 'pointer',
+            }}
+            component={'button'}
+            onClick={() => {
+              handleShareEvent();
             }}
           >
             <FaRegShareFromSquare />

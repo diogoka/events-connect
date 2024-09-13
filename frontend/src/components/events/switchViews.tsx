@@ -35,9 +35,8 @@ const SwitchViews = ({ isCalendarView, setIsCalendarView }: Props) => {
         sx={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           width: '22%',
-          paddingRight: '1rem',
         }}
       >
         <Box
