@@ -1,5 +1,5 @@
 'use client';
-import { Stack } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 
 import { Events as Event } from '@/types/pages.types';
 import { Tag } from '@/types/types';
@@ -8,6 +8,8 @@ import Pagination from '@mui/material/Pagination';
 import { useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import NewEventCard from './newEventCard';
+
+import SwitchViews from './switchViews';
 
 type Props = {
   events: Event[];
@@ -27,6 +29,8 @@ function EventList({ events, tags, user, setEvents, attendance }: Props) {
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = events.slice(indexOfFirstEvent, indexOfLastEvent);
+
+  const [isCalendarView, setIsCalendarView] = useState<boolean>(false);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -65,35 +69,55 @@ function EventList({ events, tags, user, setEvents, attendance }: Props) {
         useFlexGap
         flexWrap='wrap'
       >
-        {currentEvents.map((event, index) => {
-          const eventTags = tags.filter(
-            (tag) => tag.id_event === event.id_event
-          );
-          const attending = checkAttendance(event.id_event);
-          let oldEvent = new Date(event.date_event_end) < today;
-          return (
-            // Old Event Item:
-            // <EventItem
-            //   event={event}
-            //   key={index}
-            //   tags={eventTags}
-            //   user={user}
-            //   deleteEvent={deleteEvent}
-            //   attending={attending}
-            //   oldEvent={oldEvent}
-            //   page={currentPage}
-            // />
-            <NewEventCard
-              key={index}
-              event={event}
-              user={user}
-              attending={attending}
-              oldEvent={oldEvent}
-            />
-          );
-        })}
+        <SwitchViews
+          isCalendarView={isCalendarView}
+          setIsCalendarView={setIsCalendarView}
+        />
+
+        {isCalendarView ? (
+          <div>calendar</div>
+        ) : (
+          currentEvents.map((event, index) => {
+            const eventTags = tags.filter(
+              (tag) => tag.id_event === event.id_event
+            );
+            const attending = checkAttendance(event.id_event);
+            let oldEvent = new Date(event.date_event_end) < today;
+            return (
+              // Old Event Item:
+              // <EventItem
+              //   event={event}
+              //   key={index}
+              //   tags={eventTags}
+              //   user={user}
+              //   deleteEvent={deleteEvent}
+              //   attending={attending}
+              //   oldEvent={oldEvent}
+              //   page={currentPage}
+              // />
+
+              <NewEventCard
+                key={index}
+                event={event}
+                user={user}
+                attending={attending}
+                oldEvent={oldEvent}
+              />
+            );
+          })
+        )}
       </Stack>
-      {events.length > 6 && (
+      <Button
+        fullWidth
+        sx={{
+          backgroundColor: '#FFD7F3',
+          marginBottom: '2rem',
+          marginTop: '2rem',
+        }}
+      >
+        Load more events
+      </Button>
+      {/* {events.length > 6 && (
         <Pagination
           count={Math.ceil(events.length / eventsPerPage)}
           page={currentPage}
@@ -102,7 +126,7 @@ function EventList({ events, tags, user, setEvents, attendance }: Props) {
           shape='rounded'
           sx={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}
         />
-      )}
+      )} */}
     </>
   );
 }

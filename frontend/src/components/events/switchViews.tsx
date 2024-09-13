@@ -3,9 +3,13 @@ import React from 'react';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GridViewIcon from '@mui/icons-material/GridView';
 
-type Props = {};
+type Props = {
+  isCalendarView: boolean;
+  setIsCalendarView: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-const SwitchViews = (props: Props) => {
+const SwitchViews = ({ isCalendarView, setIsCalendarView }: Props) => {
+  console.log('isCalendarView', isCalendarView);
   return (
     <Box
       sx={{
@@ -36,8 +40,40 @@ const SwitchViews = (props: Props) => {
           paddingRight: '1rem',
         }}
       >
-        <GridViewIcon />
-        <CalendarMonthIcon />
+        <Box
+          sx={{
+            background: 'none',
+            backgroundColor: isCalendarView ? '' : '#FFD7F3',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0.5rem',
+            borderRadius: '6px',
+            border: '0',
+            cursor: 'pointer',
+          }}
+          component={'button'}
+          onClick={() => setIsCalendarView(false)}
+        >
+          <GridViewIcon />
+        </Box>
+        <Box
+          sx={{
+            background: 'none',
+            backgroundColor: isCalendarView ? '#FFD7F3' : 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0.5rem',
+            borderRadius: '6px',
+            border: '0',
+            cursor: 'pointer',
+          }}
+          component={'button'}
+          onClick={() => setIsCalendarView(true)}
+        >
+          <CalendarMonthIcon />
+        </Box>
       </Box>
     </Box>
   );

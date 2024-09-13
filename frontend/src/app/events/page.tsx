@@ -9,8 +9,6 @@ import { Tag } from '@/types/types';
 import { Events as Event, CurrentUser } from '@/types/pages.types';
 import { AlertState } from '@/types/alert.types';
 
-import SwitchViews from '@/components/events/switchViews';
-
 export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(UserContext);
@@ -26,7 +24,6 @@ export default function EventsPage() {
     message: '',
     severity: 'info',
   });
-  const [noEvents, setNoEvents] = useState<boolean>(false);
 
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
@@ -41,7 +38,6 @@ export default function EventsPage() {
     } = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events`);
     setEvents(events);
     setTags(tags);
-    events.length == 0 ? setNoEvents(true) : setNoEvents(false);
 
     if (currentUser.id) {
       const attendingEvents: [number, boolean][] = [];
@@ -131,8 +127,7 @@ export default function EventsPage() {
           {alert.message}
         </Alert>
       )}
-      <SearchBar searchEvents={searchEvents} isDisabled={noEvents} />
-      <SwitchViews />
+      <SearchBar searchEvents={searchEvents} isDisabled={events.length === 0} />
       {events.length === 0 ? (
         <Typography
           sx={{
