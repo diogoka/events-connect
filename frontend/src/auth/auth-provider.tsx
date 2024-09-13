@@ -279,7 +279,7 @@ export default function AuthProvider({
               paddingInline='40px'
               paddingBlock='50px'
               marginInline='auto'
-              marginTop='30px'
+              // marginTop='30px'
             >
               {children}
             </Box>
