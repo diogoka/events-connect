@@ -101,8 +101,8 @@ export const TimeFn = (date: string) =>
 
 export const monthDayFn = (date: string) =>
   new Date(date).toLocaleString('en-us', {
-    month: 'short',
     day: 'numeric',
+    month: 'short',
   });
 
 export const updateFirstName = (

@@ -7,6 +7,7 @@ import EventItem from '@/components/events/eventItem';
 import Pagination from '@mui/material/Pagination';
 import { useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import NewEventCard from './newEventCard';
 
 type Props = {
   events: Event[];
@@ -71,15 +72,22 @@ function EventList({ events, tags, user, setEvents, attendance }: Props) {
           const attending = checkAttendance(event.id_event);
           let oldEvent = new Date(event.date_event_end) < today;
           return (
-            <EventItem
-              event={event}
+            // <EventItem
+            //   event={event}
+            //   key={index}
+            //   tags={eventTags}
+            //   user={user}
+            //   deleteEvent={deleteEvent}
+            //   attending={attending}
+            //   oldEvent={oldEvent}
+            //   page={currentPage}
+            // />
+            <NewEventCard
               key={index}
-              tags={eventTags}
+              event={event}
               user={user}
-              deleteEvent={deleteEvent}
               attending={attending}
               oldEvent={oldEvent}
-              page={currentPage}
             />
           );
         })}
