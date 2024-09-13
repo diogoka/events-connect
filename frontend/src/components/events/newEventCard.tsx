@@ -1,15 +1,19 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
+
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
+import Skeleton from '@mui/material/Skeleton';
+import Fade from '@mui/material/Fade';
+import { Box, Button, Typography } from '@mui/material';
 
 import { Event } from '@/types/pages.types';
-import { Box, Button, Typography } from '@mui/material';
 import { monthDayFn, TimeFn } from '@/common/functions';
-import { ScheduleRounded } from '@mui/icons-material';
 
+import { ScheduleRounded } from '@mui/icons-material';
 import { FaRegShareFromSquare } from 'react-icons/fa6';
 
 type Props = {
@@ -24,25 +28,42 @@ type Props = {
   oldEvent?: boolean;
 };
 
-const NewEventCard = ({ event, user, attending, oldEvent = false }: Props) => {
-  console.log('Event', event);
-
+const NewEventCard = ({ event, user, attending, oldEvent }: Props) => {
   const startTime = TimeFn(event.date_event_start);
   const endTime = TimeFn(event.date_event_end);
   const monthAndDay = monthDayFn(event.date_event_start);
 
+  const router = useRouter();
+
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleJoinEvent = () => router.push(`/events/${event.id_event}`);
+
   return (
     <Card sx={{ width: '100%', boxShadow: 'none' }}>
-      <CardMedia
-        sx={{
-          height: '208px',
-          width: '100%',
-          padding: '1rem',
-          borderRadius: '4px',
-        }}
-        image={event.image_url_event}
-        title='event_image'
-      >
+      <Box sx={{ position: 'relative' }}>
+        {!imageLoaded && (
+          <Skeleton
+            variant='rectangular'
+            height='208px'
+            sx={{ borderRadius: '4px' }}
+            animation='wave'
+          />
+        )}
+        <Fade in={imageLoaded} timeout={1500} easing={'ease-in'}>
+          <CardMedia
+            component={'img'}
+            sx={{
+              height: '208px',
+              width: '100%',
+              borderRadius: '4px',
+              display: imageLoaded ? 'block' : 'none',
+            }}
+            image={event.image_url_event}
+            title='event_image'
+            onLoad={() => setImageLoaded(true)}
+          />
+        </Fade>
         <Box
           sx={{
             backgroundColor: ' #FBF8FF',
@@ -50,11 +71,13 @@ const NewEventCard = ({ event, user, attending, oldEvent = false }: Props) => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '8px 16px',
             borderRadius: '4px',
             width: '57px',
             height: '58px',
-            margin: '1px, 0, 0, 1px',
+            marginLeft: '8px',
+            marginTop: '8px',
+            position: 'absolute',
+            top: '0',
           }}
         >
           <Typography>{monthAndDay.split(' ')[0]}</Typography>
@@ -62,7 +85,7 @@ const NewEventCard = ({ event, user, attending, oldEvent = false }: Props) => {
             {monthAndDay.split(' ')[1]}
           </Typography>
         </Box>
-      </CardMedia>
+      </Box>
       <CardContent
         sx={{
           padding: '1rem 0 0 0',
@@ -100,6 +123,9 @@ const NewEventCard = ({ event, user, attending, oldEvent = false }: Props) => {
               borderRadius: '6px',
               padding: '8px',
               fontSize: '1rem',
+            }}
+            onClick={() => {
+              handleJoinEvent();
             }}
           >
             Join

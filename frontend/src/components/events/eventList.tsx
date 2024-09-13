@@ -72,6 +72,7 @@ function EventList({ events, tags, user, setEvents, attendance }: Props) {
           const attending = checkAttendance(event.id_event);
           let oldEvent = new Date(event.date_event_end) < today;
           return (
+            // Old Event Item:
             // <EventItem
             //   event={event}
             //   key={index}
