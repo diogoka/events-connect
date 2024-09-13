@@ -19,6 +19,10 @@ export default function EventsPage() {
     []
   );
 
+  const [emptyList, setEmptyList] = useState(false);
+
+  const [numberOfEvents, setNumberOfEvents] = useState(0);
+
   const [alert, setAlert] = useState<AlertState>({
     status: false,
     message: '',
@@ -34,10 +38,11 @@ export default function EventsPage() {
 
   const getEvents = async () => {
     const {
-      data: { events, tags },
-    } = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events`);
+      data: { events },
+    } = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/?start=${numberOfEvents}&qnt=6`
+    );
     setEvents(events);
-    setTags(tags);
 
     if (currentUser.id) {
       const attendingEvents: [number, boolean][] = [];
@@ -56,6 +61,25 @@ export default function EventsPage() {
     }
 
     setIsLoading(false);
+  };
+
+  const handleLoadMoreEvents = async () => {
+    const {
+      data: { events },
+    } = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/?start=${
+        numberOfEvents + 6
+      }&qnt=6`
+    );
+
+    if (events.length !== 6) {
+      setEvents(events);
+      setEmptyList(true);
+    } else {
+      setEvents((prev) => [...prev, events]);
+    }
+
+    setNumberOfEvents((prev) => prev + 6);
   };
 
   useEffect(() => {
@@ -153,6 +177,8 @@ export default function EventsPage() {
           tags={tags}
           user={currentUser}
           attendance={eventsOfUser}
+          handleLoadMoreEvents={handleLoadMoreEvents}
+          emptyList={emptyList}
         />
       )}
     </Box>

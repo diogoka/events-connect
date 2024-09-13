@@ -5,7 +5,7 @@ import { Events as Event } from '@/types/pages.types';
 import { Tag } from '@/types/types';
 import EventItem from '@/components/events/eventItem';
 import Pagination from '@mui/material/Pagination';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import NewEventCard from './newEventCard';
 
@@ -20,24 +20,21 @@ type Props = {
     role: string | undefined;
   };
   attendance: [number, boolean][];
+  handleLoadMoreEvents: () => void;
+  emptyList: boolean;
 };
 
-function EventList({ events, tags, user, setEvents, attendance }: Props) {
-  const [currentPage, setCurrentPage] = useState(1);
+function EventList({
+  events,
+  tags,
+  user,
+  setEvents,
+  attendance,
+  handleLoadMoreEvents,
+  emptyList,
+}: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
-  const eventsPerPage = 6;
-  const indexOfLastEvent = currentPage * eventsPerPage;
-  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = events.slice(indexOfFirstEvent, indexOfLastEvent);
-
   const [isCalendarView, setIsCalendarView] = useState<boolean>(false);
-
-  const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
-    page: number
-  ) => {
-    setCurrentPage(page);
-  };
 
   const deleteEvent = async (id: number) => {
     const newEvents = await events.filter((event) => event.id_event !== id);
@@ -53,6 +50,10 @@ function EventList({ events, tags, user, setEvents, attendance }: Props) {
   };
 
   const today = new Date();
+
+  useEffect(() => {
+    console.log(events);
+  }, []);
 
   return (
     <>
@@ -77,12 +78,9 @@ function EventList({ events, tags, user, setEvents, attendance }: Props) {
         {isCalendarView ? (
           <div>calendar</div>
         ) : (
-          currentEvents.map((event, index) => {
-            const eventTags = tags.filter(
-              (tag) => tag.id_event === event.id_event
-            );
+          events.map((event, index) => {
             const attending = checkAttendance(event.id_event);
-            let oldEvent = new Date(event.date_event_end) < today;
+
             return (
               // Old Event Item:
               // <EventItem
@@ -101,7 +99,6 @@ function EventList({ events, tags, user, setEvents, attendance }: Props) {
                 event={event}
                 user={user}
                 attending={attending}
-                oldEvent={oldEvent}
               />
             );
           })
@@ -114,19 +111,11 @@ function EventList({ events, tags, user, setEvents, attendance }: Props) {
           marginBottom: '2rem',
           marginTop: '2rem',
         }}
+        disabled={emptyList}
+        onClick={() => handleLoadMoreEvents()}
       >
-        Load more events
+        {emptyList ? 'No more events available' : 'Load more events'}
       </Button>
-      {/* {events.length > 6 && (
-        <Pagination
-          count={Math.ceil(events.length / eventsPerPage)}
-          page={currentPage}
-          onChange={handlePageChange}
-          variant='outlined'
-          shape='rounded'
-          sx={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}
-        />
-      )} */}
     </>
   );
 }

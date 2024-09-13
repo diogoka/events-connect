@@ -69,3 +69,8 @@ export type CheckToken = {
   message?: string;
   payload?: JwtPayload | string;
 };
+
+export type QueryEventsParamType = {
+  start: string;
+  qnt: string;
+};

@@ -2,84 +2,40 @@ import pool from '../db/db';
 import express from 'express';
 import { sendEmail, EmailOption } from '../helpers/mail';
 import moment from 'moment-timezone';
-import { Attendee, EventInput, Date } from '../types/types';
+import {
+  Attendee,
+  EventInput,
+  Date,
+  QueryEventsParamType,
+} from '../types/types';
+
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const getEvents = async (
   req: express.Request,
   res: express.Response
 ) => {
   try {
-    const numOfDays = Number(req.query.numOfDays ? req.query.numOfDays : 60);
-    const today = new Date().toLocaleString('en-US', {
-      timeZone: 'America/Vancouver',
+    const queryParams: QueryEventsParamType = req.query as QueryEventsParamType;
+    const today = new Date();
+
+    const events = await prisma.events.findMany({
+      where: {
+        date_event_start: {
+          gte: today,
+        },
+      },
     });
-    const dayFromNow = new Date(
-      new Date().getTime() + numOfDays * 24 * 60 * 60 * 1000
-    )
-      .toISOString()
-      .slice(0, 19)
-      .replace('T', ' ');
 
-    const events = req.query.past
-      ? req.query.attendees
-        ? await pool.query(
-            `SELECT
-              events.id_event,
-              events.name_event,
-              events.date_event_start,
-              events.date_event_end,
-              events.location_event,
-              events.description_event,
-              events.price_event,
-              events.capacity_event,
-              events.category_event,
-              events.image_url_event,
-              json_agg(attendees) AS attendees
-            FROM
-              events
-            LEFT JOIN
-              attendees ON events.id_event = attendees.id_event
-            WHERE
-              events.date_event_start < $1
-            GROUP BY
-              events.id_event,
-              events.name_event,
-              events.date_event_start,
-              events.date_event_end,
-              events.location_event,
-              events.description_event,
-              events.price_event,
-              events.capacity_event,
-              events.category_event
-            ORDER BY
-              events.date_event_start ASC`,
-            [today]
-          )
-        : await pool.query(
-            `SELECT * FROM events where events.date_event_start <= $1 ORDER BY events.date_event_start ASC`,
-            [today]
-          )
-      : await pool.query(
-          `SELECT * FROM events where events.date_event_start >= $1 and events.date_event_start < $2 ORDER BY events.date_event_start ASC`,
-          [today, dayFromNow]
-        );
+    const start = parseInt(queryParams.start);
+    const quantity = parseInt(queryParams.qnt);
 
-    const ids =
-      events.rows.length !== 0
-        ? events.rows.map((val) => {
-            return val.id_event;
-          })
-        : null;
-
-    const tags = await pool.query(`
-      SELECT events.id_event, tags.name_tag FROM events
-      inner join events_tags on events.id_event = events_tags.id_event
-      inner join tags on events_tags.id_tag = tags.id_tag where events_tags.id_event in (${ids})
-      `);
+    const slicedEvents = events.slice(start, quantity);
 
     res.status(200).json({
-      events: events.rows,
-      tags: tags.rows,
+      events: slicedEvents.length === 0 ? events : slicedEvents,
     });
   } catch (err: any) {
     res.status(500).send(err.message);

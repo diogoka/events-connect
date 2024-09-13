@@ -24,11 +24,10 @@ type Props = {
     id: string | undefined;
     role: string | undefined;
   };
-  attending: boolean;
-  oldEvent?: boolean;
+  attending?: boolean;
 };
 
-const NewEventCard = ({ event, user, attending, oldEvent }: Props) => {
+const NewEventCard = ({ event, user, attending }: Props) => {
   const startTime = TimeFn(event.date_event_start);
   const endTime = TimeFn(event.date_event_end);
   const monthAndDay = monthDayFn(event.date_event_start);
@@ -95,7 +94,7 @@ const NewEventCard = ({ event, user, attending, oldEvent }: Props) => {
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
           <Typography sx={{ fontWeight: '700' }}>
-            {event.name_event.length > 19
+            {event && event.name_event.length > 19
               ? `${event.name_event.slice(0, 20)}...`
               : event.name_event}
           </Typography>
