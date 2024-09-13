@@ -10,9 +10,11 @@ import {
   InputAdornment,
 } from '@mui/material';
 
-import ReactQuillEditor from './reactQuillEditor';
-
 import dynamic from 'next/dynamic';
+
+const ReactQuillEditor = dynamic(() => import('./reactQuillEditor'), {
+  ssr: false,
+});
 
 export default function DescriptionContainer({
   isMobile,
@@ -21,10 +23,6 @@ export default function DescriptionContainer({
 }) {
   const { createdEvent, dispatch } = useContext(EventContext);
   const [countedDesc, setCountedDesc] = useState<number>(1200);
-
-  const ReactQuillEditor = dynamic(() => import('./reactQuillEditor'), {
-    ssr: false,
-  });
 
   const changeDesc = (description: string) => {
     setCountedDesc(1200 - description.length);
@@ -54,7 +52,11 @@ export default function DescriptionContainer({
         </Box>
       </InputLabel>
 
-      <ReactQuillEditor onChange={changeDesc} />
+      <ReactQuillEditor
+        onChange={(value) => {
+          changeDesc(value);
+        }}
+      />
 
       {/* Old TextField: */}
       {/* <TextField
