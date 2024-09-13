@@ -11,7 +11,7 @@ export type EmailOption = {
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'eventllege.info@gmail.com',
+    user: 'cornerstone.connect.info@gmail.com',
     pass: process.env.MAIL_PASSWORD,
   },
 });
@@ -26,7 +26,7 @@ const defaultCallBack = (error: any, info: any) => {
 
 export const sendEmail = (option: EmailOption, cb = defaultCallBack) => {
   const mailOptions = {
-    from: 'noreply@ciccc-connect.ca',
+    from: 'cornerstone.connect.info@gmail.com',
     to: option.to,
     subject: option.subject,
     text: option.text,
@@ -42,7 +42,7 @@ export const sendConfirmationEmail = async (email: string, token: string) => {
   const emailHTML = await generateEmail(link);
 
   const mailOptions = {
-    from: 'noreply@ciccc-connect.ca',
+    from: 'cornerstone.connect.info@gmail.com',
     to: email,
     subject: 'Email Verification - Cornerstone Connect',
     html: emailHTML,

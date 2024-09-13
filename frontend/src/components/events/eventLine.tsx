@@ -168,9 +168,24 @@ function EventLine({
       </Box>
 
       <Typography sx={descriptionStyle}>
-        {event.description_event.length > 50
+        <pre
+          style={{
+            fontFamily: 'inherit',
+            margin: 0,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+          dangerouslySetInnerHTML={{
+            __html:
+              event?.description_event.length > 50
+                ? `${event.description_event.slice(0, 50)}...`
+                : event.description_event || '',
+          }}
+        />
+
+        {/* {event.description_event.length > 50
           ? `${event.description_event.slice(0, 50)}...`
-          : event.description_event}
+          : event.description_event} */}
       </Typography>
       <ImageHelper
         src={`${event.image_url_event}`}

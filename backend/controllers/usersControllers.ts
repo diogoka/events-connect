@@ -15,6 +15,10 @@ import { validateUserInput } from '../helpers/validateUser';
 import { sendEmail, sendConfirmationEmail } from '../helpers/mail';
 import { generateToken, checkToken } from '../helpers/tokenHandler';
 
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
 export const getUsers = async (req: express.Request, res: express.Response) => {
   try {
     const users = await getAllUsers();
@@ -80,6 +84,16 @@ export const createUser = async (
   }
 
   try {
+    const userFound = await prisma.users.findUnique({
+      where: { email_user: userInput.email },
+    });
+
+    if (userFound) {
+      res
+        .status(400)
+        .json({ message: 'User already registered. Try to login.' });
+    }
+
     await createUserModel(userInput);
     await addingCourse(userInput);
     const token = generateToken(userInput.id, userInput.email);

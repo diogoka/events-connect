@@ -113,6 +113,7 @@ const DetailContainer = ({
         margin={forMobile ? '1rem 1rem 1rem 0.5rem' : '30px auto'}
       >
         <Box fontWeight='bold'>About this event:</Box>
+
         <pre
           style={{
             fontFamily: 'inherit',
@@ -120,9 +121,8 @@ const DetailContainer = ({
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
           }}
-        >
-          {event?.description_event}
-        </pre>
+          dangerouslySetInnerHTML={{ __html: event?.description_event || '' }}
+        />
       </Box>
     </>
   );

@@ -40,6 +40,8 @@ import ModalAgreement from '@/components/login/modal-agreement';
 import { sendUserToServer } from '@/services/sendUserToServer';
 import AlertMessage from '@/components/registering/alertMessage';
 
+import ModalVerifyEmail from '@/components/registering/modalVerifyEmail';
+
 export default function SignUpPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const router = useRouter();
@@ -77,6 +79,8 @@ export default function SignUpPage() {
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const openModal = () => setModalOpen(true);
   const closeModal = () => setModalOpen(false);
+
+  const [isUserCreated, setIsUserCreated] = useState<boolean>(false);
 
   useEffect(() => {
     if (loginStatus === 'Logged In') {
@@ -151,6 +155,20 @@ export default function SignUpPage() {
     }
   };
 
+  const handleConfirmModal = () => {
+    setTimeout(() => {
+      setRegisterMessage({
+        showMessage: false,
+        message: '',
+        severity: 'info',
+      });
+      setLoad(false);
+      signOut(getAuth());
+      setLoginStatus(LoginStatus.LoggedOut);
+      router.replace('/login');
+    }, 4000);
+  };
+
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -209,28 +227,13 @@ export default function SignUpPage() {
         };
 
         try {
-          const response = await sendUserToServer(newUser);
-          setRegisterMessage({
-            showMessage: true,
-            message: `${response} Please verify your email. You are being redirected. `,
-            severity: 'success',
-          });
-
-          setTimeout(() => {
-            setRegisterMessage({
-              showMessage: false,
-              message: '',
-              severity: 'info',
-            });
-            setLoad(false);
-            signOut(getAuth());
-            setLoginStatus(LoginStatus.LoggedOut);
-            router.replace('/login');
-          }, 6000);
+          await sendUserToServer(newUser);
+          setIsUserCreated(true);
         } catch (error: any) {
+          console.log(error);
           setRegisterMessage({
             showMessage: true,
-            message: 'Internal Error. Please try again later.',
+            message: `${error?.response?.data?.message}.`,
             severity: 'error',
           });
 
@@ -241,7 +244,7 @@ export default function SignUpPage() {
               severity: 'info',
             });
             setLoad(false);
-          }, 6000);
+          }, 5500);
         }
       } else {
         createUserWithEmailAndPassword(
@@ -262,25 +265,8 @@ export default function SignUpPage() {
               avatarURL: result.user.photoURL!,
             };
 
-            const response = await sendUserToServer(newUser);
-
-            setRegisterMessage({
-              showMessage: true,
-              message: `${response} Please verify your email. You are being redirected `,
-              severity: 'success',
-            });
-
-            setTimeout(() => {
-              setRegisterMessage({
-                showMessage: false,
-                message: '',
-                severity: 'info',
-              });
-              setLoad(false);
-              signOut(getAuth());
-              setLoginStatus(LoginStatus.LoggedOut);
-              router.replace('/login');
-            }, 6000);
+            await sendUserToServer(newUser);
+            setIsUserCreated(true);
           })
           .catch((error: any) => {
             handleMessage(
@@ -510,6 +496,10 @@ export default function SignUpPage() {
         </Stack>
       </Box>
       <ModalAgreement openModal={isModalOpen} handleClose={closeModal} />
+      <ModalVerifyEmail
+        isOpen={isUserCreated}
+        handleConfirm={handleConfirmModal}
+      />
     </>
   );
 }

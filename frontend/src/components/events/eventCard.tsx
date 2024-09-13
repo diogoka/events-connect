@@ -184,9 +184,24 @@ function EventCard({
             wordWrap: 'break-word',
           }}
         >
-          {event.description_event.length > 100
+          <pre
+            style={{
+              fontFamily: 'inherit',
+              margin: 0,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+            dangerouslySetInnerHTML={{
+              __html:
+                event?.description_event.length > 100
+                  ? `${event.description_event.slice(0, 100)}...`
+                  : event.description_event || '',
+            }}
+          />
+          {/* Old way to display the description: */}
+          {/* {event.description_event.length > 100
             ? `${event.description_event.slice(0, 100)}...`
-            : event.description_event}
+            : event.description_event} */}
         </Typography>
 
         {oldEvent ? (
