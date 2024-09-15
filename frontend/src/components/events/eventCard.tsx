@@ -92,7 +92,7 @@ function EventCard({
       sx={{
         position: 'relative',
         width: '23.75rem',
-        height: '23.5rem',
+        height: '24.5rem',
         borderRadius: '5px',
         cursor: 'pointer',
         '&:hover': {
@@ -175,34 +175,24 @@ function EventCard({
           </Box>
         </Box>
 
-        <Typography
-          sx={{
-            gridArea: 'description',
-            textAlign: 'justify',
-            fontSize: '0.75rem',
-            height: '2.3rem',
-            wordWrap: 'break-word',
-          }}
-        >
+        <Box sx={{ minHeight: '36px', maxHeight: '36px', padding: 0 }}>
           <pre
             style={{
               fontFamily: 'inherit',
               margin: 0,
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
+              fontSize: '0.75rem',
+              textAlign: 'justify',
             }}
             dangerouslySetInnerHTML={{
               __html:
-                event?.description_event.length > 100
-                  ? `${event.description_event.slice(0, 100)}...`
+                event?.description_event.length > 50
+                  ? `${event.description_event.slice(0, 50)}...`
                   : event.description_event || '',
             }}
           />
-          {/* Old way to display the description: */}
-          {/* {event.description_event.length > 100
-            ? `${event.description_event.slice(0, 100)}...`
-            : event.description_event} */}
-        </Typography>
+        </Box>
 
         {oldEvent ? (
           <CardActions
@@ -215,7 +205,6 @@ function EventCard({
           >
             <Box
               sx={{
-                gridArea: 'icons',
                 display: 'flex',
                 justifyContent: laptopQuery ? 'flex-start' : 'center',
                 alignItems: 'center',
@@ -267,7 +256,6 @@ function EventCard({
                 display: 'flex',
                 justifyContent: 'start',
                 width: '100%',
-                marginBottom: '0.5rem',
               }}
             ></Box>
           </CardActions>
