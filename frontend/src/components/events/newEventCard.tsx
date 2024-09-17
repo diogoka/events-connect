@@ -15,6 +15,7 @@ import { monthDayFn, TimeFn } from '@/common/functions';
 
 import { ScheduleRounded } from '@mui/icons-material';
 import { FaRegShareFromSquare } from 'react-icons/fa6';
+import EventImageWithDate from '../common/eventImageWithDate';
 
 type Props = {
   event: Event & {
@@ -43,53 +44,18 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
     console.log('COPIED');
   };
 
+  const handleSetLoadedImage = () => {
+    setImageLoaded(true);
+  };
+
   return (
     <Card sx={{ width: laptopQuery ? '32.1%' : '100%', boxShadow: 'none' }}>
-      <Box sx={{ position: 'relative' }}>
-        {!imageLoaded && (
-          <Skeleton
-            variant='rectangular'
-            height='208px'
-            sx={{ borderRadius: '4px' }}
-            animation='wave'
-          />
-        )}
-        <Fade in={imageLoaded} timeout={1500} easing={'ease-in'}>
-          <CardMedia
-            component={'img'}
-            sx={{
-              height: '208px',
-              width: '100%',
-              borderRadius: '4px',
-              display: imageLoaded ? 'block' : 'none',
-            }}
-            image={event.image_url_event}
-            title='event_image'
-            onLoad={() => setImageLoaded(true)}
-          />
-        </Fade>
-        <Box
-          sx={{
-            backgroundColor: ' #FBF8FF',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '4px',
-            width: '57px',
-            height: '58px',
-            marginLeft: '8px',
-            marginTop: '8px',
-            position: 'absolute',
-            top: '0',
-          }}
-        >
-          <Typography>{monthAndDay.split(' ')[0]}</Typography>
-          <Typography sx={{ fontWeight: '700' }}>
-            {monthAndDay.split(' ')[1]}
-          </Typography>
-        </Box>
-      </Box>
+      <EventImageWithDate
+        imageLoaded={imageLoaded}
+        imageUrl={event?.image_url_event!}
+        monthAndDay={monthAndDay}
+        handleLoadedImage={handleSetLoadedImage}
+      />
       <CardContent
         sx={{
           padding: '1rem 0 0 0',

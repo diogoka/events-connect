@@ -168,6 +168,13 @@ export default function EventPage() {
             alertMessage.severity
           )}
 
+        {/* Photo */}
+        {/* title */}
+        {/* Time and price */}
+        {/* Description */}
+        {/* Location */}
+        {/* Tags */}
+
         <DetailContainer
           event={event!}
           otherInfo={otherInfo!}
