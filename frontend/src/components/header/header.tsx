@@ -12,7 +12,6 @@ export default function Header() {
         bgcolor: 'transparent',
         boxShadow: 'none',
         borderBottom: 'none',
-        marginTop: '10px',
       }}
     >
       <Switcher sp={<HeaderMB />} pc={<HeaderPC />} />
