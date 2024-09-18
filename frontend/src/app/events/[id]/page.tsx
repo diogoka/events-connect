@@ -27,6 +27,7 @@ import MapWithMarker from '@/components/map/mapWithMarker';
 import { Attendee, Event, OtherInfo } from '@/types/types';
 
 import { AlertState } from '@/types/alert.types';
+import EventImageWithDate from '@/components/common/eventImageWithDate';
 
 export default function EventPage() {
   const { notFound } = useContext(PageContext);
@@ -45,6 +46,8 @@ export default function EventPage() {
     message: '',
     severity: 'success',
   });
+
+  const [imageLoaded, setImageLoaded] = useState<boolean>(false);
 
   const params = useParams();
 
