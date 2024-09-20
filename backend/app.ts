@@ -29,11 +29,6 @@ app.use((req, res, next) => {
   next();
 });
 
-pool
-  .connect()
-  .then(() => console.log('Connected to database'))
-  .catch((err) => console.log('Error connecting to database', err));
-
 app.use('/api/users', usersRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/events', eventsRouter);
