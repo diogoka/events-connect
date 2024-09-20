@@ -230,7 +230,6 @@ export default function SignUpPage() {
           await sendUserToServer(newUser);
           setIsUserCreated(true);
         } catch (error: any) {
-          console.log(error);
           setRegisterMessage({
             showMessage: true,
             message: `${error?.response?.data?.message}.`,
