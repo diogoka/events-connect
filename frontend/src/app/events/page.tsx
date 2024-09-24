@@ -9,6 +9,8 @@ import { Tag } from '@/types/types';
 import { Events as Event, CurrentUser } from '@/types/pages.types';
 import { AlertState } from '@/types/alert.types';
 
+import { api } from '@/services/api';
+
 export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(UserContext);
@@ -19,9 +21,12 @@ export default function EventsPage() {
     []
   );
 
-  const [emptyList, setEmptyList] = useState(false);
+  const [isPastEvents, setIsPastEvents] = useState<boolean>(false);
 
+  const [emptyList, setEmptyList] = useState(false);
   const [numberOfEvents, setNumberOfEvents] = useState(0);
+
+  const [isCalendarView, setIsCalendarView] = useState<boolean>(false);
 
   const [alert, setAlert] = useState<AlertState>({
     status: false,
@@ -36,57 +41,117 @@ export default function EventsPage() {
     role: user?.roleName!,
   };
 
-  const getEvents = async () => {
-    const {
-      data: { events },
-    } = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/?start=${numberOfEvents}&qnt=6`
-    );
-    setEvents(events);
-
-    if (currentUser.id) {
-      const attendingEvents: [number, boolean][] = [];
-      const {
-        data: { events: userEvents },
-      } = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/user/${currentUser.id}`
-      );
-
-      userEvents.map((event: Event) => {
-        let attendingEvent: [number, boolean] = [event.id_event, true];
-        attendingEvents.push(attendingEvent);
-      });
-
-      setEventsOfUser(attendingEvents);
-    }
-
+  const handlePastEventSwitch = () => {
+    setIsLoading(true);
+    setIsPastEvents((prev) => !prev);
+    setEmptyList(false);
     setIsLoading(false);
   };
 
-  const handleLoadMoreEvents = async () => {
-    const {
-      data: { events },
-    } = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/?start=${
-        numberOfEvents + 6
-      }&qnt=6`
-    );
+  const handleCalendarViewSwitch = () => {
+    setIsLoading(true);
+    setIsCalendarView((prev) => !prev);
+    setEmptyList(false);
+    setIsLoading(false);
+  };
 
-    if (events.length !== 6) {
-      setEvents(events);
-      setEmptyList(true);
-    } else if (events.length === 6) {
-      setEmptyList(true);
-    } else {
-      setEvents((prev) => [...prev, events]);
+  const getUpcomingEvents = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(
+        `/api/events/upcoming/?start=${numberOfEvents}&qnt=6`
+      );
+
+      setEvents(data.events);
+      if (currentUser.id) {
+        const attendingEvents: [number, boolean][] = [];
+        const {
+          data: { events: userEvents },
+        } = await api.get(`/api/events/user/${currentUser.id}`);
+
+        userEvents.map((event: Event) => {
+          let attendingEvent: [number, boolean] = [event.id_event, true];
+          attendingEvents.push(attendingEvent);
+        });
+
+        setEventsOfUser(attendingEvents);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setNumberOfEvents((prev) => prev + 6);
+  const getPastEvents = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(
+        `/api/events/past/?start=${numberOfEvents}&qnt=6`
+      );
+      setEvents(data.events);
+      if (currentUser.id) {
+        const attendingEvents: [number, boolean][] = [];
+        const {
+          data: { events: userEvents },
+        } = await api.get(`/api/events/user/${currentUser.id}`);
+
+        userEvents.map((event: Event) => {
+          let attendingEvent: [number, boolean] = [event.id_event, true];
+          attendingEvents.push(attendingEvent);
+        });
+
+        setEventsOfUser(attendingEvents);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoadMoreEvents = async () => {
+    try {
+      if (!isPastEvents) {
+        const {
+          data: { events },
+        } = await api.get(
+          `/api/events/upcoming/?start=${numberOfEvents + 6}&qnt=6`
+        );
+        if (events.length !== 6) {
+          setEvents(events);
+          setEmptyList(true);
+        } else if (events.length === 6) {
+          setEmptyList(true);
+        } else {
+          setEvents((prev) => [...prev, events]);
+        }
+        setNumberOfEvents((prev) => prev + 6);
+      } else {
+        const {
+          data: { events },
+        } = await api.get(
+          `/api/events/past/?start=${numberOfEvents + 6}&qnt=6`
+        );
+
+        if (events.length === 6) {
+          setEvents((prev) => [...prev, ...events]);
+          setEmptyList(false);
+        } else {
+          setEmptyList(true);
+        }
+        setNumberOfEvents((prev) => prev + 6);
+      }
+    } catch (error) {}
   };
 
   useEffect(() => {
-    getEvents();
-  }, []);
+    if (isPastEvents) {
+      getPastEvents();
+    } else {
+      getUpcomingEvents();
+    }
+  }, [isPastEvents]);
 
   const searchEvents = (text: string) => {
     axios
@@ -141,32 +206,19 @@ export default function EventsPage() {
         position: 'relative',
       }}
     >
-      {alert.status && (
-        <Alert
-          severity='info'
-          variant='filled'
-          onClose={() =>
-            setAlert({ status: false, message: '', severity: 'info' })
-          }
-          sx={{ position: 'absolute', top: '10px', zIndex: 9999 }}
-        >
-          {alert.message}
-        </Alert>
-      )}
       <SearchBar searchEvents={searchEvents} isDisabled={events.length === 0} />
       {events.length === 0 ? (
         <Typography
           sx={{
-            position: 'absolute',
-            top: '20rem',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             color: 'white',
-            backgroundColor: '#141D4F',
+            backgroundColor: 'primary.main',
             width: laptopQuery ? '50%' : '100%',
             height: '5rem',
             padding: '1rem',
+            margin: '8rem 0',
             borderRadius: '5px',
           }}
         >
@@ -181,6 +233,10 @@ export default function EventsPage() {
           attendance={eventsOfUser}
           handleLoadMoreEvents={handleLoadMoreEvents}
           emptyList={emptyList}
+          setPastEvents={handlePastEventSwitch}
+          pastEvents={isPastEvents}
+          isCalendarView={isCalendarView}
+          setIsCalendarView={handleCalendarViewSwitch}
         />
       )}
     </Box>

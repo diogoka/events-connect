@@ -4,8 +4,6 @@ import { useMediaQuery, Box, Typography, Button, Divider } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 
 import { usePathname } from 'next/navigation';
 
@@ -29,15 +27,8 @@ export default function Footer() {
   return (
     <Box
       component='footer'
-      width={isFooterRight ? '50%' : '100vw'}
-      minWidth={isFooterRight ? '560px' : 'auto'}
-      maxWidth={isFooterRight ? '960px' : 'auto'}
-      position='absolute'
-      right={0}
-      zIndex={200}
       textAlign='center'
       sx={{
-        transform: 'translateY(-100%)',
         backgroundColor: '#4F5B92',
         minHeight: '430px',
         padding: '40px 24px',
@@ -86,7 +77,7 @@ export default function Footer() {
               justifyContent: 'center',
               gap: '8px',
             }}
-            onClick={() => {}}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <GoogleIcon name='arrow_upward' size={20} />
             Back to top

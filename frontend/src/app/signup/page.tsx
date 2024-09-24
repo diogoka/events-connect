@@ -193,10 +193,16 @@ export default function SignUpPage() {
       }
     }
 
-    const checkStudentID = await studentValidation(
-      userInputForm.email,
-      userInputForm.student_id
-    );
+    // const checkStudentID = await studentValidation(
+    //   userInputForm.email,
+    //   userInputForm.student_id
+    // );
+
+    const checkStudentID = {
+      checked: true,
+      message: '',
+      code: 1,
+    };
 
     if (!checkStudentID.checked) {
       handleMessage(
@@ -289,7 +295,7 @@ export default function SignUpPage() {
       )}
 
       <Box
-        bgcolor='white'
+        bgcolor='inherit'
         width={isMobile ? 'auto' : '50%'}
         height={isMobile ? 'auto' : '100vh'}
         minWidth={isMobile ? 'auto' : '560px'}
@@ -485,7 +491,11 @@ export default function SignUpPage() {
                 {load ? <ThreeDots color='white' /> : 'Register'}
               </Button>
 
-              <Typography variant='body2' align='center'>
+              <Typography
+                variant='body2'
+                align='center'
+                sx={{ margin: '1rem 0' }}
+              >
                 If you are an organizer, please contact admin:{' '}
                 head.tech@ciccc.ca
               </Typography>

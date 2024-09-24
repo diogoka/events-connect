@@ -271,16 +271,14 @@ export default function AuthProvider({
         );
       case PageStatus.Ready:
         return (
-          <>
-            <Box
-              component='main'
-              maxWidth='1280px'
-              paddingInline='24px'
-              marginInline='auto'
-            >
-              {children}
-            </Box>
-          </>
+          <Box
+            component='main'
+            maxWidth='1280px'
+            padding='0 24px'
+            marginInline='auto'
+          >
+            <Box flexGrow={1}>{children}</Box>
+          </Box>
         );
       case PageStatus.NotFound:
         return <NotFound />;

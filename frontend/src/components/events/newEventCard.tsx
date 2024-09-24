@@ -39,7 +39,7 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
 
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const handleJoinEvent = () => router.push(`/events/${event.id_event}`);
+  const handleClickCard = () => router.push(`/events/${event.id_event}`);
 
   const handleShareEvent = () => {
     console.log('COPIED');
@@ -55,7 +55,11 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
         width: laptopQuery ? '32.1%' : '100%',
         boxShadow: 'none',
         backgroundColor: '#FBF8FF',
+        cursor: 'pointer',
+        border: 0,
       }}
+      component={'button'}
+      onClick={() => handleClickCard()}
     >
       <EventImageWithDate
         imageLoaded={imageLoaded}
@@ -111,7 +115,7 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
               fontSize: '1rem',
             }}
             onClick={() => {
-              handleJoinEvent();
+              handleClickCard();
             }}
           >
             Join

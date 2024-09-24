@@ -47,36 +47,28 @@ export const getPastEvents = async (
   res: express.Response
 ) => {
   try {
-    const numOfDays = Number(req.query.numOfDays ? req.query.numOfDays : 180);
-    const dateLimit = new Date(
-      new Date().getTime() - numOfDays * 24 * 60 * 60 * 1000
-    )
-      .toISOString()
-      .slice(0, 19)
-      .replace('T', ' ');
-    const today = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const queryParams: QueryEventsParamType = req.query as QueryEventsParamType;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    const events = await pool.query(
-      `SELECT * FROM events where events.date_event_start >= $1 and events.date_event_start < $2 ORDER BY events.date_event_start ASC`,
-      [dateLimit, today]
-    );
+    const events = await prisma.events.findMany({
+      where: {
+        date_event_start: {
+          lt: today,
+        },
+      },
+      orderBy: {
+        date_event_start: 'desc',
+      },
+    });
 
-    const ids =
-      events.rows.length !== 0
-        ? events.rows.map((val) => {
-            return val.id_event;
-          })
-        : null;
+    const start = parseInt(queryParams.start);
+    const quantity = parseInt(queryParams.qnt);
 
-    const tags = await pool.query(`
-      SELECT events.id_event, tags.name_tag FROM events
-      inner join events_tags on events.id_event = events_tags.id_event
-      inner join tags on events_tags.id_tag = tags.id_tag where events_tags.id_event in (${ids})
-      `);
+    const slicedEvents = events.slice(start, start + quantity);
 
     res.status(200).json({
-      events: events.rows,
-      tags: tags.rows,
+      events: slicedEvents.length === 0 ? events : slicedEvents,
     });
   } catch (err: any) {
     res.status(500).send(err.message);

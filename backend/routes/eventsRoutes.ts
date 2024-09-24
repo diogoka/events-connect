@@ -13,6 +13,7 @@ import {
   getEventsByOwner,
   getEventsByUser,
   searchEvents,
+  getPastEvents,
 } from '../controllers/eventsControllers';
 
 const eventsRouter: Router = express.Router();
@@ -23,7 +24,9 @@ eventsRouter.get('/user/:id', getEventsByUser);
 eventsRouter.get('/owner/:id', getEventsByOwner);
 eventsRouter.get('/search/', searchEvents);
 
-eventsRouter.get('/', getEvents);
+eventsRouter.get('/upcoming', getEvents);
+eventsRouter.get('/past', getPastEvents);
+
 eventsRouter.get('/:id', getEvent);
 
 eventsRouter.post('/new', createEvents);

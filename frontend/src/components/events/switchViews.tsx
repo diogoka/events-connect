@@ -1,13 +1,20 @@
 import { Box, Typography } from '@mui/material';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import GoogleIcon from '../icons/googleIcon';
 
 type Props = {
   isCalendarView: boolean;
-  setIsCalendarView: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsCalendarView: Dispatch<SetStateAction<boolean>>;
+  setPastEvents: Dispatch<SetStateAction<boolean>>;
+  pastEvents: boolean;
 };
 
-const SwitchViews = ({ isCalendarView, setIsCalendarView }: Props) => {
+const SwitchViews = ({
+  isCalendarView,
+  setIsCalendarView,
+  pastEvents,
+  setPastEvents,
+}: Props) => {
   return (
     <Box
       sx={{
@@ -20,21 +27,35 @@ const SwitchViews = ({ isCalendarView, setIsCalendarView }: Props) => {
     >
       <Box sx={{ display: 'flex', width: '100%', gap: '24px' }}>
         <Typography
+          component={'button'}
+          onClick={() => setPastEvents(false)}
           sx={{
+            backgroundColor: 'inherit',
+            border: 'none',
             color: '#1B1B21',
             fontSize: '20px',
-            fontWeight: 'bold',
-            textDecoration: 'underline',
+            fontWeight: pastEvents ? 'none' : 'bold',
+            textDecoration: pastEvents ? 'none' : 'underline',
             textUnderlineOffset: '8px',
             textDecorationColor: '#B8C3FF',
+            cursor: 'pointer',
           }}
         >
           Upcoming
         </Typography>
         <Typography
+          component={'button'}
+          onClick={() => setPastEvents(true)}
           sx={{
+            backgroundColor: 'inherit',
+            border: 'none',
             color: '#1B1B21',
             fontSize: '20px',
+            fontWeight: pastEvents ? 'bold' : 'none',
+            textDecoration: pastEvents ? 'underline' : 'none',
+            textUnderlineOffset: '8px',
+            textDecorationColor: '#B8C3FF',
+            cursor: 'pointer',
           }}
         >
           Previous

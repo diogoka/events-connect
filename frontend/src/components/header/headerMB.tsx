@@ -24,7 +24,6 @@ export default function HeaderMB() {
         height: '59px',
       }}
     >
-      <Logo />
       {user ? (
         <>
           <HamburgerMenu />
@@ -34,10 +33,8 @@ export default function HeaderMB() {
       ) : (
         <Button
           onClick={() => router.push('/login')}
-          // variant='contained'
-          // color='primary'
           sx={{
-            backgroundColor: '#4F5B92',
+            backgroundColor: 'primary.main',
             color: '#FFFFFF',
             padding: '8px 16px',
           }}

@@ -1,8 +1,8 @@
 'use client';
-import { Button, Stack } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import { Events as Event } from '@/types/pages.types';
 import { Tag } from '@/types/types';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import NewEventCard from './newEventCard';
 
@@ -19,6 +19,10 @@ type Props = {
   attendance: [number, boolean][];
   handleLoadMoreEvents: () => void;
   emptyList: boolean;
+  setPastEvents: Dispatch<SetStateAction<boolean>>;
+  pastEvents: boolean;
+  isCalendarView: boolean;
+  setIsCalendarView: () => void;
 };
 
 function EventList({
@@ -28,9 +32,12 @@ function EventList({
   attendance,
   handleLoadMoreEvents,
   emptyList,
+  setPastEvents,
+  pastEvents,
+  isCalendarView,
+  setIsCalendarView,
 }: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
-  const [isCalendarView, setIsCalendarView] = useState<boolean>(false);
 
   const deleteEvent = async (id: number) => {
     const newEvents = await events.filter((event) => event.id_event !== id);
@@ -50,6 +57,8 @@ function EventList({
       <SwitchViews
         isCalendarView={isCalendarView}
         setIsCalendarView={setIsCalendarView}
+        pastEvents={pastEvents}
+        setPastEvents={setPastEvents}
       />
       <Stack
         spacing={2}
@@ -64,10 +73,21 @@ function EventList({
         direction={'row'}
       >
         {isCalendarView ? (
-          <div>calendar</div>
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'red',
+            }}
+          >
+            CALENDAR VIEW
+          </Box>
         ) : (
           events.map((event, index) => {
             const attending = checkAttendance(event.id_event);
+
             return (
               <NewEventCard
                 key={index}
