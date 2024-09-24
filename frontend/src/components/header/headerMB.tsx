@@ -14,24 +14,6 @@ export default function HeaderMB() {
 
   const router = useRouter();
 
-  const LoginButton = () => {
-    return (
-      <Button
-        onClick={() => router.push('/login')}
-        variant='contained'
-        color='primary'
-        startIcon={<LoginIcon />}
-        sx={{
-          minWidth: '6.25rem',
-          width: '6.25rem',
-          height: '100%',
-          borderRadius: '0',
-        }}
-      >
-        Log in
-      </Button>
-    );
-  };
   return (
     <Stack
       direction='row'
@@ -40,18 +22,28 @@ export default function HeaderMB() {
       sx={{
         width: '100%',
         height: '59px',
-        paddingLeft: '40px',
-        paddingRight: '40px',
       }}
     >
-      <HamburgerMenu />
+      <Logo />
       {user ? (
         <>
+          <HamburgerMenu />
           <Logo />
           <AvatarIcon />
         </>
       ) : (
-        LoginButton()
+        <Button
+          onClick={() => router.push('/login')}
+          // variant='contained'
+          // color='primary'
+          sx={{
+            backgroundColor: '#4F5B92',
+            color: '#FFFFFF',
+            padding: '8px 16px',
+          }}
+        >
+          Log in
+        </Button>
       )}
     </Stack>
   );

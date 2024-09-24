@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import Card from '@mui/material/Card';
@@ -16,6 +16,7 @@ import { monthDayFn, TimeFn } from '@/common/functions';
 import { ScheduleRounded } from '@mui/icons-material';
 import { FaRegShareFromSquare } from 'react-icons/fa6';
 import EventImageWithDate from '../common/eventImageWithDate';
+import GoogleIcon from '../icons/googleIcon';
 
 type Props = {
   event: Event & {
@@ -49,7 +50,13 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
   };
 
   return (
-    <Card sx={{ width: laptopQuery ? '32.1%' : '100%', boxShadow: 'none' }}>
+    <Card
+      sx={{
+        width: laptopQuery ? '32.1%' : '100%',
+        boxShadow: 'none',
+        backgroundColor: '#FBF8FF',
+      }}
+    >
       <EventImageWithDate
         imageLoaded={imageLoaded}
         imageUrl={event?.image_url_event!}
@@ -94,7 +101,7 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
               handleShareEvent();
             }}
           >
-            <FaRegShareFromSquare />
+            <GoogleIcon name='ios_share' size={25} weight={100} outlined />
           </Box>
           <Button
             sx={{

@@ -1,7 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import GridViewIcon from '@mui/icons-material/GridView';
+import GoogleIcon from '../icons/googleIcon';
 
 type Props = {
   isCalendarView: boolean;
@@ -9,7 +8,6 @@ type Props = {
 };
 
 const SwitchViews = ({ isCalendarView, setIsCalendarView }: Props) => {
-  console.log('isCalendarView', isCalendarView);
   return (
     <Box
       sx={{
@@ -20,16 +18,28 @@ const SwitchViews = ({ isCalendarView, setIsCalendarView }: Props) => {
         marginBottom: '1rem',
       }}
     >
-      <Typography
-        sx={{
-          color: '#1B1B21',
-          fontSize: '20px',
-          fontWeight: 'bold',
-          maxWidth: '30%',
-        }}
-      >
-        Upcoming Activities
-      </Typography>
+      <Box sx={{ display: 'flex', width: '100%', gap: '24px' }}>
+        <Typography
+          sx={{
+            color: '#1B1B21',
+            fontSize: '20px',
+            fontWeight: 'bold',
+            textDecoration: 'underline',
+            textUnderlineOffset: '8px',
+            textDecorationColor: '#B8C3FF',
+          }}
+        >
+          Upcoming
+        </Typography>
+        <Typography
+          sx={{
+            color: '#1B1B21',
+            fontSize: '20px',
+          }}
+        >
+          Previous
+        </Typography>
+      </Box>
 
       <Box
         sx={{
@@ -54,7 +64,7 @@ const SwitchViews = ({ isCalendarView, setIsCalendarView }: Props) => {
           component={'button'}
           onClick={() => setIsCalendarView(false)}
         >
-          <GridViewIcon />
+          <GoogleIcon name='grid_view' size={20} outlined weight={200} />
         </Box>
         <Box
           sx={{
@@ -71,7 +81,7 @@ const SwitchViews = ({ isCalendarView, setIsCalendarView }: Props) => {
           component={'button'}
           onClick={() => setIsCalendarView(true)}
         >
-          <CalendarMonthIcon />
+          <GoogleIcon name='calendar_month' size={20} outlined weight={200} />
         </Box>
       </Box>
     </Box>

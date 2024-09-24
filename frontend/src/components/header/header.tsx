@@ -7,11 +7,12 @@ import { AppBar } from '@mui/material';
 export default function Header() {
   return (
     <AppBar
-      position='fixed'
       sx={{
+        position: 'relative',
         bgcolor: 'transparent',
         boxShadow: 'none',
         borderBottom: 'none',
+        padding: '16px 24px',
       }}
     >
       <Switcher sp={<HeaderMB />} pc={<HeaderPC />} />

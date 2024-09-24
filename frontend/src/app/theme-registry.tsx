@@ -53,6 +53,32 @@ let theme = createTheme({
         },
       },
     },
+    MuiList: {
+      styleOverrides: {
+        root: {
+          padding: 0,
+        },
+      },
+    },
+    MuiListItem: {
+      styleOverrides: {
+        root: {
+          padding: 0,
+          margin: 0,
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          fontSize: '16px',
+          fontWeight: 500,
+          color: '#ffffff',
+          padding: 0,
+          margin: 0,
+        },
+      },
+    },
   },
   typography: {
     fontFamily: `'Space Grotesk', 'Roboto', sans-serif`,

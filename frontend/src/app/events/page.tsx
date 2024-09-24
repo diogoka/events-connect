@@ -75,6 +75,8 @@ export default function EventsPage() {
     if (events.length !== 6) {
       setEvents(events);
       setEmptyList(true);
+    } else if (events.length === 6) {
+      setEmptyList(true);
     } else {
       setEvents((prev) => [...prev, events]);
     }

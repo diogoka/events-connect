@@ -275,9 +275,7 @@ export default function AuthProvider({
             <Box
               component='main'
               maxWidth='1280px'
-              minHeight='100vh'
-              paddingInline='40px'
-              paddingBlock='50px'
+              paddingInline='24px'
               marginInline='auto'
             >
               {children}

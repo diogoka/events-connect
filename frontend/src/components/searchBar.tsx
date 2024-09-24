@@ -31,7 +31,7 @@ function SearchBar({ searchEvents, isDisabled, clearSearchBar }: Props) {
   }, [clearSearchBar]);
 
   const gridContainerStyle = {
-    marginTop: laptopQuery ? '4rem' : '2rem',
+    // marginTop: laptopQuery ? '5rem' : '3rem',
     marginBottom: laptopQuery ? '3rem' : '1rem',
     height: '3rem',
     width: laptopQuery ? '36.25rem' : '100%',
