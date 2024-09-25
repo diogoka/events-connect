@@ -207,38 +207,20 @@ export default function EventsPage() {
       }}
     >
       <SearchBar searchEvents={searchEvents} isDisabled={events.length === 0} />
-      {events.length === 0 ? (
-        <Typography
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            color: 'white',
-            backgroundColor: 'primary.main',
-            width: laptopQuery ? '50%' : '100%',
-            height: '5rem',
-            padding: '1rem',
-            margin: '8rem 0',
-            borderRadius: '5px',
-          }}
-        >
-          No events found
-        </Typography>
-      ) : (
-        <EventList
-          events={events}
-          setEvents={setEvents}
-          tags={tags}
-          user={currentUser}
-          attendance={eventsOfUser}
-          handleLoadMoreEvents={handleLoadMoreEvents}
-          emptyList={emptyList}
-          setPastEvents={handlePastEventSwitch}
-          pastEvents={isPastEvents}
-          isCalendarView={isCalendarView}
-          setIsCalendarView={handleCalendarViewSwitch}
-        />
-      )}
+
+      <EventList
+        events={events}
+        setEvents={setEvents}
+        tags={tags}
+        user={currentUser}
+        attendance={eventsOfUser}
+        handleLoadMoreEvents={handleLoadMoreEvents}
+        emptyList={emptyList}
+        setPastEvents={handlePastEventSwitch}
+        pastEvents={isPastEvents}
+        isCalendarView={isCalendarView}
+        setIsCalendarView={handleCalendarViewSwitch}
+      />
     </Box>
   );
 }

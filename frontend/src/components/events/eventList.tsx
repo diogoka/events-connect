@@ -1,5 +1,5 @@
 'use client';
-import { Box, Button, Stack } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { Events as Event } from '@/types/pages.types';
 import { Tag } from '@/types/types';
 import { Dispatch, SetStateAction, useState } from 'react';
@@ -53,69 +53,90 @@ function EventList({
   };
 
   return (
-    <>
+    <Box sx={{ width: '100%' }}>
       <SwitchViews
         isCalendarView={isCalendarView}
         setIsCalendarView={setIsCalendarView}
         pastEvents={pastEvents}
         setPastEvents={setPastEvents}
       />
-      <Stack
-        spacing={2}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          marginTop: '0',
-          width: '100%',
-        }}
-        useFlexGap
-        flexWrap='wrap'
-        direction={'row'}
-      >
-        {isCalendarView ? (
-          <Box
-            sx={{
-              height: '100%',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: 'red',
-            }}
-          >
-            CALENDAR VIEW
-          </Box>
-        ) : (
-          events.map((event, index) => {
-            const attending = checkAttendance(event.id_event);
 
-            return (
-              <NewEventCard
-                key={index}
-                event={event}
-                user={user}
-                attending={attending}
-                laptopQuery={laptopQuery}
-              />
-            );
-          })
-        )}
-      </Stack>
-
-      {!isCalendarView && (
-        <Button
-          fullWidth
+      {events.length === 0 ? (
+        <Typography
           sx={{
-            backgroundColor: '#FFD7F3',
-            marginBottom: '2rem',
-            marginTop: '2rem',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            color: 'white',
+            backgroundColor: 'primary.main',
+            width: laptopQuery ? '50%' : '100%',
+            height: '4rem',
+            padding: '1rem',
+            margin: '9rem 0',
+            borderRadius: '5px',
           }}
-          disabled={emptyList}
-          onClick={() => handleLoadMoreEvents()}
         >
-          {emptyList ? 'No more events available' : 'Load more events'}
-        </Button>
+          {pastEvents ? 'No past events...' : 'No upcoming events...'}
+        </Typography>
+      ) : (
+        <>
+          <Stack
+            spacing={2}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              marginTop: '0',
+              width: '100%',
+            }}
+            useFlexGap
+            flexWrap='wrap'
+            direction={'row'}
+          >
+            {isCalendarView ? (
+              <Box
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: 'red',
+                }}
+              >
+                CALENDAR VIEW
+              </Box>
+            ) : (
+              events.map((event, index) => {
+                const attending = checkAttendance(event.id_event);
+
+                return (
+                  <NewEventCard
+                    key={index}
+                    event={event}
+                    user={user}
+                    attending={attending}
+                    laptopQuery={laptopQuery}
+                  />
+                );
+              })
+            )}
+          </Stack>
+          {!isCalendarView && (
+            <Button
+              fullWidth
+              sx={{
+                backgroundColor: '#FFD7F3',
+                marginBottom: '2rem',
+                marginTop: '2rem',
+              }}
+              disabled={emptyList}
+              onClick={() => handleLoadMoreEvents()}
+            >
+              {emptyList ? 'No more events available' : 'Load more events'}
+            </Button>
+          )}
+        </>
       )}
-    </>
+    </Box>
   );
 }
 

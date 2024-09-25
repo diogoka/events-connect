@@ -5,13 +5,24 @@ import Switcher from '../common/switcher';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Logo() {
+type Props = {
+  closeMenu?: (isMenuOpen: boolean) => void;
+};
+
+export default function Logo({ closeMenu }: Props) {
   const router = useRouter();
+
+  const handleLogoClick = () => {
+    router.push('/events');
+    if (closeMenu) {
+      closeMenu(false);
+    }
+  };
   return (
     <Switcher
       sp={
         <Button
-          onClick={() => router.push('/events')}
+          onClick={handleLogoClick}
           sx={{
             '&:hover': { background: 'none' },
             width: '40%',

@@ -27,11 +27,13 @@ export default function LogoutBtn() {
   return (
     <Button
       onClick={handleLogout}
-      variant='outlined'
-      color='error'
       sx={{
+        color: 'primary.contrastText',
         width: '100%',
-        m: '3.125rem auto 1.25rem',
+        textAlign: 'start',
+        display: 'flex',
+        justifyContent: 'start',
+        fontSize: '40px',
       }}
     >
       Log out

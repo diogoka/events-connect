@@ -26,7 +26,6 @@ export default function HeaderMB() {
     >
       {user ? (
         <>
-          <HamburgerMenu />
           <Logo />
           <AvatarIcon />
         </>
