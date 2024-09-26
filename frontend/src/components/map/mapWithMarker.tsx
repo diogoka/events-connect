@@ -22,6 +22,11 @@ export default function MapWithMarker({ location }: { location: string }) {
     }
   }, [location]);
 
+  const mapOptions = {
+    mapTypeControl: false,
+    streetViewControl: false,
+  };
+
   return (
     isLoaded &&
     coordinate && (
@@ -33,6 +38,7 @@ export default function MapWithMarker({ location }: { location: string }) {
         }}
         center={coordinate}
         zoom={14}
+        options={mapOptions}
       >
         <MarkerF position={coordinate} />
       </GoogleMap>

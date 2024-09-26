@@ -1,9 +1,6 @@
 import express, { Router } from 'express';
 import {
   createEvents,
-  getEvents,
-  getEvent,
-  getUserEvents,
   updateEvents,
   deleteEvents,
   newAttendee,
@@ -11,23 +8,28 @@ import {
   newReview,
   getReviews,
   getEventsByOwner,
-  getEventsByUser,
   searchEvents,
   getPastEvents,
+  getEventById,
+  getUpComingEvents,
+  getUpcomingEventsByUserId,
+  getPastEventsByUserId,
 } from '../controllers/eventsControllers';
 
 const eventsRouter: Router = express.Router();
 
-eventsRouter.get('/user', getUserEvents);
+// Prisma
+eventsRouter.get('/past', getPastEvents);
+eventsRouter.get('/upcoming', getUpComingEvents);
+eventsRouter.get('/:id', getEventById);
 
-eventsRouter.get('/user/:id', getEventsByUser);
+eventsRouter.get('/upcoming/user/:id', getUpcomingEventsByUserId);
+eventsRouter.get('/past/user/:id', getPastEventsByUserId);
+
+// Old
+
 eventsRouter.get('/owner/:id', getEventsByOwner);
 eventsRouter.get('/search/', searchEvents);
-
-eventsRouter.get('/upcoming', getEvents);
-eventsRouter.get('/past', getPastEvents);
-
-eventsRouter.get('/:id', getEvent);
 
 eventsRouter.post('/new', createEvents);
 

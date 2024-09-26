@@ -13,7 +13,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const getEvents = async (
+export const getUpComingEvents = async (
   req: express.Request,
   res: express.Response
 ) => {
@@ -75,130 +75,128 @@ export const getPastEvents = async (
   }
 };
 
-export const getEventsByUser = async (
+export const getEventById = async (
   req: express.Request,
   res: express.Response
 ) => {
+  const id = req.params.id;
+
+  console.log('By Id');
+
   try {
-    const user = req.params.id;
+    const event = await prisma.events.findUnique({
+      where: {
+        id_event: +id,
+      },
+      include: {
+        attendees: {
+          select: {
+            users: {
+              select: {
+                first_name_user: true,
+                last_name_user: true,
+                avatar_url: true,
+              },
+            },
+          },
+        },
+        events_tags: {
+          select: {
+            tags: {
+              select: {
+                name_tag: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-    const events = await pool.query(
-      `
-    SELECT 
-    *
-    FROM 
-    attendees
-    JOIN 
-    events ON attendees.id_event = events.id_event
-    WHERE 
-    attendees.id_user = $1;
-    `,
-      [user]
-    );
-
-    let tags: any = [];
-    if (events.rows.length !== 0) {
-      const ids = events.rows.map((val) => val.id_event);
-      tags = await pool.query(`
-        SELECT 
-          events.id_event, 
-          tags.name_tag 
-        FROM 
-          events
-        INNER JOIN 
-          events_tags ON events.id_event = events_tags.id_event
-        INNER JOIN 
-          tags ON events_tags.id_tag = tags.id_tag 
-        WHERE 
-          events.id_event IN (${ids.join(',')});
-      `);
-    }
-
-    if (req.query.search) {
-      const text = req.query.search !== undefined ? req.query.search : '';
-      const searchWords = text.toString().toLowerCase().split(' ');
-
-      const filteredEvents = events.rows.filter((event: any) => {
-        return searchWords.some((word) => {
-          return event.name_event.toLowerCase().includes(word);
-        });
-      });
-
-      if (req.query.past) {
-        const today = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        let pastEvents = filteredEvents.filter((event: any) => {
-          return new Date(event.date_event_start).toISOString() < today;
-        });
-
-        if (pastEvents.length === 0) {
-          res.status(200).json({
-            events: [],
-            tags: [],
-          });
-          return;
-        } else {
-          const ids = pastEvents.map((val: any) => {
-            return val.id_event;
-          });
-          tags = await pool.query(`
-          SELECT 
-            events.id_event, 
-            tags.name_tag 
-          FROM 
-            events
-          INNER JOIN 
-            events_tags ON events.id_event = events_tags.id_event
-          INNER JOIN 
-            tags ON events_tags.id_tag = tags.id_tag 
-          WHERE 
-            events.id_event IN (${ids.join(',')});
-        `);
-          res.status(200).json({
-            events: pastEvents,
-            tags: tags.rows,
-          });
-        }
-      } else {
-        if (filteredEvents.length === 0) {
-          res.status(200).json({
-            events: [],
-            tags: [],
-          });
-          return;
-        } else {
-          const ids = filteredEvents.map((val: any) => {
-            return val.id_event;
-          });
-          tags = await pool.query(`
-          SELECT 
-            events.id_event, 
-            tags.name_tag 
-          FROM 
-            events
-          INNER JOIN 
-            events_tags ON events.id_event = events_tags.id_event
-          INNER JOIN 
-            tags ON events_tags.id_tag = tags.id_tag 
-          WHERE 
-            events.id_event IN (${ids.join(',')});
-        `);
-          res.status(200).json({
-            events: filteredEvents,
-            tags: tags.rows,
-          });
-        }
-      }
-    } else {
-      res.status(200).json({
-        events: events.rows,
-        tags: tags.rows,
-      });
-    }
+    res.status(200).json({ event });
   } catch (err: any) {
     res.status(500).send(err.message);
   }
 };
 
+export const getUpcomingEventsByUserId = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const queryParams: QueryEventsParamType = req.query as QueryEventsParamType;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const id = req.params.id;
+
+  try {
+    const data = await prisma.attendees.findMany({
+      where: {
+        id_user: 'user1',
+      },
+      include: {
+        events: true,
+      },
+    });
+
+    const events = data.map((attendee) => attendee.events);
+
+    const upcomingEvents = events.filter(
+      (event) => event.date_event_start >= today
+    );
+
+    if (upcomingEvents.length > 6) {
+      const start = parseInt(queryParams.start);
+      const quantity = parseInt(queryParams.qnt);
+      const slicedEvents = upcomingEvents.slice(start, quantity);
+      res.status(200).json(slicedEvents);
+    } else {
+      res.status(200).json(upcomingEvents);
+    }
+  } catch (error: any) {
+    res.status(505).json(error.message);
+  }
+};
+
+export const getPastEventsByUserId = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const queryParams: QueryEventsParamType = req.query as QueryEventsParamType;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const id = req.params.id;
+
+  try {
+    const data = await prisma.attendees.findMany({
+      where: {
+        id_user: id,
+      },
+      include: {
+        events: true,
+      },
+    });
+
+    const events = data.map((attendee) => attendee.events);
+
+    const pastEvents = events.filter(
+      (event) => event.date_event_start <= today
+    );
+
+    if (pastEvents.length > 6) {
+      const start = parseInt(queryParams.start);
+      const quantity = parseInt(queryParams.qnt);
+      const slicedEvents = pastEvents.slice(start, quantity);
+      res.status(200).json(slicedEvents);
+    } else {
+      res.status(200).json(pastEvents);
+    }
+  } catch (error: any) {
+    res.status(505).json(error.message);
+  }
+};
+
+// Legacy Controllers
 export const searchEvents = async (
   req: express.Request,
   res: express.Response
@@ -306,121 +304,6 @@ export const getEventsByOwner = async (
     res.status(200).json({
       events: events.rows,
       tags: tags.rows,
-    });
-  } catch (err: any) {
-    res.status(500).send(err.message);
-  }
-};
-
-const getCourse = async (id: string) => {
-  const userCourse = await pool.query(
-    'SELECT id_course FROM users_courses WHERE id_user = $1',
-    [id]
-  );
-
-  const course = await pool.query(
-    'SELECT name_course FROM courses WHERE id_course = $1',
-    [userCourse.rows[0].id_course]
-  );
-
-  return course.rows[0].name_course;
-};
-
-export const getEvent = async (req: express.Request, res: express.Response) => {
-  const id = req.params.id;
-
-  try {
-    const event = await prisma.events.findUnique({
-      where: {
-        id_event: +id,
-      },
-      include: {
-        attendees: {
-          select: {
-            users: {
-              select: {
-                first_name_user: true,
-                last_name_user: true,
-                avatar_url: true,
-              },
-            },
-          },
-        },
-        events_tags: {
-          select: {
-            tags: {
-              select: {
-                name_tag: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    console.log(event);
-
-    res.status(200).json({ event });
-  } catch (err: any) {
-    res.status(500).send(err.message);
-  }
-};
-
-export const getUserEvents = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  const date = new Date();
-  const SAMPLE_USER = req.query.id_user;
-
-  try {
-    const att = await pool.query(
-      'SELECT * FROM attendees ' +
-        'inner join events on attendees.id_event = events.id_event ' +
-        'where attendees.id_user = $1 and events.date_event_start >= $2',
-      [SAMPLE_USER, date]
-    );
-
-    const ids = att.rows.map((val) => {
-      return val.id_event;
-    });
-
-    const tags = await pool.query(
-      `SELECT events.id_event, tags.name_tag FROM events ` +
-        `inner join events_tags on events.id_event = events_tags.id_event ` +
-        `inner join tags on events_tags.id_tag = tags.id_tag where events_tags.id_event in (${ids})`
-    );
-
-    const attendees = await pool.query(
-      `SELECT users.first_name_user, users.last_name_user, attendees.id_event FROM events ` +
-        `inner join attendees on events.id_event = attendees.id_event ` +
-        `inner join users on attendees.id_user = users.id_user where attendees.id_event in (${ids})`
-    );
-
-    const events = att.rows.map((val) => {
-      return {
-        ...val,
-
-        tags: tags.rows
-          .filter((tag) => {
-            return val.id_event == tag.id_event ? true : false;
-          })
-          .map((t) => {
-            return t.name_tag;
-          }),
-
-        attendees: attendees.rows
-          .filter((att) => {
-            return val.id_event == att.id_event ? true : false;
-          })
-          .map((a) => {
-            return a.first_name_user + ' ' + a.last_name_user;
-          }),
-      };
-    });
-
-    res.json({
-      events: events,
     });
   } catch (err: any) {
     res.status(500).send(err.message);

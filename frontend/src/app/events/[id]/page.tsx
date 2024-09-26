@@ -12,6 +12,7 @@ import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import { api } from '@/services/api';
 import AttendeesModal from '@/components/event/attendees/attendees-modal';
+import MapWithMarker from '@/components/map/mapWithMarker';
 
 export default function EventPage() {
   const { notFound } = useContext(PageContext);
@@ -223,9 +224,12 @@ export default function EventPage() {
           <Typography sx={{ fontSize: '24px', fontWeight: 700 }}>
             Activity Location
           </Typography>
+          <Box sx={{ width: '100%' }}>
+            <MapWithMarker location={event?.location_event!} />
+          </Box>
 
           <Box sx={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
-            <Typography>Tags</Typography>
+            <Typography sx={{ fontSize: '18px' }}>Tags</Typography>
 
             <Box sx={{ display: 'flex', gap: '12px' }}>
               {event?.events_tags.map(({ tags }, index) => (
@@ -249,7 +253,7 @@ export default function EventPage() {
             </Box>
           </Box>
           <Box sx={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
-            <Typography>Categories</Typography>
+            <Typography sx={{ fontSize: '18px' }}>Categories</Typography>
             <Box
               sx={{
                 display: 'flex',

@@ -73,4 +73,5 @@ export type CheckToken = {
 export type QueryEventsParamType = {
   start: string;
   qnt: string;
+  id?: string;
 };
