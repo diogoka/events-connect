@@ -327,65 +327,40 @@ const getCourse = async (id: string) => {
 };
 
 export const getEvent = async (req: express.Request, res: express.Response) => {
-  const EVENT_ID = req.originalUrl.split('/api/events/')[1];
+  const id = req.params.id;
 
   try {
-    const events = await pool.query('SELECT * FROM events where id_event=$1', [
-      EVENT_ID,
-    ]);
+    const event = await prisma.events.findUnique({
+      where: {
+        id_event: +id,
+      },
+      include: {
+        attendees: {
+          select: {
+            users: {
+              select: {
+                first_name_user: true,
+                last_name_user: true,
+                avatar_url: true,
+              },
+            },
+          },
+        },
+        events_tags: {
+          select: {
+            tags: {
+              select: {
+                name_tag: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-    const tags = await pool.query(
-      `
-      SELECT tags.id_tag, tags.name_tag
-      FROM events
-      INNER JOIN events_tags ON events.id_event = events_tags.id_event
-      INNER JOIN tags ON events_tags.id_tag = tags.id_tag
-      WHERE events.id_event=$1
-    `,
-      [EVENT_ID]
-    );
+    console.log(event);
 
-    const attendees = await pool.query(
-      `
-      SELECT users.id_user, users.first_name_user, users.last_name_user, users.email_user, users.avatar_url, users.student_id_user
-      FROM events
-      INNER JOIN attendees ON events.id_event = attendees.id_event
-      INNER JOIN users ON attendees.id_user = users.id_user
-      WHERE events.id_event=$1
-    `,
-      [EVENT_ID]
-    );
-
-    const attendeesArray: Attendee[] = await Promise.all(
-      attendees.rows.map(async (attendee) => {
-        const course = await getCourse(attendee.id_user);
-
-        return {
-          id: attendee.id_user,
-          firstName: attendee.first_name_user,
-          lastName: attendee.last_name_user,
-          email: attendee.email_user,
-          course: course,
-          avatarURL: attendee.avatar_url,
-          studentId: attendee.student_id_user,
-        };
-      })
-    );
-
-    const convertToPST = (date: string) => {
-      return moment.utc(date).tz('America/Vancouver').format();
-    };
-    const formattedEvent = {
-      ...events.rows[0],
-      date_event_start: convertToPST(events.rows[0].date_event_start),
-      date_event_end: convertToPST(events.rows[0].date_event_end),
-      tags: tags.rows.map((val) => ({
-        id_tag: val.id_tag,
-        name_tag: val.name_tag,
-      })),
-      attendees: attendeesArray,
-    };
-    res.status(200).json({ event: formattedEvent });
+    res.status(200).json({ event });
   } catch (err: any) {
     res.status(500).send(err.message);
   }
@@ -795,36 +770,3 @@ export const sendTicket = async (eventId: any, userId: any) => {
     console.error(err);
   }
 };
-
-function validateEventInput(eventInput: EventInput): {
-  result: boolean;
-  message: string;
-} {
-  let result = false;
-  let message = '';
-
-  if (!eventInput.owner) {
-    message = 'Invalid owner';
-  } else if (!/.+/.test(eventInput.title)) {
-    message = 'Please enter a title';
-  } else if (!/.+/.test(eventInput.description)) {
-    message = 'Please enter a description';
-  } else if (!eventInput.dates) {
-    message = 'Please chose a date';
-  } else if (!/.+/.test(eventInput.location)) {
-    message = 'Please enter a location';
-  } else if (isNaN(eventInput.spots)) {
-    message = 'Invalid spots ';
-  } else if (isNaN(eventInput.price)) {
-    message = 'Invalid price';
-  } else if (isNaN(eventInput.tag)) {
-    message = 'Invalid tag';
-  } else {
-    result = true;
-  }
-
-  return {
-    result,
-    message,
-  };
-}

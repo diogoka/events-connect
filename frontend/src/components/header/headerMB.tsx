@@ -30,16 +30,19 @@ export default function HeaderMB() {
           <AvatarIcon />
         </>
       ) : (
-        <Button
-          onClick={() => router.push('/login')}
-          sx={{
-            backgroundColor: 'primary.main',
-            color: '#FFFFFF',
-            padding: '8px 16px',
-          }}
-        >
-          Log in
-        </Button>
+        <>
+          <Logo />
+          <Button
+            onClick={() => router.push('/login')}
+            sx={{
+              backgroundColor: 'primary.main',
+              color: '#FFFFFF',
+              padding: '8px 16px',
+            }}
+          >
+            Log in
+          </Button>
+        </>
       )}
     </Stack>
   );

@@ -1,376 +1,306 @@
 'use client';
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
 import { useParams } from 'next/navigation';
-import DetailInfo from '@/components/event/detail-info';
-import {
-  Box,
-  Stack,
-  Typography,
-  Link,
-  useMediaQuery,
-  AlertColor,
-  AlertTitle,
-  Alert,
-} from '@mui/material';
-import DetailContainer from '@/components/event/detail-container';
-import DetailIconContainer from '@/components/event/detail-icon-container';
-import DetailTimeContainer from '@/components/event/detail-time-container';
-import DetailButtonContainer from '@/components/event/detail-button-container';
-import Review from '@/components/event/review/review';
+import { Box, Stack, Typography, useMediaQuery, Button } from '@mui/material';
 import { UserContext } from '@/context/userContext';
 import { PageContext } from '@/context/pageContext';
-import ImageHelper from '@/components/common/image-helper';
-import IconsContainer from '@/components/icons/iconsContainer';
-import dayjs from 'dayjs';
-import MapWithMarker from '@/components/map/mapWithMarker';
 import { Attendee, Event, OtherInfo } from '@/types/types';
-
-import { AlertState } from '@/types/alert.types';
-import EventImageWithDate from '@/components/common/eventImageWithDate';
+import Image from 'next/image';
+import { monthDayFn, TimeFn } from '@/common/functions';
+import GoogleIcon from '@/components/icons/googleIcon';
+import Avatar from '@mui/material/Avatar';
+import AvatarGroup from '@mui/material/AvatarGroup';
+import { api } from '@/services/api';
+import AttendeesModal from '@/components/event/attendees/attendees-modal';
 
 export default function EventPage() {
   const { notFound } = useContext(PageContext);
   const { user } = useContext(UserContext);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [event, setEvent] = useState<Event>();
-  const [otherInfo, setOtherInfo] = useState<OtherInfo>();
-  const [applied, setApplied] = useState<boolean>(false);
-  const [attendees, setAttendees] = useState<Array<Attendee>>();
-  const [organizerEvent, setOrganizerEvent] = useState<boolean>(false);
-  const [oldEvent, setOldEvent] = useState<boolean>(false);
-  const [isAlertVisible, setIsAlertVisible] = useState<boolean>(false);
-  const [forPreview, setForPreview] = useState<boolean>(false);
-  const [alertMessage, setAlertMessage] = useState<AlertState>({
-    title: '',
-    message: '',
-    severity: 'success',
-  });
 
-  const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+  const [event, setEvent] = useState<Event>();
+  const [attendees, setAttendees] = useState<Attendee[]>([] as Attendee[]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const [applied, setApplied] = useState<boolean>(false);
 
   const params = useParams();
 
   const EVENT_ID = params.id;
   const laptopQuery = useMediaQuery('(max-width:769px)');
 
-  const handleAlert = (
-    isOpen: boolean,
-    titleParam: string,
-    messageParam: string,
-    severityParam: AlertColor
-  ) => {
-    setAlertMessage({
-      title: titleParam,
-      message: messageParam,
-      severity: severityParam,
-    });
-    setIsAlertVisible(isOpen);
+  const monthAndDay = monthDayFn(event?.date_event_start!);
+  const startTime = TimeFn(event?.date_event_start!);
+  const endTime = TimeFn(event?.date_event_end!);
+
+  const getEvent = async () => {
+    try {
+      const { data } = await api.get(`/api/events/${EVENT_ID}`);
+
+      console.log('response', data.event);
+
+      setEvent(data.event);
+
+      setAttendees(data.event.attendees);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleAlertClose = (event: React.SyntheticEvent) => {
-    event.stopPropagation();
-    setIsAlertVisible(false);
-  };
-
-  const alertFn = (title: string, message: string, severity: AlertColor) => {
-    return laptopQuery ? (
-      <Alert
-        severity={severity}
-        onClose={handleAlertClose}
-        variant='filled'
-        sx={{
-          position: 'absolute',
-          width: '90%',
-          top: '5rem',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 99999999,
-        }}
-      >
-        <AlertTitle sx={{ color: 'white' }}>{title}</AlertTitle>
-        {message}
-      </Alert>
-    ) : (
-      <Alert
-        severity={severity}
-        onClose={handleAlertClose}
-        variant='filled'
-        sx={{
-          position: 'absolute',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 99999999,
-        }}
-      >
-        <AlertTitle sx={{ color: 'white' }}>{title}</AlertTitle>
-        {message}
-      </Alert>
-    );
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   useEffect(() => {
-    axios
-      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/${EVENT_ID}`)
-      .then((res) => {
-        if (!res.data.event.id_event) {
-          notFound();
-          return;
-        }
-
-        setEvent({
-          ...res.data.event,
-          dates_event: [
-            {
-              date_event_start: dayjs(res.data.event.date_event_start),
-              date_event_end: dayjs(res.data.event.date_event_end),
-            },
-          ],
-        });
-
-        setAttendees([...res.data.event.attendees]);
-
-        setOtherInfo({
-          image_event: '',
-          id_event: res.data.event.id_event,
-          id_owner: res.data.event.id_owner,
-        });
-
-        res.data.event.attendees.map((val: Attendee) => {
-          val.id == user!.id && setApplied(true);
-        });
-
-        user?.roleName == 'organizer' &&
-          user?.id == res.data.event.id_owner &&
-          setOrganizerEvent(true);
-        let today = new Date();
-        let eventDate = new Date(res.data.event.date_event_start);
-        eventDate.setHours(0, 0, 0, 0);
-        today.setHours(0, 0, 0, 0);
-        eventDate < today && setOldEvent(true);
-
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error(error.response);
-      });
+    getEvent();
   }, [applied]);
 
-  const eventCapacity = event?.capacity_event;
-
-  if (!otherInfo?.id_event) {
-    return <></>;
-  } else if (laptopQuery) {
-    ///////////////////// Mobile /////////////////////
-    return (
-      <Stack>
-        {isAlertVisible &&
-          alertFn(
-            alertMessage.title!,
-            alertMessage.message,
-            alertMessage.severity
-          )}
-
-        {/* Photo */}
-        {/* title */}
-        {/* Time and price */}
-        {/* Description */}
-        {/* Location */}
-        {/* Tags */}
-
-        <DetailContainer
-          event={event!}
-          otherInfo={otherInfo!}
-          applied={applied}
-          organizerEvent={organizerEvent}
-          forMobile={laptopQuery}
-          forPreview={forPreview}
-          isAlertVisible={isAlertVisible}
-          setIsAlertVisible={setIsAlertVisible}
-          handleAlertFn={handleAlert}
-        />
-        {event && (
-          <DetailInfo
-            price={event.price_event}
-            maxSpots={event.capacity_event}
-            attendees={attendees!}
-            tags={event.tags}
-            category={event.category_event}
-            forMobile={laptopQuery}
-            forPreview={forPreview}
+  return (
+    <>
+      <AttendeesModal
+        attendees={attendees}
+        open={isModalOpen}
+        handleClose={handleCloseModal}
+      />
+      <Stack rowGap={'40px'}>
+        <Box sx={{ maxWidth: '100%', maxHeight: '208px' }}>
+          <Image
+            alt='image_event'
+            src={event?.image_url_event!}
+            height={600}
+            width={600}
+            style={{ width: '100%', height: '208px', borderRadius: '4px' }}
           />
-        )}
-        {oldEvent ? (
-          <Review id_event={otherInfo!.id_event} applied={applied} />
-        ) : (
-          <DetailButtonContainer
-            event={event!}
-            otherInfo={otherInfo!}
-            applied={applied}
-            organizerEvent={organizerEvent}
-            forMobile={laptopQuery}
-            forPreview={forPreview}
-            maxSpots={eventCapacity}
-            setAttendees={setAttendees}
-            setApplied={setApplied}
-            handleAlertFn={handleAlert}
-          />
-        )}
-      </Stack>
-    );
-  } else {
-    ///////////////////// Lap Top /////////////////////
-
-    return (
-      <>
-        {isAlertVisible &&
-          alertFn(
-            alertMessage.title!,
-            alertMessage.message,
-            alertMessage.severity
-          )}
-        <Stack sx={{ marginBottom: '5%' }}>
-          <Box
-            width='100%'
-            display='flex'
-            paddingTop='50px'
-            justifyContent='space-between'
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            sx={{ fontSize: '36px', fontWeight: 700, textAlign: 'center' }}
           >
-            {/* /////////// Left /////////// */}
-            <Box width='67%'>
-              <DetailContainer
-                event={event!}
-                otherInfo={otherInfo!}
-                applied={applied}
-                organizerEvent={organizerEvent}
-                forMobile={laptopQuery}
-                forPreview={forPreview}
-                isAlertVisible={isAlertVisible}
-                setIsAlertVisible={setIsAlertVisible}
+            {event?.name_event}
+          </Typography>
+        </Box>
+
+        <Stack gap={1}>
+          <Box sx={{ width: '100%', display: 'flex', gap: '8px' }}>
+            <Box
+              sx={{
+                width: '50%',
+                backgroundColor: '#F5F2FA',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '16px',
+                gap: '8px',
+              }}
+            >
+              <GoogleIcon
+                name='calendar_month'
+                size={24}
+                outlined
+                weight={400}
+                color='#4F5B92'
               />
-              {event && (
-                <DetailInfo
-                  price={event.price_event}
-                  maxSpots={event.capacity_event}
-                  attendees={attendees!}
-                  tags={event.tags}
-                  category={event.category_event}
-                  forMobile={laptopQuery}
-                  forPreview={forPreview}
-                />
+              <Typography sx={{ fontSize: '18px' }}>{monthAndDay}</Typography>
+            </Box>
+            <Box
+              sx={{
+                width: '50%',
+                backgroundColor: '#F5F2FA',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '16px',
+                gap: '8px',
+              }}
+            >
+              <GoogleIcon
+                name='schedule'
+                size={24}
+                outlined
+                weight={400}
+                color='#4F5B92'
+              />
+              <Typography sx={{ fontSize: '18px' }}>
+                {startTime.replace(/\s+/g, '')} to {endTime.replace(/\s+/g, '')}
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              width: '100%',
+              backgroundColor: '#F5F2FA',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '16px',
+              gap: '8px',
+            }}
+          >
+            <GoogleIcon
+              name='near_me'
+              size={24}
+              outlined
+              weight={400}
+              color='#4F5B92'
+            />
+            <Typography sx={{ textDecoration: 'underline', fontSize: '18px' }}>
+              {event?.location_event}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              width: '100%',
+              backgroundColor: '#F5F2FA',
+              borderRadius: '8px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '16px',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <GoogleIcon
+                name='group'
+                size={24}
+                outlined
+                weight={400}
+                color='#4F5B92'
+              />
+
+              {attendees?.length === 0 ? (
+                <Typography sx={{ fontSize: '18px' }}>
+                  No Attendees yet
+                </Typography>
+              ) : (
+                <AvatarGroup max={5}>
+                  {attendees.map((attendee, index) => (
+                    <Avatar
+                      key={index}
+                      alt={'avatar'}
+                      src={attendee.users.avatarURL}
+                    />
+                  ))}
+                </AvatarGroup>
               )}
             </Box>
 
-            {/* /////////// Right /////////// */}
-            <Box width='30%'>
-              <DetailIconContainer
-                event={event!}
-                otherInfo={otherInfo!}
-                applied={applied}
-                organizerEvent={organizerEvent}
-                forMobile={laptopQuery}
-                forPreview={forPreview}
-                setIsAlertVisible={setIsAlertVisible}
-                handleAlertFn={handleAlert}
-              />
-              <Box>
-                <ImageHelper
-                  src={`${event?.image_url_event}`}
-                  width='100%'
-                  height='100%'
-                  style={{
-                    maxHeight: '260px',
-                    borderRadius: '.5rem',
-                  }}
-                  alt={event?.name_event ?? 'Event'}
-                />
-              </Box>
-              <Link
-                href={`https://maps.google.com/?q=${event?.location_event}`}
-                target='_blank'
+            {attendees.length > 0 && (
+              <Button
+                sx={{ fontSize: '18px', padding: '0 4px' }}
+                onClick={() => {
+                  setIsModalOpen(true);
+                }}
               >
-                <Box display='flex' marginTop='20px'>
-                  <IconsContainer
-                    icons={[
-                      {
-                        name: 'FaLocationArrow',
-                        isClickable: false,
-                        color: 'navy',
-                      },
-                    ]}
-                    onIconClick={() => {
-                      return;
-                    }}
-                  />
-                  <Typography>{event?.location_event}</Typography>
-                </Box>
-              </Link>
-              <MapWithMarker location={event?.location_event ?? ''} />
-            </Box>
-            {/* //right */}
+                All Attendees
+              </Button>
+            )}
           </Box>
-          {/* //flex */}
         </Stack>
+        <Box sx={{ width: '100%' }}>
+          <Typography sx={{ fontSize: '18px' }}>
+            <pre
+              style={{
+                fontFamily: 'inherit',
+                margin: 0,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}
+              dangerouslySetInnerHTML={{
+                __html: event?.description_event || '',
+              }}
+            />
+          </Typography>
+        </Box>
+        <Stack gap={'16px'} sx={{ marginBottom: '150px' }}>
+          <Typography sx={{ fontSize: '24px', fontWeight: 700 }}>
+            Activity Location
+          </Typography>
 
-        {oldEvent && (
-          <Review id_event={otherInfo!.id_event} applied={applied} />
-        )}
+          <Box sx={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
+            <Typography>Tags</Typography>
 
-        {/* /////////// Footer /////////// */}
-        {!oldEvent && (
-          <Box
-            padding='0 30px'
-            left='0'
-            width='100%'
-            margin='0 auto'
-            position='fixed'
-            bottom='0'
-            zIndex='201'
-            style={{ backgroundColor: '#dedede' }}
-          >
-            <Box
-              maxWidth='1280px'
-              width='100%'
-              paddingInline='40px'
-              marginInline='auto'
-              display='flex'
-              justifyContent='space-between'
-            >
-              <Box
-                display='flex'
-                flexDirection='column'
-                justifyContent='center'
-              >
-                <DetailTimeContainer
-                  event={event!}
-                  otherInfo={otherInfo!}
-                  applied={applied}
-                  organizerEvent={organizerEvent}
-                  forMobile={laptopQuery}
-                />
-                <Box marginLeft='10px' fontWeight='bold'>
-                  {event?.name_event}
+            <Box sx={{ display: 'flex', gap: '12px' }}>
+              {event?.events_tags.map(({ tags }, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#DFE1F9',
+                    padding: '8px',
+                    borderRadius: '6px',
+                    maxWidth: 'fit-content',
+                  }}
+                >
+                  <Typography sx={{ fontSize: '18x', fontWeight: 500 }}>
+                    {tags.name_tag}
+                  </Typography>
                 </Box>
-              </Box>
-
-              <Box width='55%'>
-                <DetailButtonContainer
-                  event={event!}
-                  otherInfo={otherInfo!}
-                  applied={applied}
-                  organizerEvent={organizerEvent}
-                  forMobile={laptopQuery}
-                  forPreview={forPreview}
-                  maxSpots={eventCapacity}
-                  setApplied={setApplied}
-                  setAttendees={setAttendees}
-                  handleAlertFn={handleAlert}
-                />
-              </Box>
+              ))}
             </Box>
           </Box>
-        )}
-      </>
-    );
-  }
+          <Box sx={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
+            <Typography>Categories</Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#DFE1F9',
+                padding: '8px',
+                borderRadius: '6px',
+                maxWidth: 'fit-content',
+              }}
+            >
+              <Typography sx={{ fontSize: '18x', fontWeight: 500 }}>
+                {event?.category_event}
+              </Typography>
+            </Box>
+          </Box>
+        </Stack>
+      </Stack>
+      <Box
+        padding='0 30px'
+        left='0'
+        width='100%'
+        margin='0 auto'
+        position='fixed'
+        bottom='0'
+        zIndex='201'
+        style={{ backgroundColor: '#DFE1F9' }}
+      >
+        <Box
+          sx={{
+            maxWidth: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '24px 0',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'baseline' }}>
+            <Typography sx={{ fontSize: '40px', fontWeight: 700 }}>
+              ${event?.price_event}/
+            </Typography>
+            <Typography sx={{ fontSize: '16px' }}>person</Typography>
+          </Box>
+          <Button variant='contained' sx={{ padding: '8px 16px' }}>
+            Join Event
+          </Button>
+        </Box>
+      </Box>
+    </>
+  );
 }

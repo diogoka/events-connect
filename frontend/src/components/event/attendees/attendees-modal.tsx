@@ -1,9 +1,15 @@
 import React from 'react';
-import { Modal, Stack, Typography } from '@mui/material';
+import {
+  Avatar,
+  Button,
+  Divider,
+  Modal,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { Attendee } from '@/types/types';
 import { Box } from '@mui/system';
-import { IoMdClose } from 'react-icons/io';
-import AttendeesList from './attendees-list';
+import GoogleIcon from '@/components/icons/googleIcon';
 
 type Props = {
   attendees: Attendee[];
@@ -11,9 +17,20 @@ type Props = {
   handleClose: () => void;
 };
 
-export default function AttendeesModal(props: Props) {
+export default function AttendeesModal({
+  attendees,
+  open,
+  handleClose,
+}: Props) {
   return (
-    <Modal open={props.open} onClose={props.handleClose}>
+    <Modal
+      open={open}
+      onClose={handleClose}
+      sx={{
+        backdropFilter: 'blur(2px)',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      }}
+    >
       <Stack
         rowGap='1rem'
         sx={{
@@ -24,29 +41,57 @@ export default function AttendeesModal(props: Props) {
           height: 500,
           width: '90%',
           maxWidth: '680px',
-          bgcolor: 'white',
           boxShadow: 24,
-          paddingInline: '1rem',
-          paddingBlock: '2rem',
-          borderRadius: '1rem',
+          borderRadius: '8px',
+          padding: '24px',
+          backgroundColor: '#FBF8FF',
         }}
       >
-        <IoMdClose
-          onClick={props.handleClose}
-          style={{
-            fontSize: '2rem',
-            position: 'absolute',
-            inset: '0 0 auto auto',
-            transform: 'translate(-50%, 50%)',
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
-        />
-        <Box display='flex' alignItems='center' columnGap='1rem'>
-          <Typography variant='h2' fontWeight='bold'>
+        >
+          <Typography sx={{ fontSize: '24px', fontWeight: 700 }}>
             Attendees
           </Typography>
-          <Typography>{props.attendees.length}</Typography>
+
+          <Button
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+            onClick={() => handleClose()}
+          >
+            <GoogleIcon
+              name='close'
+              outlined
+              size={24}
+              weight={400}
+              color='#1B1B21'
+            />
+          </Button>
         </Box>
-        <AttendeesList attendees={props.attendees} />
+        <Divider sx={{ opacity: 0.3, borderBottomWidth: '3px' }} />
+        <Stack
+          sx={{
+            overflowY: 'auto',
+          }}
+          divider={<Divider sx={{ opacity: 0.3, borderBottomWidth: '3px' }} />}
+          gap={'10px'}
+        >
+          {attendees.map((attendee, index) => (
+            <Box
+              key={index}
+              sx={{ display: 'flex', alignItems: 'center', gap: '20px' }}
+            >
+              <Avatar src={attendee.users.avatarURL} alt='avatar' />
+              <Typography>{attendee.users.first_name_user}</Typography>
+            </Box>
+          ))}
+        </Stack>
       </Stack>
     </Modal>
   );
