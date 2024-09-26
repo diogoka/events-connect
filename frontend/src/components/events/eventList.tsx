@@ -6,6 +6,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import NewEventCard from './newEventCard';
 
 import SwitchViews from './switchViews';
+import EventCalendarView from './eventCalendarView';
 
 type Props = {
   events: Event[];
@@ -78,13 +79,13 @@ function EventList({
           <Box
             sx={{
               height: '100%',
+              minWidth: '100%',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: 'red',
             }}
           >
-            CALENDAR VIEW
+            <EventCalendarView />
           </Box>
         ) : (
           <>

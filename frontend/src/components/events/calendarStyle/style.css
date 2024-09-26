@@ -1,0 +1,40 @@
+.fc {
+  width: 100%;
+  border: none;
+}
+
+thead {
+  border: none;
+}
+
+.fc-col-header {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.fc-col-header-cell > div {
+  background-color: #efedf4;
+  padding: 16px 0;
+  a {
+    text-transform: uppercase;
+  }
+}
+
+.fc-theme-standard th,
+.fc-theme-standard td {
+  border: none !important;
+}
+
+.fc-theme-standard td {
+  padding: 6px;
+}
+
+.fc .fc-scrollgrid {
+  border-left-width: 0px !important;
+  border-top-width: 0px !important;
+}
+
+.fc .fc-daygrid-day-frame {
+  border: 2px solid #efedf4;
+  border-radius: 6px;
+}
