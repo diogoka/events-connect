@@ -35,9 +35,6 @@ export default function EventPage() {
   const getEvent = async () => {
     try {
       const { data } = await api.get(`/api/events/${EVENT_ID}`);
-
-      console.log('response', data.event);
-
       setEvent(data.event);
 
       setAttendees(data.event.attendees);

@@ -49,7 +49,6 @@ function UserEvents() {
       const { data } = await api.get(
         `/api/events/upcoming/user/${user?.id}/?start=${numberOfEvents}&qnt=6`
       );
-      console.log('data', data);
       setEvents(data);
     } catch (error) {
       console.log(error);
