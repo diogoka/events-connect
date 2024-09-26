@@ -7,6 +7,7 @@ import SearchBar from '@/components/searchBar';
 import ResetButton from '@/components/user/reset-button';
 import { Typography, Box, Alert, useMediaQuery } from '@mui/material';
 import { Tag, HasEvents, CurrentUser, Event } from '@/types/pages.types';
+import { api } from '@/services/api';
 
 function UserEvents() {
   const { user } = useContext(UserContext);
@@ -28,6 +29,10 @@ function UserEvents() {
   const [clearSearchBar, setClearSearchBar] = useState<boolean>(false);
   const [disableButton, setDisableButton] = useState<boolean>(true);
 
+  const [numberOfEvents, setNumberOfEvents] = useState(0);
+  const [isPastEvents, setIsPastEvents] = useState<boolean>(false);
+  const [emptyList, setEmptyList] = useState(false);
+
   const currentUser: CurrentUser = {
     id: user?.id ? user!.id : '',
     role: user?.roleName ? user!.roleName : '',
@@ -37,6 +42,87 @@ function UserEvents() {
     await getEvents();
     clearSearchBar ? setClearSearchBar(false) : setClearSearchBar(true);
     setDisableButton(true);
+  };
+
+  const getUserUpcomingEvents = async () => {
+    try {
+      const { data } = await api.get(
+        `/api/events/upcoming/user/${user?.id}/?start=${numberOfEvents}&qnt=6`
+      );
+      console.log('data', data);
+      setEvents(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getUserPastEvents = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(
+        `/api/events/past/user/${user?.id}/?start=${numberOfEvents}&qnt=6`
+      );
+      setEvents(data);
+      if (currentUser.id) {
+        const attendingEvents: [number, boolean][] = [];
+        const {
+          data: { events: userEvents },
+        } = await api.get(`/api/events/user/${currentUser.id}`);
+
+        userEvents.map((event: Event) => {
+          let attendingEvent: [number, boolean] = [event.id_event, true];
+          attendingEvents.push(attendingEvent);
+        });
+
+        setEventsOfUser(attendingEvents);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePastEventSwitch = () => {
+    setIsLoading(true);
+    setIsPastEvents((prev) => !prev);
+    setEmptyList(false);
+    setIsLoading(false);
+  };
+
+  const handleLoadMoreEvents = async () => {
+    try {
+      if (!isPastEvents) {
+        const {
+          data: { events },
+        } = await api.get(
+          `/api/events/upcoming/?start=${numberOfEvents + 6}&qnt=6`
+        );
+        if (events.length !== 6) {
+          setEvents(events);
+          setEmptyList(true);
+        } else if (events.length === 6) {
+          setEmptyList(true);
+        } else {
+          setEvents((prev) => [...prev, events]);
+        }
+        setNumberOfEvents((prev) => prev + 6);
+      } else {
+        const {
+          data: { events },
+        } = await api.get(
+          `/api/events/past/?start=${numberOfEvents + 6}&qnt=6`
+        );
+
+        if (events.length === 6) {
+          setEvents((prev) => [...prev, ...events]);
+          setEmptyList(false);
+        } else {
+          setEmptyList(true);
+        }
+        setNumberOfEvents((prev) => prev + 6);
+      }
+    } catch (error) {}
   };
 
   const getEvents = async () => {
@@ -71,8 +157,12 @@ function UserEvents() {
   };
 
   useEffect(() => {
-    getEvents();
-  }, []);
+    if (isPastEvents) {
+      getUserPastEvents();
+    } else {
+      getUserUpcomingEvents();
+    }
+  }, [isPastEvents]);
 
   if (!user) return;
 
@@ -124,7 +214,6 @@ function UserEvents() {
     }, 1000);
   };
 
-  if (isLoading) return <></>;
   return (
     <Box
       sx={{
@@ -135,59 +224,19 @@ function UserEvents() {
         position: 'relative',
       }}
     >
-      {alertSearchBar.status && (
-        <Alert
-          severity='info'
-          variant='filled'
-          onClose={closeAlert}
-          sx={{ position: 'absolute', top: '10px', zIndex: 9999 }}
-        >
-          {alertSearchBar.message}
-        </Alert>
-      )}
+      <SearchBar searchEvents={searchEvents} isDisabled={events.length === 0} />
 
-      <SearchBar
-        searchEvents={searchEvents}
-        isDisabled={noEvents}
-        clearSearchBar={clearSearchBar}
+      <EventList
+        events={events}
+        setEvents={setEvents}
+        user={currentUser}
+        attendance={eventsOfUser}
+        handleLoadMoreEvents={handleLoadMoreEvents}
+        emptyList={emptyList}
+        setPastEvents={handlePastEventSwitch}
+        pastEvents={isPastEvents}
+        isUserPage={true}
       />
-      <Box
-        sx={{
-          width: '98%',
-          display: 'flex',
-          justifyContent: 'start',
-          minHeight: '64px',
-        }}
-      >
-        <ResetButton getEvents={resetEvents} disable={disableButton} />
-      </Box>
-      {events.length === 0 ? (
-        <Typography
-          sx={{
-            position: 'absolute',
-            top: '20rem',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            color: 'white',
-            backgroundColor: '#141D4F',
-            width: laptopQuery ? '50%' : '100%',
-            height: '5rem',
-            padding: '1rem',
-            borderRadius: '5px',
-          }}
-        >
-          {hasEvents.message !== '' ? hasEvents.message : 'No events found'}
-        </Typography>
-      ) : (
-        <EventList
-          events={events}
-          tags={tags}
-          user={currentUser}
-          setEvents={setEvents}
-          attendance={eventsOfUser}
-        ></EventList>
-      )}
     </Box>
   );
 }

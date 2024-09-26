@@ -10,7 +10,6 @@ import SwitchViews from './switchViews';
 
 type Props = {
   events: Event[];
-  tags: Tag[];
   setEvents: (events: Event[]) => void;
   user: {
     id: string | undefined;
@@ -21,8 +20,9 @@ type Props = {
   emptyList: boolean;
   setPastEvents: Dispatch<SetStateAction<boolean>>;
   pastEvents: boolean;
-  isCalendarView: boolean;
-  setIsCalendarView: () => void;
+  isCalendarView?: boolean;
+  setIsCalendarView?: () => void;
+  isUserPage?: boolean;
 };
 
 function EventList({
@@ -36,8 +36,11 @@ function EventList({
   pastEvents,
   isCalendarView,
   setIsCalendarView,
+  isUserPage = false,
 }: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
+
+  console.log('EventList', events);
 
   const deleteEvent = async (id: number) => {
     const newEvents = await events.filter((event) => event.id_event !== id);
@@ -59,6 +62,7 @@ function EventList({
         setIsCalendarView={setIsCalendarView}
         pastEvents={pastEvents}
         setPastEvents={setPastEvents}
+        isUserPage={isUserPage}
       />
 
       {events.length === 0 ? (
@@ -76,7 +80,9 @@ function EventList({
             borderRadius: '5px',
           }}
         >
-          {pastEvents ? 'No past events...' : 'No upcoming events...'}
+          {pastEvents
+            ? `No past ${isUserPage ? 'attended' : ''} events`
+            : `No upcoming events ${isUserPage ? 'to attend' : ''}`}
         </Typography>
       ) : (
         <>
@@ -128,10 +134,12 @@ function EventList({
                 marginBottom: '2rem',
                 marginTop: '2rem',
               }}
-              disabled={emptyList}
+              disabled={emptyList || events.length < 6}
               onClick={() => handleLoadMoreEvents()}
             >
-              {emptyList ? 'No more events available' : 'Load more events'}
+              {emptyList || events.length < 6
+                ? 'No more events available'
+                : 'Load more events'}
             </Button>
           )}
         </>

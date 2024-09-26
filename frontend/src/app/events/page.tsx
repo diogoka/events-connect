@@ -211,7 +211,6 @@ export default function EventsPage() {
       <EventList
         events={events}
         setEvents={setEvents}
-        tags={tags}
         user={currentUser}
         attendance={eventsOfUser}
         handleLoadMoreEvents={handleLoadMoreEvents}
