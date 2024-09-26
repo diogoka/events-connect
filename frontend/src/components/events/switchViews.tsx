@@ -64,57 +64,51 @@ const SwitchViews = ({
         </Typography>
       </Box>
 
-      {isCalendarView ||
-        (setIsCalendarView && (
+      {setIsCalendarView && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            width: '22%',
+          }}
+        >
           <Box
             sx={{
+              background: 'none',
+              backgroundColor: isCalendarView ? '' : '#FFD7F3',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'flex-end',
-              width: '22%',
+              justifyContent: 'center',
+              padding: '0.5rem',
+              borderRadius: '6px',
+              border: '0',
+              cursor: 'pointer',
             }}
+            component={'button'}
+            onClick={() => setIsCalendarView(false)}
           >
-            <Box
-              sx={{
-                background: 'none',
-                backgroundColor: isCalendarView ? '' : '#FFD7F3',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0.5rem',
-                borderRadius: '6px',
-                border: '0',
-                cursor: 'pointer',
-              }}
-              component={'button'}
-              onClick={() => setIsCalendarView && setIsCalendarView(false)}
-            >
-              <GoogleIcon name='grid_view' size={20} outlined weight={200} />
-            </Box>
-            <Box
-              sx={{
-                background: 'none',
-                backgroundColor: isCalendarView ? '#FFD7F3' : 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0.5rem',
-                borderRadius: '6px',
-                border: '0',
-                cursor: 'pointer',
-              }}
-              component={'button'}
-              onClick={() => setIsCalendarView && setIsCalendarView(true)}
-            >
-              <GoogleIcon
-                name='calendar_month'
-                size={20}
-                outlined
-                weight={200}
-              />
-            </Box>
+            <GoogleIcon name='grid_view' size={20} outlined weight={200} />
           </Box>
-        ))}
+          <Box
+            sx={{
+              background: 'none',
+              backgroundColor: isCalendarView ? '#FFD7F3' : 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.5rem',
+              borderRadius: '6px',
+              border: '0',
+              cursor: 'pointer',
+            }}
+            component={'button'}
+            onClick={() => setIsCalendarView(true)}
+          >
+            <GoogleIcon name='calendar_month' size={20} outlined weight={200} />
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 };

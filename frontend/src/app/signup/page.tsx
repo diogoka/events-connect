@@ -193,16 +193,10 @@ export default function SignUpPage() {
       }
     }
 
-    // const checkStudentID = await studentValidation(
-    //   userInputForm.email,
-    //   userInputForm.student_id
-    // );
-
-    const checkStudentID = {
-      checked: true,
-      message: '',
-      code: 1,
-    };
+    const checkStudentID = await studentValidation(
+      userInputForm.email,
+      userInputForm.student_id
+    );
 
     if (!checkStudentID.checked) {
       handleMessage(

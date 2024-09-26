@@ -237,7 +237,6 @@ export default function LoginPage() {
         marginInline='auto'
         padding={isMobile ? '5rem 0' : '3rem 6rem'}
         borderRadius='0.75rem'
-        bgcolor='white'
         zIndex={100}
         sx={{
           position: isMobile ? 'static' : 'absolute',
