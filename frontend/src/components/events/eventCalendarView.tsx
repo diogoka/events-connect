@@ -22,9 +22,21 @@ const EventCalendarView = (props: Props) => {
       dateClick={handleDateClick}
       fixedWeekCount={false}
       events={[
-        { title: 'event 1', date: '2024-09-25', details: 'details' },
-        { title: 'event 2', date: '2024-09-26' },
-        { title: 'event 2.1', date: '2024-09-26' },
+        {
+          title: '1 activity',
+          date: '2024-10-25',
+          classNames: ['custom-event'],
+          textColor: '#2c1229',
+          details: 'details',
+        },
+        {
+          title: '1 activity',
+          date: '2024-10-25',
+          classNames: ['custom-event'],
+          textColor: '#2c1229',
+          details: 'details',
+        },
+        { title: '1 activity', date: '2024-10-26' },
       ]}
     />
   );
