@@ -1,5 +1,4 @@
-'use client';
-import { useMediaQuery, Box, Typography, Button, Divider } from '@mui/material';
+import { Box, Typography, Button, Divider } from '@mui/material';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -16,13 +15,14 @@ import PinterestIconSvg from '../../public/icons/pinterestIcon.svg';
 import YouTubeIconSvg from '../../public/icons/youtubeIcon.svg';
 import LinkedInIconSvg from '../../public/icons/linkedinIcon.svg';
 import TikTokIconSvg from '../../public/icons/tiktokIcon.svg';
-import ListItemFooter from './Footer/ListItem/ListIem';
+import ListItemFooter from './footer/ListItem/ListIem';
 
-export default function Footer() {
-  const isMobile = useMediaQuery('(max-width: 768px)');
+type Props = {
+  laptopQuery: boolean;
+};
+
+export default function Footer({ laptopQuery }: Props) {
   const pathname = usePathname();
-  const isFooterRight = pathname === '/signup' && !isMobile;
-  const isFooterWhite = pathname === '/login' && !isMobile;
 
   return (
     <Box
@@ -30,8 +30,7 @@ export default function Footer() {
       textAlign='center'
       sx={{
         backgroundColor: '#4F5B92',
-        minHeight: '430px',
-        padding: '40px 24px',
+        padding: laptopQuery ? '40px 104px' : '40px 24px',
       }}
     >
       <Box
@@ -102,7 +101,6 @@ export default function Footer() {
         >
           <Box
             sx={{
-              width: '50%',
               display: 'flex',
               flexDirection: 'column',
               gap: '16px',
@@ -116,26 +114,22 @@ export default function Footer() {
                 width: '100%',
                 display: 'flex',
                 flexWrap: 'wrap',
-                justifyContent: 'space-between',
-                rowGap: '20px',
+                justifyContent: laptopQuery ? 'flex-start' : 'space-between',
+                rowGap: laptopQuery ? '0' : '20px',
+                columnGap: laptopQuery ? '16px' : '0',
               }}
             >
-              <ListItem sx={{ width: '50%' }}>
+              <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
                 <ListItemButton href='/events'>Home</ListItemButton>
-              </ListItem>
-
-              <ListItem sx={{ width: '50%' }}>
                 <ListItemButton href='/user/my-events'>
                   My Events
                 </ListItemButton>
               </ListItem>
 
-              <ListItem sx={{ width: '50%' }}>
+              <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
                 <ListItemButton href='https://www.google.com.br'>
                   History
                 </ListItemButton>
-              </ListItem>
-              <ListItem sx={{ width: '50%' }}>
                 <ListItemButton href='https://www.google.com.br'>
                   Profile
                 </ListItemButton>
@@ -144,7 +138,6 @@ export default function Footer() {
           </Box>
           <Box
             sx={{
-              width: '42%',
               display: 'flex',
               flexDirection: 'column',
               gap: '16px',
@@ -158,9 +151,10 @@ export default function Footer() {
                 width: '100%',
                 display: 'flex',
                 flexWrap: 'wrap',
-                justifyContent: 'space-between',
+                justifyContent: laptopQuery ? 'flex-start' : 'space-between',
                 alignItems: 'start',
-                rowGap: '20px',
+                rowGap: laptopQuery ? '0' : '20px',
+                columnGap: laptopQuery ? '24px' : '0',
               }}
             >
               <ListItemFooter
@@ -168,6 +162,7 @@ export default function Footer() {
                 src={InstagramIconSvg}
                 size={24}
                 href='https://www.instagram.com/cicccvancouver/'
+                width={laptopQuery ? 'fit-content' : '30%'}
               />
 
               <ListItemFooter
@@ -175,6 +170,7 @@ export default function Footer() {
                 src={FacebookIconSvg}
                 size={24}
                 href='https://www.facebook.com/cicccvancouver/'
+                width={laptopQuery ? 'fit-content' : '30%'}
               />
 
               <ListItemFooter
@@ -182,6 +178,7 @@ export default function Footer() {
                 src={PinterestIconSvg}
                 size={24}
                 href='https://www.pinterest.ca/cicccvancouver/'
+                width={laptopQuery ? 'fit-content' : '30%'}
               />
 
               <ListItemFooter
@@ -189,6 +186,7 @@ export default function Footer() {
                 src={YouTubeIconSvg}
                 size={24}
                 href='https://www.youtube.com/channel/UCDj9ILg0V9aAF0NxCVDUlww'
+                width={laptopQuery ? 'fit-content' : '30%'}
               />
 
               <ListItemFooter
@@ -196,6 +194,7 @@ export default function Footer() {
                 src={LinkedInIconSvg}
                 size={24}
                 href='https://www.linkedin.com/school/cornerstone-international-community-college-of-canada/'
+                width={laptopQuery ? 'fit-content' : '30%'}
               />
 
               <ListItemFooter
@@ -203,6 +202,7 @@ export default function Footer() {
                 src={TikTokIconSvg}
                 size={24}
                 href='https://www.tiktok.com/@cicccvancouver/'
+                width={laptopQuery ? 'fit-content' : '30%'}
               />
             </List>
           </Box>

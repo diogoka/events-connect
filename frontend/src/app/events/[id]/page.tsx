@@ -60,15 +60,16 @@ export default function EventPage() {
         handleClose={handleCloseModal}
       />
       <Stack rowGap={'40px'}>
-        <Box sx={{ maxWidth: '100%', maxHeight: '208px' }}>
-          <Image
-            alt='image_event'
-            src={event?.image_url_event!}
-            height={600}
-            width={600}
-            style={{ width: '100%', height: '208px', borderRadius: '4px' }}
-          />
-        </Box>
+        <Box
+          sx={{
+            minWidth: '100%',
+            minHeight: '208px',
+            backgroundImage: `url(${event?.image_url_event})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            borderRadius: '4px',
+          }}
+        ></Box>
         <Box
           sx={{
             display: 'flex',
@@ -83,7 +84,7 @@ export default function EventPage() {
           </Typography>
         </Box>
 
-        <Stack gap={1}>
+        <Stack gap={1} direction={laptopQuery ? 'column' : 'row'}>
           <Box sx={{ width: '100%', display: 'flex', gap: '8px' }}>
             <Box
               sx={{
@@ -205,6 +206,7 @@ export default function EventPage() {
             )}
           </Box>
         </Stack>
+
         <Box sx={{ width: '100%' }}>
           <Typography sx={{ fontSize: '18px' }}>
             <pre
@@ -273,7 +275,7 @@ export default function EventPage() {
         </Stack>
       </Stack>
       <Box
-        padding='0 30px'
+        padding={laptopQuery ? '0 30px' : '0 104px'}
         left='0'
         width='100%'
         margin='0 auto'

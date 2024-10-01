@@ -29,8 +29,7 @@ export default function HeaderPC() {
           onClick={() => router.push('/login')}
           variant='contained'
           color='primary'
-          startIcon={<LoginIcon />}
-          sx={{ width: '7rem', padding: '2rem 1rem', borderRadius: 0 }}
+          sx={{ width: '7rem', padding: '2rem 1rem' }}
         >
           Log in
         </Button>

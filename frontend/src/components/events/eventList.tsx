@@ -78,11 +78,13 @@ function EventList({
         {isCalendarView ? (
           <Box
             sx={{
-              height: '100%',
+              minHeight: '100%',
               minWidth: '100%',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
+
+              marginBottom: '104px',
             }}
           >
             <EventCalendarView />

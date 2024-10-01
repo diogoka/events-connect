@@ -5,7 +5,7 @@ import axios from 'axios';
 import { initializeFirebase } from '@/auth/firebase';
 
 import { getAuth, deleteUser, signOut } from 'firebase/auth';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 import { UserContext } from '@/context/userContext';
 import { PageContext } from '@/context/pageContext';
 import { LoginStatus, PageStatus } from '@/types/context.types';
@@ -15,84 +15,13 @@ import Loading from '@/app/loading';
 import NotFound from '@/components/common/notFound';
 import { Page, Limitation, Permission } from '@/types/auth-provider.types';
 
-const PAGES: Page[] = [
-  {
-    path: /^\/$/,
-    limitation: Limitation.None,
-    isLoadingRequired: false,
-  },
-  {
-    path: /^\/events$/,
-    limitation: Limitation.None,
-    isLoadingRequired: true,
-  },
-  {
-    path: /^\/events\/\d+$/,
-    limitation: Limitation.None,
-    isLoadingRequired: true,
-  },
-  {
-    path: /^\/signup$/,
-    limitation: Limitation.None,
-    isLoadingRequired: false,
-  },
-  {
-    path: /^\/login$/,
-    limitation: Limitation.None,
-    isLoadingRequired: false,
-  },
-  {
-    path: /^\/user$/,
-    limitation: Limitation.LoggedIn,
-    isLoadingRequired: false,
-  },
-  {
-    path: /^\/user\/edit$/,
-    limitation: Limitation.LoggedIn,
-    isLoadingRequired: false,
-  },
-  {
-    path: /^\/history$/,
-    limitation: Limitation.LoggedIn,
-    isLoadingRequired: true,
-  },
-  {
-    path: /^\/user\/my-events$/,
-    limitation: Limitation.LoggedIn,
-    isLoadingRequired: true,
-  },
-  {
-    path: /^\/events\/new$/,
-    limitation: Limitation.Organizer,
-    isLoadingRequired: false,
-  },
-  {
-    path: /^\/events\/new\/preview$/,
-    limitation: Limitation.Organizer,
-    isLoadingRequired: false,
-  },
-  {
-    path: /^\/events\/\d+\/edit$/,
-    limitation: Limitation.Organizer,
-    isLoadingRequired: true,
-  },
-  {
-    path: /^\/organizer-events$/,
-    limitation: Limitation.Organizer,
-    isLoadingRequired: true,
-  },
-  {
-    path: /^\/verification$/,
-    limitation: Limitation.None,
-    isLoadingRequired: true,
-  },
-];
+import { PAGES } from './pages';
 
-export default function AuthProvider({
-  children,
-}: {
+type Props = {
   children: React.ReactNode;
-}) {
+};
+
+const AuthProvider = ({ children }: Props) => {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -106,6 +35,8 @@ export default function AuthProvider({
     firebaseAccount: firebaseAccountContext,
     setError,
   } = useContext(UserContext);
+
+  const laptopQuery = useMediaQuery('(min-width:769px)');
 
   useEffect(() => {
     initializeFirebase;
@@ -261,7 +192,9 @@ export default function AuthProvider({
     return false;
   };
 
-  const getComponent = () => {
+  const getComponent = (laptopQuery: boolean) => {
+    console.log('Laptop', laptopQuery);
+
     switch (pageStatus) {
       case PageStatus.Loading:
         return (
@@ -271,12 +204,7 @@ export default function AuthProvider({
         );
       case PageStatus.Ready:
         return (
-          <Box
-            component='main'
-            maxWidth='1280px'
-            padding='0 24px'
-            marginInline='auto'
-          >
+          <Box component='main' padding={laptopQuery ? '0 104px' : '0 24px'}>
             <Box flexGrow={1}>{children}</Box>
           </Box>
         );
@@ -288,11 +216,11 @@ export default function AuthProvider({
   return (
     <>
       {isHeaderReady() && <Header />}
-      {getComponent()}
-      <Footer />
+      {getComponent(laptopQuery)}
+      <Footer laptopQuery={laptopQuery} />
     </>
   );
-}
+};
 
 export const deleteAccount = async () => {
   getAuth().onAuthStateChanged(async (firebaseAccount) => {
@@ -309,3 +237,5 @@ function getPage(pathname: string): Page | undefined {
     return PAGE.path.test(pathname);
   });
 }
+
+export default AuthProvider;

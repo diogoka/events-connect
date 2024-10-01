@@ -11,13 +11,15 @@ type Props = {
   alt: string;
   src: string;
   size: number;
+  width: string;
 };
 
-const ListItemFooter = ({ href, src, alt, size }: Props) => {
+const ListItemFooter = ({ href, src, alt, size, width }: Props) => {
   return (
     <ListItem
       sx={{
-        width: '30%',
+        // width: '30%',
+        width: width,
       }}
     >
       <ListItemButton href={href} target='_blank' sx={{ width: '20px' }}>
