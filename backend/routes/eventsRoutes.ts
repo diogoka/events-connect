@@ -14,6 +14,7 @@ import {
   getUpComingEvents,
   getUpcomingEventsByUserId,
   getPastEventsByUserId,
+  getPastEventsOfMonth,
 } from '../controllers/eventsControllers';
 
 const eventsRouter: Router = express.Router();
@@ -25,6 +26,8 @@ eventsRouter.get('/:id', getEventById);
 
 eventsRouter.get('/upcoming/user/:id', getUpcomingEventsByUserId);
 eventsRouter.get('/past/user/:id', getPastEventsByUserId);
+
+eventsRouter.get('/past/month', getPastEventsOfMonth);
 
 // Old
 

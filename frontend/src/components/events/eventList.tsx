@@ -7,6 +7,8 @@ import NewEventCard from './newEventCard';
 
 import SwitchViews from './switchViews';
 import EventCalendarView from './eventCalendarView';
+import React from 'react';
+import MobileEventCalendarView from './mobileEventCalendarView';
 
 type Props = {
   events: Event[];
@@ -23,6 +25,9 @@ type Props = {
   isCalendarView?: boolean;
   setIsCalendarView?: () => void;
   isUserPage?: boolean;
+  getPastEventsOfMonth?: (month: number, year: number) => void;
+  isPastMonthEvents: boolean;
+  setIsPastMonthEvents: Dispatch<SetStateAction<boolean>>;
 };
 
 function EventList({
@@ -37,6 +42,9 @@ function EventList({
   isCalendarView,
   setIsCalendarView,
   isUserPage = false,
+  getPastEventsOfMonth,
+  isPastMonthEvents,
+  setIsPastMonthEvents,
 }: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
@@ -61,6 +69,10 @@ function EventList({
         pastEvents={pastEvents}
         setPastEvents={setPastEvents}
         isUserPage={isUserPage}
+        isDesktop={laptopQuery}
+        getPastEventsOfMonth={getPastEventsOfMonth}
+        isPastMonthEvents={isPastMonthEvents}
+        setIsPastMonthEvents={setIsPastMonthEvents}
       />
 
       <Stack
@@ -83,11 +95,13 @@ function EventList({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-
-              marginBottom: '104px',
             }}
           >
-            <EventCalendarView />
+            {laptopQuery ? (
+              <EventCalendarView eventsToCalendar={events} />
+            ) : (
+              <MobileEventCalendarView events={events} />
+            )}
           </Box>
         ) : (
           <>

@@ -7,6 +7,7 @@ import { UserContext } from '@/context/userContext';
 import { Events as Event, CurrentUser } from '@/types/pages.types';
 
 import { api } from '@/services/api';
+import React from 'react';
 
 export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -19,8 +20,7 @@ export default function EventsPage() {
   const [emptyList, setEmptyList] = useState(false);
   const [numberOfEvents, setNumberOfEvents] = useState(0);
   const [isCalendarView, setIsCalendarView] = useState<boolean>(false);
-
-  const laptopQuery = useMediaQuery('(min-width:769px)');
+  const [isPastMonthEvents, setIsPastMonthEvents] = useState(false);
 
   const currentUser: CurrentUser = {
     id: user?.id!,
@@ -96,6 +96,19 @@ export default function EventsPage() {
     }
   };
 
+  const getPastEventsOfMonth = async (month: number, year: number) => {
+    try {
+      const { data } = await api.get(
+        `/api/events/past/month/?month=${month}&year=${year}`
+      );
+
+      setEvents(data);
+      setIsPastMonthEvents(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleLoadMoreEvents = async () => {
     try {
       if (!isPastEvents) {
@@ -163,6 +176,9 @@ export default function EventsPage() {
         pastEvents={isPastEvents}
         isCalendarView={isCalendarView}
         setIsCalendarView={handleCalendarViewSwitch}
+        getPastEventsOfMonth={getPastEventsOfMonth}
+        isPastMonthEvents={isPastMonthEvents}
+        setIsPastMonthEvents={setIsPastMonthEvents}
       />
     </Box>
   );

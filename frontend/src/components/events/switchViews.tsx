@@ -2,12 +2,18 @@ import { Box, Typography } from '@mui/material';
 import React, { Dispatch, SetStateAction } from 'react';
 import GoogleIcon from '../icons/googleIcon';
 
+import { getYear, getMonth } from 'date-fns';
+
 type Props = {
   isCalendarView?: boolean;
   setIsCalendarView?: Dispatch<SetStateAction<boolean>>;
   setPastEvents: Dispatch<SetStateAction<boolean>>;
   pastEvents: boolean;
   isUserPage?: boolean;
+  isDesktop: boolean;
+  getPastEventsOfMonth?: (month: number, year: number) => void;
+  isPastMonthEvents: boolean;
+  setIsPastMonthEvents: Dispatch<SetStateAction<boolean>>;
 };
 
 const SwitchViews = ({
@@ -16,7 +22,17 @@ const SwitchViews = ({
   pastEvents,
   setPastEvents,
   isUserPage = false,
+  isDesktop,
+  getPastEventsOfMonth,
+  isPastMonthEvents,
+  setIsPastMonthEvents,
 }: Props) => {
+  const handleMonthPastEventsClick = () => {
+    const currentYear = getYear(new Date());
+    const currentMonth = getMonth(new Date()) + 1;
+    getPastEventsOfMonth!(currentMonth, currentYear);
+  };
+
   return (
     <Box
       sx={{
@@ -36,32 +52,43 @@ const SwitchViews = ({
             border: 'none',
             color: '#1B1B21',
             fontSize: '20px',
-            fontWeight: pastEvents ? 'none' : 'bold',
-            textDecoration: pastEvents ? 'none' : 'underline',
+            fontWeight: pastEvents || isPastMonthEvents ? 'none' : 'bold',
+            textDecoration:
+              pastEvents || isPastMonthEvents ? 'none' : 'underline',
             textUnderlineOffset: '8px',
             textDecorationColor: '#B8C3FF',
             cursor: 'pointer',
           }}
         >
-          Upcoming
+          {isCalendarView && isDesktop ? 'All Activities' : 'Upcoming'}
         </Typography>
-        <Typography
-          component={'button'}
-          onClick={() => setPastEvents(true)}
-          sx={{
-            backgroundColor: 'inherit',
-            border: 'none',
-            color: '#1B1B21',
-            fontSize: '20px',
-            fontWeight: pastEvents ? 'bold' : 'none',
-            textDecoration: pastEvents ? 'underline' : 'none',
-            textUnderlineOffset: '8px',
-            textDecorationColor: '#B8C3FF',
-            cursor: 'pointer',
-          }}
-        >
-          {isUserPage ? 'Attended' : ' Previous'}
-        </Typography>
+
+        {(!isDesktop || (isDesktop && !isCalendarView)) && (
+          <Typography
+            component={'button'}
+            onClick={() => {
+              if (!isDesktop && isCalendarView) {
+                handleMonthPastEventsClick();
+              } else {
+                setPastEvents(true);
+              }
+            }}
+            sx={{
+              backgroundColor: 'inherit',
+              border: 'none',
+              color: '#1B1B21',
+              fontSize: '20px',
+              fontWeight: pastEvents || isPastMonthEvents ? 'bold' : 'none',
+              textDecoration:
+                pastEvents || isPastMonthEvents ? 'underline' : 'none',
+              textUnderlineOffset: '8px',
+              textDecorationColor: '#B8C3FF',
+              cursor: 'pointer',
+            }}
+          >
+            {isUserPage ? 'Attended' : ' Previous'}
+          </Typography>
+        )}
       </Box>
 
       {setIsCalendarView && (

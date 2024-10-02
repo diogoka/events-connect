@@ -75,13 +75,53 @@ export const getPastEvents = async (
   }
 };
 
+export const getPastEventsOfMonth = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const month = req.query.month;
+    const year = req.query.year;
+
+    if (!month || !year) {
+      return res.status(400).json({ error: 'Month and year are required' });
+    }
+
+    const startDate = new Date(+year, +month - 1, 1);
+    const endDate = new Date(+year, +month, 0);
+
+    const today = new Date();
+
+    const events = await prisma.events.findMany({
+      where: {
+        AND: [
+          {
+            date_event_end: {
+              lt: today,
+            },
+          },
+          {
+            date_event_start: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
+      },
+    });
+
+    res.status(200).json(events);
+  } catch (error) {
+    console.error('Error fetching past events:', error);
+    res.status(500).json({ error: 'Failed to fetch past events' });
+  }
+};
+
 export const getEventById = async (
   req: express.Request,
   res: express.Response
 ) => {
   const id = req.params.id;
-
-  console.log('By Id');
 
   try {
     const event = await prisma.events.findUnique({
