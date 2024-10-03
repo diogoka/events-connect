@@ -15,22 +15,27 @@ import {
   getUpcomingEventsByUserId,
   getPastEventsByUserId,
   getPastEventsOfMonth,
+  getUpcomingMonthEvents,
+  getAttendedEventsByUser,
 } from '../controllers/eventsControllers';
 
 const eventsRouter: Router = express.Router();
 
 // Prisma
 eventsRouter.get('/past', getPastEvents);
+eventsRouter.get('/past/month', getPastEventsOfMonth);
+
 eventsRouter.get('/upcoming', getUpComingEvents);
+eventsRouter.get('/upcoming/month', getUpcomingMonthEvents);
+
 eventsRouter.get('/:id', getEventById);
 
 eventsRouter.get('/upcoming/user/:id', getUpcomingEventsByUserId);
 eventsRouter.get('/past/user/:id', getPastEventsByUserId);
 
-eventsRouter.get('/past/month', getPastEventsOfMonth);
+eventsRouter.get('/attended/user/:id', getAttendedEventsByUser);
 
 // Old
-
 eventsRouter.get('/owner/:id', getEventsByOwner);
 eventsRouter.get('/search/', searchEvents);
 

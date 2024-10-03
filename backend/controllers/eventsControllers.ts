@@ -1,13 +1,7 @@
 import pool from '../db/db';
 import express from 'express';
-import { sendEmail, EmailOption } from '../helpers/mail';
-import moment from 'moment-timezone';
-import {
-  Attendee,
-  EventInput,
-  Date,
-  QueryEventsParamType,
-} from '../types/types';
+import { sendEmail } from '../helpers/mail';
+import { Date, QueryEventsParamType } from '../types/types';
 
 import { PrismaClient } from '@prisma/client';
 
@@ -20,12 +14,16 @@ export const getUpComingEvents = async (
   try {
     const queryParams: QueryEventsParamType = req.query as QueryEventsParamType;
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const events = await prisma.events.findMany({
       where: {
         date_event_start: {
           gte: today,
         },
+      },
+      orderBy: {
+        date_event_start: 'asc',
       },
     });
 
@@ -91,6 +89,7 @@ export const getPastEventsOfMonth = async (
     const endDate = new Date(+year, +month, 0);
 
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const events = await prisma.events.findMany({
       where: {
@@ -108,12 +107,61 @@ export const getPastEventsOfMonth = async (
           },
         ],
       },
+      orderBy: {
+        date_event_start: 'desc',
+      },
     });
 
     res.status(200).json(events);
   } catch (error) {
     console.error('Error fetching past events:', error);
     res.status(500).json({ error: 'Failed to fetch past events' });
+  }
+};
+
+export const getUpcomingMonthEvents = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const month = req.query.month;
+    const year = req.query.year;
+
+    if (!month || !year) {
+      return res.status(400).json({ error: 'Month and year are required' });
+    }
+
+    const startDate = new Date(+year, +month - 1, 1);
+    const endDate = new Date(+year, +month, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const events = await prisma.events.findMany({
+      where: {
+        AND: [
+          {
+            date_event_start: {
+              gte: today,
+            },
+          },
+          {
+            date_event_start: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
+      },
+      orderBy: {
+        date_event_start: 'asc',
+      },
+    });
+
+    res.status(200).json(events);
+  } catch (error) {
+    console.error('Error fetching upcoming events:', error);
+    res.status(500).json({ error: 'Failed to fetch upcoming events' });
   }
 };
 
@@ -171,7 +219,7 @@ export const getUpcomingEventsByUserId = async (
   try {
     const data = await prisma.attendees.findMany({
       where: {
-        id_user: 'user1',
+        id_user: id,
       },
       include: {
         events: true,
@@ -233,6 +281,35 @@ export const getPastEventsByUserId = async (
     }
   } catch (error: any) {
     res.status(505).json(error.message);
+  }
+};
+
+export const getAttendedEventsByUser = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const attendedEvents = await prisma.attendees.findMany({
+      where: {
+        id_user: id,
+      },
+      select: {
+        id_event: true,
+      },
+    });
+
+    return res.status(200).json(attendedEvents);
+  } catch (error) {
+    console.error('Error fetching user attended events:', error);
+    return res
+      .status(500)
+      .json({ error: 'Failed to fetch user attended events.' });
   }
 };
 
