@@ -1,8 +1,9 @@
 import { Box, Typography } from '@mui/material';
 import React, { Dispatch, SetStateAction } from 'react';
-import GoogleIcon from '../icons/googleIcon';
+import Image from 'next/image';
 
-import { getYear, getMonth } from 'date-fns';
+import calendarIconSvg from '../../../public/icons/calendarIconSvg.svg';
+import gridIconSvg from '../../../public/icons/gridIconSvg.svg';
 
 type Props = {
   isCalendarView?: boolean;
@@ -11,9 +12,9 @@ type Props = {
   pastEvents: boolean;
   isUserPage?: boolean;
   isDesktop: boolean;
-  getPastEventsOfMonth?: (month: number, year: number) => void;
-  isPastMonthEvents: boolean;
-  setIsPastMonthEvents: Dispatch<SetStateAction<boolean>>;
+  getPastEventsOfMonth?: () => void;
+  isPastMonthEvents?: boolean;
+  setIsPastMonthEvents?: Dispatch<SetStateAction<boolean>>;
 };
 
 const SwitchViews = ({
@@ -28,9 +29,20 @@ const SwitchViews = ({
   setIsPastMonthEvents,
 }: Props) => {
   const handleMonthPastEventsClick = () => {
-    const currentYear = getYear(new Date());
-    const currentMonth = getMonth(new Date()) + 1;
-    getPastEventsOfMonth!(currentMonth, currentYear);
+    getPastEventsOfMonth!();
+    setIsPastMonthEvents!(true);
+    setPastEvents(true);
+  };
+
+  const handleUpcomingSwitchClick = () => {
+    setPastEvents(false);
+    if (isCalendarView) {
+      setIsPastMonthEvents!(false);
+    }
+  };
+
+  const handlePastSwitchClick = () => {
+    setPastEvents(true);
   };
 
   return (
@@ -46,18 +58,18 @@ const SwitchViews = ({
       <Box sx={{ display: 'flex', width: '100%', gap: '24px' }}>
         <Typography
           component={'button'}
-          onClick={() => setPastEvents(false)}
+          onClick={() => handleUpcomingSwitchClick()}
           sx={{
             backgroundColor: 'inherit',
             border: 'none',
             color: '#1B1B21',
             fontSize: '20px',
-            fontWeight: pastEvents || isPastMonthEvents ? 'none' : 'bold',
-            textDecoration:
-              pastEvents || isPastMonthEvents ? 'none' : 'underline',
+            fontWeight: pastEvents ? 'none' : 'bold',
+            textDecoration: pastEvents ? 'none' : 'underline',
             textUnderlineOffset: '8px',
             textDecorationColor: '#B8C3FF',
             cursor: 'pointer',
+            padding: 0,
           }}
         >
           {isCalendarView && isDesktop ? 'All Activities' : 'Upcoming'}
@@ -70,7 +82,7 @@ const SwitchViews = ({
               if (!isDesktop && isCalendarView) {
                 handleMonthPastEventsClick();
               } else {
-                setPastEvents(true);
+                handlePastSwitchClick();
               }
             }}
             sx={{
@@ -78,12 +90,12 @@ const SwitchViews = ({
               border: 'none',
               color: '#1B1B21',
               fontSize: '20px',
-              fontWeight: pastEvents || isPastMonthEvents ? 'bold' : 'none',
-              textDecoration:
-                pastEvents || isPastMonthEvents ? 'underline' : 'none',
+              fontWeight: pastEvents ? 'bold' : 'none',
+              textDecoration: pastEvents ? 'underline' : 'none',
               textUnderlineOffset: '8px',
               textDecorationColor: '#B8C3FF',
               cursor: 'pointer',
+              padding: 0,
             }}
           >
             {isUserPage ? 'Attended' : ' Previous'}
@@ -115,7 +127,7 @@ const SwitchViews = ({
             component={'button'}
             onClick={() => setIsCalendarView(false)}
           >
-            <GoogleIcon name='grid_view' size={20} outlined weight={200} />
+            <Image src={gridIconSvg} alt='grid icon' width={20} height={20} />
           </Box>
           <Box
             sx={{
@@ -132,7 +144,12 @@ const SwitchViews = ({
             component={'button'}
             onClick={() => setIsCalendarView(true)}
           >
-            <GoogleIcon name='calendar_month' size={20} outlined weight={200} />
+            <Image
+              src={calendarIconSvg}
+              alt='grid icon'
+              width={20}
+              height={20}
+            />
           </Box>
         </Box>
       )}

@@ -30,14 +30,6 @@ export default function RootLayout({
           href='https://fonts.googleapis.com/css2?family=Outfit:wght@600&family=Space+Grotesk:wght@400;500;600&display=swap'
           rel='stylesheet'
         />
-        <link
-          href='https://fonts.googleapis.com/icon?family=Material+Icons'
-          rel='stylesheet'
-        />
-        <link
-          rel='stylesheet'
-          href='https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24..48,100..700,0,0&display=swap'
-        />
       </head>
       <Box
         component='body'

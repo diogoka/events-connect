@@ -1,22 +1,15 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-
 import Card from '@mui/material/Card';
-
 import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-import Skeleton from '@mui/material/Skeleton';
-import Fade from '@mui/material/Fade';
 import { Box, Button, Typography } from '@mui/material';
-
 import { Event } from '@/types/pages.types';
 import { monthDayFn, TimeFn } from '@/common/functions';
-
-import { ScheduleRounded } from '@mui/icons-material';
-import { FaRegShareFromSquare } from 'react-icons/fa6';
 import EventImageWithDate from '../common/eventImageWithDate';
-import GoogleIcon from '../icons/googleIcon';
+import scheduleIconSvg from '../../../public/icons/scheduleIconSvg.svg';
+import shareIconSvg from '../../../public/icons/iosShareIconSvg.svg';
+import Image from 'next/image';
 
 type Props = {
   event: Event & {
@@ -26,11 +19,18 @@ type Props = {
     id: string | undefined;
     role: string | undefined;
   };
-  attending?: boolean;
+  isAttending?: boolean;
   laptopQuery: boolean;
+  pastEvent: boolean;
 };
 
-const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
+const NewEventCard = ({
+  event,
+  user,
+  isAttending = false,
+  laptopQuery,
+  pastEvent,
+}: Props) => {
   const startTime = TimeFn(event.date_event_start);
   const endTime = TimeFn(event.date_event_end);
   const monthAndDay = monthDayFn(event.date_event_start);
@@ -57,6 +57,7 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
         backgroundColor: '#FBF8FF',
         cursor: 'pointer',
         border: 0,
+        padding: 0,
       }}
       component={'button'}
       onClick={() => handleClickCard()}
@@ -66,6 +67,8 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
         imageUrl={event?.image_url_event!}
         monthAndDay={monthAndDay}
         handleLoadedImage={handleSetLoadedImage}
+        isAttending={isAttending}
+        pastEvent={pastEvent}
       />
       <CardContent
         sx={{
@@ -75,13 +78,18 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
         }}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-          <Typography sx={{ fontWeight: '700' }}>
+          <Typography sx={{ fontWeight: '700', textAlign: 'start' }}>
             {event && event.name_event.length > 19
               ? `${event.name_event.slice(0, 20)}...`
               : event.name_event}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <ScheduleRounded fontSize='inherit' sx={{ marginRight: '3px' }} />
+            <Image
+              src={scheduleIconSvg}
+              alt='schedule icon'
+              width={18}
+              height={18}
+            />
             <Typography>
               {startTime} to {endTime}
             </Typography>
@@ -105,7 +113,7 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
               handleShareEvent();
             }}
           >
-            <GoogleIcon name='ios_share' size={25} weight={100} outlined />
+            <Image src={shareIconSvg} alt='share icon' width={25} height={25} />
           </Box>
           <Button
             sx={{
@@ -113,7 +121,11 @@ const NewEventCard = ({ event, user, attending, laptopQuery }: Props) => {
               borderRadius: '6px',
               padding: '8px',
               fontSize: '1rem',
+              '&:disabled': {
+                backgroundColor: 'rgba(27, 27, 33, 0.12)',
+              },
             }}
+            disabled={isAttending}
             onClick={() => {
               handleClickCard();
             }}

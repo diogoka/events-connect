@@ -1,6 +1,6 @@
 'use client';
 import { Box, Button, Stack, Typography } from '@mui/material';
-import { Events as Event } from '@/types/pages.types';
+import { AttendedEvent, Events as Event } from '@/types/pages.types';
 import { Dispatch, SetStateAction, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import NewEventCard from './newEventCard';
@@ -17,34 +17,24 @@ type Props = {
     id: string | undefined;
     role: string | undefined;
   };
-  attendance: [number, boolean][];
   handleLoadMoreEvents: () => void;
   emptyList: boolean;
-  setPastEvents: Dispatch<SetStateAction<boolean>>;
-  pastEvents: boolean;
-  isCalendarView?: boolean;
-  setIsCalendarView?: () => void;
   isUserPage?: boolean;
-  getPastEventsOfMonth?: (month: number, year: number) => void;
-  isPastMonthEvents: boolean;
-  setIsPastMonthEvents: Dispatch<SetStateAction<boolean>>;
+  isCalendarView?: boolean;
+  pastEvents: boolean;
+  attendedEvents?: AttendedEvent[];
 };
 
 function EventList({
   events,
   user,
   setEvents,
-  attendance,
   handleLoadMoreEvents,
   emptyList,
-  setPastEvents,
-  pastEvents,
-  isCalendarView,
-  setIsCalendarView,
   isUserPage = false,
-  getPastEventsOfMonth,
-  isPastMonthEvents,
-  setIsPastMonthEvents,
+  isCalendarView = false,
+  pastEvents,
+  attendedEvents,
 }: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
@@ -52,29 +42,14 @@ function EventList({
     const newEvents = await events.filter((event) => event.id_event !== id);
     setEvents(newEvents);
   };
+
   const checkAttendance = (id: number) => {
-    for (let i = 0; i < attendance.length; i++) {
-      if (attendance[i][0] === id) {
-        return true;
-      }
-    }
-    return false;
+    const isAttended = attendedEvents!.some((event) => event.id_event === id);
+    return isAttended;
   };
 
   return (
     <Box sx={{ width: '100%' }}>
-      <SwitchViews
-        isCalendarView={isCalendarView}
-        setIsCalendarView={setIsCalendarView}
-        pastEvents={pastEvents}
-        setPastEvents={setPastEvents}
-        isUserPage={isUserPage}
-        isDesktop={laptopQuery}
-        getPastEventsOfMonth={getPastEventsOfMonth}
-        isPastMonthEvents={isPastMonthEvents}
-        setIsPastMonthEvents={setIsPastMonthEvents}
-      />
-
       <Stack
         spacing={2}
         sx={{
@@ -126,15 +101,18 @@ function EventList({
               </Typography>
             ) : (
               events.map((event, index) => {
-                const attending = checkAttendance(event.id_event);
+                const attended = isUserPage
+                  ? true
+                  : checkAttendance(event.id_event);
 
                 return (
                   <NewEventCard
                     key={index}
                     event={event}
                     user={user}
-                    attending={attending}
+                    isAttending={attended}
                     laptopQuery={laptopQuery}
+                    pastEvent={pastEvents}
                   />
                 );
               })

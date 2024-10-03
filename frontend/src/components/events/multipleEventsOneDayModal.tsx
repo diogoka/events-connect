@@ -10,7 +10,6 @@ type Props = {
 };
 
 const MultipleEventsOneDayModal = ({ isOpen, handleClose, events }: Props) => {
-  console.log('events in modal', events);
   return (
     <Modal
       open={isOpen}
@@ -45,8 +44,9 @@ const MultipleEventsOneDayModal = ({ isOpen, handleClose, events }: Props) => {
                 key={index}
                 event={event}
                 user={{ id: '', role: '' }}
-                attending={false}
+                isAttending={false}
                 laptopQuery={false}
+                pastEvent={false}
               />
             );
           })}

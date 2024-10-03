@@ -193,8 +193,6 @@ const AuthProvider = ({ children }: Props) => {
   };
 
   const getComponent = (laptopQuery: boolean) => {
-    console.log('Laptop', laptopQuery);
-
     switch (pageStatus) {
       case PageStatus.Loading:
         return (

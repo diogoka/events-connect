@@ -98,3 +98,7 @@ export interface UserInputDTO extends UserInputForm {
 export interface UserEditInfo extends User {
   courseId: string;
 }
+
+export type AttendedEvent = {
+  id_event: number;
+};

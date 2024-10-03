@@ -7,7 +7,6 @@ import ListItemButton from '@mui/material/ListItemButton';
 import { usePathname } from 'next/navigation';
 
 import Image from 'next/image';
-import GoogleIcon from './icons/googleIcon';
 
 import InstagramIconSvg from '../../public/icons/instagramIcon.svg';
 import FacebookIconSvg from '../../public/icons/facebookIcon.svg';
@@ -15,7 +14,9 @@ import PinterestIconSvg from '../../public/icons/pinterestIcon.svg';
 import YouTubeIconSvg from '../../public/icons/youtubeIcon.svg';
 import LinkedInIconSvg from '../../public/icons/linkedinIcon.svg';
 import TikTokIconSvg from '../../public/icons/tiktokIcon.svg';
-import ListItemFooter from './footer/ListItem/ListIem';
+import ListItemFooter from './Footer/ListItem/ListIem';
+
+import arrowIconSvg from '../../public/icons/arrowIconSvg.svg';
 
 type Props = {
   laptopQuery: boolean;
@@ -78,7 +79,7 @@ export default function Footer({ laptopQuery }: Props) {
             }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            <GoogleIcon name='arrow_upward' size={20} />
+            <Image src={arrowIconSvg} alt='arrow icon' width={20} height={20} />
             Back to top
           </Button>
         </Box>

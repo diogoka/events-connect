@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect, useContext } from 'react';
+
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'next/navigation';
 import { Box, Stack, Typography, useMediaQuery, Button } from '@mui/material';
 import { UserContext } from '@/context/userContext';
@@ -7,12 +8,16 @@ import { PageContext } from '@/context/pageContext';
 import { Attendee, Event, OtherInfo } from '@/types/types';
 import Image from 'next/image';
 import { monthDayFn, TimeFn } from '@/common/functions';
-import GoogleIcon from '@/components/icons/googleIcon';
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import { api } from '@/services/api';
 import AttendeesModal from '@/components/event/attendees/attendees-modal';
 import MapWithMarker from '@/components/map/mapWithMarker';
+
+import calendarIconDetailSvg from '../../../../public/icons/calendarIconSvgDetail.svg';
+import scheduleIconSvgDetail from '../../../../public/icons/scheduleIconSvgDetail.svg';
+import groupIconSvg from '../../../../public/icons/groupIconSvg.svg';
+import nearMeIconSvg from '../../../../public/icons/nearMeIconSvg.svg';
 
 export default function EventPage() {
   const { notFound } = useContext(PageContext);
@@ -97,13 +102,13 @@ export default function EventPage() {
                 gap: '8px',
               }}
             >
-              <GoogleIcon
-                name='calendar_month'
-                size={24}
-                outlined
-                weight={400}
-                color='#4F5B92'
+              <Image
+                src={calendarIconDetailSvg}
+                alt='calendar icon'
+                height={24}
+                width={24}
               />
+
               <Typography sx={{ fontSize: '18px' }}>{monthAndDay}</Typography>
             </Box>
             <Box
@@ -117,12 +122,11 @@ export default function EventPage() {
                 gap: '8px',
               }}
             >
-              <GoogleIcon
-                name='schedule'
-                size={24}
-                outlined
-                weight={400}
-                color='#4F5B92'
+              <Image
+                src={scheduleIconSvgDetail}
+                alt='schedule icon'
+                height={24}
+                width={24}
               />
               <Typography sx={{ fontSize: '18px' }}>
                 {startTime.replace(/\s+/g, '')} to {endTime.replace(/\s+/g, '')}
@@ -140,12 +144,11 @@ export default function EventPage() {
               gap: '8px',
             }}
           >
-            <GoogleIcon
-              name='near_me'
-              size={24}
-              outlined
-              weight={400}
-              color='#4F5B92'
+            <Image
+              src={nearMeIconSvg}
+              alt='near me icon'
+              width={24}
+              height={24}
             />
             <Typography sx={{ textDecoration: 'underline', fontSize: '18px' }}>
               {event?.location_event}
@@ -169,12 +172,11 @@ export default function EventPage() {
                 gap: '8px',
               }}
             >
-              <GoogleIcon
-                name='group'
-                size={24}
-                outlined
-                weight={400}
-                color='#4F5B92'
+              <Image
+                src={groupIconSvg}
+                alt='group icon'
+                width={24}
+                height={24}
               />
 
               {attendees?.length === 0 ? (

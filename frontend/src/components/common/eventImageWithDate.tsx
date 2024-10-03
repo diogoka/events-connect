@@ -1,11 +1,14 @@
 import { Box, CardMedia, Fade, Skeleton, Typography } from '@mui/material';
 import React from 'react';
+import Chip from '../events/chip';
 
 type Props = {
   imageLoaded: boolean;
   imageUrl: string;
   monthAndDay: string;
   handleLoadedImage: () => void;
+  isAttending: boolean;
+  pastEvent: boolean;
 };
 
 const EventImageWithDate = ({
@@ -13,6 +16,8 @@ const EventImageWithDate = ({
   imageUrl,
   monthAndDay,
   handleLoadedImage,
+  isAttending,
+  pastEvent,
 }: Props) => {
   return (
     <Box sx={{ position: 'relative' }}>
@@ -58,6 +63,18 @@ const EventImageWithDate = ({
         <Typography sx={{ fontWeight: '700' }}>
           {monthAndDay.split(' ')[1]}
         </Typography>
+      </Box>
+      <Box
+        sx={{
+          backgroundColor: 'translucent',
+          position: 'absolute',
+          right: '0',
+          top: '0',
+          marginRight: '8px',
+          marginTop: '8px',
+        }}
+      >
+        {isAttending && <Chip type={pastEvent ? 'ATTENDED' : 'ENROLLED'} />}
       </Box>
     </Box>
   );

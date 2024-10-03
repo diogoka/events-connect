@@ -9,7 +9,9 @@ import {
 } from '@mui/material';
 import { Attendee } from '@/types/types';
 import { Box } from '@mui/system';
-import GoogleIcon from '@/components/icons/googleIcon';
+
+import closeIconSvg from '../../../../public/icons/closeIconSvg.svg';
+import Image from 'next/image';
 
 type Props = {
   attendees: Attendee[];
@@ -65,13 +67,14 @@ export default function AttendeesModal({
             }}
             onClick={() => handleClose()}
           >
-            <GoogleIcon
+            {/* <GoogleIcon
               name='close'
               outlined
               size={24}
               weight={400}
               color='#1B1B21'
-            />
+            /> */}
+            <Image src={closeIconSvg} alt='close icon' width={24} height={24} />
           </Button>
         </Box>
         <Divider sx={{ opacity: 0.3, borderBottomWidth: '3px' }} />

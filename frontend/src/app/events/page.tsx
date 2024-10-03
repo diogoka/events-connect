@@ -4,63 +4,50 @@ import { Box, useMediaQuery } from '@mui/material';
 import EventList from '@/components/events/eventList';
 import SearchBar from '@/components/searchBar';
 import { UserContext } from '@/context/userContext';
-import { Events as Event, CurrentUser } from '@/types/pages.types';
+import {
+  Events as Event,
+  CurrentUser,
+  AttendedEvent,
+} from '@/types/pages.types';
 
 import { api } from '@/services/api';
 import React from 'react';
+
+import SwitchViews from '@/components/events/switchViews';
+import { getYear, getMonth } from 'date-fns';
 
 export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(UserContext);
   const [events, setEvents] = useState<Array<Event>>([]);
-  const [eventsOfUser, setEventsOfUser] = useState<Array<[number, boolean]>>(
-    []
-  );
   const [isPastEvents, setIsPastEvents] = useState<boolean>(false);
   const [emptyList, setEmptyList] = useState(false);
-  const [numberOfEvents, setNumberOfEvents] = useState(0);
+  const [numberOfUpcomingEvents, setNumberOfUpcomingEvents] = useState(0);
+  const [numberOfPastEvents, setNumberOfPastEvents] = useState(0);
   const [isCalendarView, setIsCalendarView] = useState<boolean>(false);
   const [isPastMonthEvents, setIsPastMonthEvents] = useState(false);
+  const [attendedEvents, setAttendedEvents] = useState<AttendedEvent[]>([]);
+
+  const laptopQuery = useMediaQuery('(min-width:769px)');
 
   const currentUser: CurrentUser = {
     id: user?.id!,
     role: user?.roleName!,
   };
 
-  const handlePastEventSwitch = () => {
-    setIsLoading(true);
-    setIsPastEvents((prev) => !prev);
-    setEmptyList(false);
-    setIsLoading(false);
-  };
-
-  const handleCalendarViewSwitch = () => {
-    setIsLoading(true);
-    setIsCalendarView((prev) => !prev);
-    setEmptyList(false);
-    setIsLoading(false);
-  };
-
   const getUpcomingEvents = async () => {
     try {
       setIsLoading(true);
       const { data } = await api.get(
-        `/api/events/upcoming/?start=${numberOfEvents}&qnt=6`
+        `/api/events/upcoming/?start=${numberOfUpcomingEvents}&qnt=6`
       );
 
       setEvents(data.events);
       if (currentUser.id) {
-        const attendingEvents: [number, boolean][] = [];
-        const {
-          data: { events: userEvents },
-        } = await api.get(`/api/events/user/${currentUser.id}`);
-
-        userEvents.map((event: Event) => {
-          let attendingEvent: [number, boolean] = [event.id_event, true];
-          attendingEvents.push(attendingEvent);
-        });
-
-        setEventsOfUser(attendingEvents);
+        const { data } = await api.get(
+          `/api/events/attended/user/${currentUser.id}`
+        );
+        setAttendedEvents(data);
       }
     } catch (error) {
       console.log(error);
@@ -73,21 +60,14 @@ export default function EventsPage() {
     try {
       setIsLoading(true);
       const { data } = await api.get(
-        `/api/events/past/?start=${numberOfEvents}&qnt=6`
+        `/api/events/past/?start=${numberOfPastEvents}&qnt=6`
       );
       setEvents(data.events);
       if (currentUser.id) {
-        const attendingEvents: [number, boolean][] = [];
-        const {
-          data: { events: userEvents },
-        } = await api.get(`/api/events/user/${currentUser.id}`);
-
-        userEvents.map((event: Event) => {
-          let attendingEvent: [number, boolean] = [event.id_event, true];
-          attendingEvents.push(attendingEvent);
-        });
-
-        setEventsOfUser(attendingEvents);
+        const { data } = await api.get(
+          `/api/events/attended/user/${currentUser.id}`
+        );
+        setAttendedEvents(data);
       }
     } catch (error) {
       console.log(error);
@@ -96,14 +76,29 @@ export default function EventsPage() {
     }
   };
 
-  const getPastEventsOfMonth = async (month: number, year: number) => {
+  const getPastEventsOfMonth = async () => {
     try {
+      const currentYear = getYear(new Date());
+      const currentMonth = getMonth(new Date()) + 1;
       const { data } = await api.get(
-        `/api/events/past/month/?month=${month}&year=${year}`
+        `/api/events/past/month/?month=${currentMonth}&year=${currentYear}`
       );
 
       setEvents(data);
-      setIsPastMonthEvents(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getUpcomingEventsOfMonth = async () => {
+    try {
+      const currentYear = getYear(new Date());
+      const currentMonth = getMonth(new Date()) + 1;
+      const { data } = await api.get(
+        `/api/events/upcoming/month/?month=${currentMonth}&year=${currentYear}`
+      );
+
+      setEvents(data);
     } catch (error) {
       console.log(error);
     }
@@ -115,7 +110,7 @@ export default function EventsPage() {
         const {
           data: { events },
         } = await api.get(
-          `/api/events/upcoming/?start=${numberOfEvents + 6}&qnt=6`
+          `/api/events/upcoming/?start=${numberOfUpcomingEvents + 6}&qnt=6`
         );
         if (events.length !== 6) {
           setEvents(events);
@@ -125,12 +120,12 @@ export default function EventsPage() {
         } else {
           setEvents((prev) => [...prev, events]);
         }
-        setNumberOfEvents((prev) => prev + 6);
+        setNumberOfUpcomingEvents((prev) => prev + 6);
       } else {
         const {
           data: { events },
         } = await api.get(
-          `/api/events/past/?start=${numberOfEvents + 6}&qnt=6`
+          `/api/events/past/?start=${numberOfPastEvents + 6}&qnt=6`
         );
 
         if (events.length === 6) {
@@ -139,20 +134,33 @@ export default function EventsPage() {
         } else {
           setEmptyList(true);
         }
-        setNumberOfEvents((prev) => prev + 6);
+        setNumberOfPastEvents((prev) => prev + 6);
       }
     } catch (error) {}
   };
 
   useEffect(() => {
     if (isPastEvents) {
-      getPastEvents();
+      if (isCalendarView) {
+        if (laptopQuery) {
+          getUpcomingEventsOfMonth();
+        } else {
+          getPastEventsOfMonth();
+        }
+      } else {
+        setEmptyList(false);
+        getPastEvents();
+      }
     } else {
-      getUpcomingEvents();
+      if (isCalendarView) {
+        getUpcomingEventsOfMonth();
+      } else {
+        setEmptyList(false);
+        getUpcomingEvents();
+      }
     }
-  }, [isPastEvents]);
+  }, [isPastEvents, isPastMonthEvents, isCalendarView]);
 
-  if (isLoading) return <></>;
   return (
     <Box
       sx={{
@@ -165,21 +173,32 @@ export default function EventsPage() {
     >
       <SearchBar searchEvents={() => {}} isDisabled={events.length === 0} />
 
-      <EventList
-        events={events}
-        setEvents={setEvents}
-        user={currentUser}
-        attendance={eventsOfUser}
-        handleLoadMoreEvents={handleLoadMoreEvents}
-        emptyList={emptyList}
-        setPastEvents={handlePastEventSwitch}
-        pastEvents={isPastEvents}
+      <SwitchViews
         isCalendarView={isCalendarView}
-        setIsCalendarView={handleCalendarViewSwitch}
+        setIsCalendarView={setIsCalendarView}
+        pastEvents={isPastEvents}
+        setPastEvents={setIsPastEvents}
+        isDesktop={laptopQuery}
         getPastEventsOfMonth={getPastEventsOfMonth}
         isPastMonthEvents={isPastMonthEvents}
         setIsPastMonthEvents={setIsPastMonthEvents}
       />
+      {isLoading ? (
+        <Box>LOADING</Box>
+      ) : (
+        <>
+          <EventList
+            events={events}
+            setEvents={setEvents}
+            user={currentUser}
+            attendedEvents={attendedEvents}
+            handleLoadMoreEvents={handleLoadMoreEvents}
+            emptyList={emptyList}
+            pastEvents={isPastEvents}
+            isCalendarView={isCalendarView}
+          />
+        </>
+      )}
     </Box>
   );
 }
