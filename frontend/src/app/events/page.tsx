@@ -15,11 +15,12 @@ import React from 'react';
 
 import SwitchViews from '@/components/events/switchViews';
 import { getYear, getMonth } from 'date-fns';
+import EventsHappening from '@/components/events/eventHappening';
 
 export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(UserContext);
-  const [events, setEvents] = useState<Array<Event>>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [isPastEvents, setIsPastEvents] = useState<boolean>(false);
   const [emptyList, setEmptyList] = useState(false);
   const [numberOfUpcomingEvents, setNumberOfUpcomingEvents] = useState(0);
@@ -27,6 +28,8 @@ export default function EventsPage() {
   const [isCalendarView, setIsCalendarView] = useState<boolean>(false);
   const [isPastMonthEvents, setIsPastMonthEvents] = useState(false);
   const [attendedEvents, setAttendedEvents] = useState<AttendedEvent[]>([]);
+
+  const [eventsHappening, setEventsHappening] = useState<Event[]>([]);
 
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
@@ -42,7 +45,18 @@ export default function EventsPage() {
         `/api/events/upcoming/?start=${numberOfUpcomingEvents}&qnt=6`
       );
 
-      setEvents(data.events);
+      const happeningNowEvents = data.events.filter((event: Event) =>
+        isEventHappeningNow(event.date_event_start, event.date_event_end)
+      );
+
+      const upcomingEvents = data.events.filter(
+        (event: Event) =>
+          !isEventHappeningNow(event.date_event_start, event.date_event_end)
+      );
+
+      setEventsHappening(happeningNowEvents);
+      setEvents(upcomingEvents);
+
       if (currentUser.id) {
         const { data } = await api.get(
           `/api/events/attended/user/${currentUser.id}`
@@ -138,6 +152,12 @@ export default function EventsPage() {
       }
     } catch (error) {}
   };
+  const isEventHappeningNow = (start: string, end: string) => {
+    const now = new Date();
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    return now >= startDate && now <= endDate;
+  };
 
   useEffect(() => {
     if (isPastEvents) {
@@ -172,6 +192,14 @@ export default function EventsPage() {
       }}
     >
       <SearchBar searchEvents={() => {}} isDisabled={events.length === 0} />
+
+      {eventsHappening.length > 0 && (
+        <EventsHappening
+          events={eventsHappening}
+          user={currentUser}
+          laptopQuery={laptopQuery}
+        />
+      )}
 
       <SwitchViews
         isCalendarView={isCalendarView}

@@ -7,7 +7,6 @@ import { Page } from '@/types/components.types';
 const usersBtns: Page[] = [
   { label: 'Events', path: '/events' },
   { label: 'My Events', path: '/user/my-events' },
-  { label: 'History', path: '/history' },
 ];
 
 export default function UsersListItemPC() {

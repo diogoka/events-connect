@@ -36,7 +36,7 @@ export default function UserPage() {
           borderRadius: '6px',
           padding: '24px',
           position: 'relative',
-          marginBottom: '40px',
+          marginBottom: '90px',
         }}
       >
         <Avatar

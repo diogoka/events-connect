@@ -28,7 +28,6 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           fontSize: '18px',
-          color: '#666666',
         },
       },
     },
@@ -115,10 +114,10 @@ let theme = createTheme({
       contrastText: '#fff',
     },
     error: {
-      light: '#f14c4c',
-      main: '#D00000',
+      light: '#FFDAD6',
+      main: '#FFDAD6',
       dark: '#970303',
-      contrastText: '#fff',
+      contrastText: '#410002',
     },
   },
   breakpoints: {

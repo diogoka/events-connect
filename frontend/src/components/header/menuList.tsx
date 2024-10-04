@@ -15,7 +15,6 @@ export default function MenuList() {
           justifyContent='center'
           alignItems='center'
           spacing={1}
-          width='59%'
           maxWidth='22.6rem'
         >
           <Navigation />

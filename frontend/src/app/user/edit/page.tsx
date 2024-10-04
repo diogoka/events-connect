@@ -1,7 +1,14 @@
 'use client';
 import { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme, Stack, Button, InputLabel, Box } from '@mui/material';
+import {
+  useTheme,
+  Stack,
+  Button,
+  InputLabel,
+  Box,
+  Typography,
+} from '@mui/material';
 import axios from 'axios';
 import useUploadImage from '@/services/imageInput';
 import { useMediaQuery, Avatar } from '@mui/material';
@@ -126,14 +133,18 @@ export default function UserEditPage() {
   };
 
   return (
-    <Stack
-      width='100%'
-      marginInline='auto'
-      paddingBlock='4rem'
-      maxWidth={'375px'}
-    >
+    <Stack width='100%' marginInline='auto' maxWidth={'375px'}>
       <form onSubmit={handleSubmit}>
-        <Stack alignItems='center' rowGap='1rem'>
+        <Stack
+          alignItems='center'
+          rowGap='24px'
+          sx={{
+            backgroundColor: 'white',
+            borderRadius: '6px',
+            padding: '24px',
+            marginBottom: '90px',
+          }}
+        >
           {user?.provider === 'google.com' ? (
             <Avatar
               src={`${url}`}
@@ -193,27 +204,52 @@ export default function UserEditPage() {
             </Box>
           )}
 
-          <NameInput
-            name={userName.firstName}
-            label=''
-            type='firstName'
-            setUserName={updateUserInfo}
-            disabled={false}
-          />
-          <NameInput
-            name={userName.lastName}
-            label=''
-            type='lastName'
-            setUserName={updateUserInfo}
-            disabled={false}
-          />
+          <Box
+            sx={{
+              width: '100%',
+              gap: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '0 24px',
+            }}
+          >
+            <Typography
+              sx={{ fontSize: '13px', fontWeight: 400, color: '#1B1B21' }}
+            >
+              First name
+            </Typography>
+            <NameInput
+              name={userName.firstName}
+              label=''
+              type='firstName'
+              setUserName={updateUserInfo}
+              disabled={false}
+            />
+            <Typography
+              sx={{ fontSize: '13px', fontWeight: 400, color: '#1B1B21' }}
+            >
+              Last name
+            </Typography>
+            <NameInput
+              name={userName.lastName}
+              label=''
+              type='lastName'
+              setUserName={updateUserInfo}
+              disabled={false}
+            />
+            <Typography
+              sx={{ fontSize: '13px', fontWeight: 400, color: '#1B1B21' }}
+            >
+              Program
+            </Typography>
 
-          <CourseInput
-            courseId={userName.courseId}
-            setCourse={updateUserInfo}
-            type='courseId'
-            disabled={false}
-          />
+            <CourseInput
+              courseId={userName.courseId}
+              setCourse={updateUserInfo}
+              type='courseId'
+              disabled={false}
+            />
+          </Box>
 
           <div>{warning}</div>
 
@@ -224,20 +260,26 @@ export default function UserEditPage() {
             columnGap='1.5rem'
           >
             <Button
-              variant='outlined'
-              color='error'
-              sx={{ width: '100px', flexGrow: 1 }}
-              onClick={() => router.push('/user')}
-            >
-              Cancel
-            </Button>
-            <Button
               type='submit'
               variant='contained'
               color='primary'
-              sx={{ width: '100px', flexGrow: 1 }}
+              sx={{ width: '100px', flexGrow: 1, padding: '8px 16px' }}
             >
               Save
+            </Button>
+            <Button
+              variant='outlined'
+              sx={{
+                width: '100px',
+                flexGrow: 1,
+                padding: '8px 16px',
+                backgroundColor: '#FFDAD6',
+                color: '#410002',
+                borderColor: '#FFDAD6',
+              }}
+              onClick={() => router.push('/user')}
+            >
+              Cancel
             </Button>
           </Box>
         </Stack>

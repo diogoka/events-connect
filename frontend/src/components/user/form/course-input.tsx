@@ -18,7 +18,6 @@ type Props = {
 export default function CourseInput(props: Props) {
   const [courses, setCourses] = useState<Course[]>([]);
 
-  // Get course data from server to show course names
   useEffect(() => {
     axios
       .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/courses`)
@@ -32,15 +31,26 @@ export default function CourseInput(props: Props) {
 
   return (
     <FormControl required fullWidth>
-      <InputLabel id='course'>Course</InputLabel>
       {courses.length > 0 && (
         <Select
           id='course'
-          label='Course'
           value={props.courseId}
           defaultValue=''
           onChange={(e) => props.setCourse(props.type, e.target.value)}
           disabled={props.disabled}
+          sx={{
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
+            backgroundColor: '#F5F2FA',
+            borderRadius: '6px',
+          }}
         >
           {courses.map((course: Course, index: number) => {
             return (
