@@ -44,7 +44,6 @@ export default function UsersListItemPC() {
           sx={{
             width: 'auto',
             padding: '2rem 1rem',
-            borderRadius: 0,
           }}
         >
           {button.label}

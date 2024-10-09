@@ -56,7 +56,7 @@ function EventList({
           display: 'flex',
           alignItems: 'center',
           marginTop: '0',
-          justifyContent: 'space-between',
+          justifyContent: events.length > 2 ? 'space-between' : 'flex-start',
         }}
         useFlexGap
         flexWrap='wrap'

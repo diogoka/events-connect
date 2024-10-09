@@ -129,9 +129,6 @@ export default function Footer({ laptopQuery }: Props) {
 
               <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
                 <ListItemButton href='https://www.google.com.br'>
-                  History
-                </ListItemButton>
-                <ListItemButton href='https://www.google.com.br'>
                   Profile
                 </ListItemButton>
               </ListItem>

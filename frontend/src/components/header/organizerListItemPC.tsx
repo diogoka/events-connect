@@ -7,7 +7,6 @@ import { Page } from '@/types/components.types';
 const organizerBtns: Page[] = [
   { label: 'Events', path: '/events' || '/events?isPublished=true' },
   { label: 'My Events', path: '/user/my-events' },
-  { label: 'History', path: '/history' },
   { label: 'Created Events', path: '/organizer-events' },
   { label: 'New Event', path: '/events/new' },
 ];
@@ -64,7 +63,6 @@ export default function OrganizerListItemPC() {
           sx={{
             width: 'auto',
             padding: '2rem 1rem',
-            borderRadius: 0,
           }}
         >
           {button.label}
