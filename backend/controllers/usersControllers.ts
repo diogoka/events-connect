@@ -37,10 +37,10 @@ export const getUser = async (req: express.Request, res: express.Response) => {
       if (!user?.is_verified) {
         return res.status(401).send('Email is not verified.');
       } else {
-        res.status(200).json(user);
+        return res.status(200).json(user);
       }
     } else {
-      res.status(401).json('You need to finish the registration.');
+      return res.status(401).json('You need to finish the registration.');
     }
   } catch (err: any) {
     res.status(500).send(err.message);
@@ -52,8 +52,7 @@ export const editUser = async (req: express.Request, res: express.Response) => {
 
   const { result, message } = validateUserInput(userInput);
   if (!result) {
-    res.status(500).send(message);
-    return;
+    return res.status(500).send(message);
   }
 
   try {
@@ -79,8 +78,7 @@ export const createUser = async (
 
   const { result, message } = validateUserInput(userInput);
   if (!result) {
-    res.status(500).send(message);
-    return;
+    return res.status(500).send(message);
   }
 
   try {
@@ -89,23 +87,30 @@ export const createUser = async (
     });
 
     if (userFound) {
-      res
+      return res
         .status(400)
         .json({ message: 'User already registered. Try to login.' });
+    } else {
+      // Create the user
+      await createUserModel(userInput);
+
+      // Add the user course
+      await addingCourse(userInput);
+
+      // Generate the token
+      const token = generateToken(userInput.id, userInput.email);
+
+      // Send email to verify the user.
+      await sendConfirmationEmail(userInput.email, token);
+
+      return res.status(200).send('User Created.');
     }
-
-    await createUserModel(userInput);
-    await addingCourse(userInput);
-    const token = generateToken(userInput.id, userInput.email);
-
-    await sendConfirmationEmail(userInput.email, token);
-
-    res.status(200).send('User Created.');
   } catch (err: any) {
-    res.status(500).send(err.message);
+    return res.status(500).send(err.message);
   }
 };
 
+// Check the studentId in the SlackBot
 export const matchStudentId = async (
   req: express.Request,
   res: express.Response
@@ -129,10 +134,10 @@ export const validateEmail = async (
     );
 
     if (isUserVerified.verified) {
-      res.status(400).json(`${isUserVerified.message}`);
+      return res.status(400).json(`${isUserVerified.message}`);
     } else {
       const isBeingVerified = await verifyUserModel(tokenValidation.payload);
-      res
+      return res
         .status(200)
         .json(`${isBeingVerified.message} You can close this window now.`);
     }
@@ -142,16 +147,16 @@ export const validateEmail = async (
       const isVerified = await isUserVerifiedModel(tokenInfo.id);
 
       if (isVerified.verified) {
-        res.status(400).json('User already verified.');
+        return res.status(400).json('User already verified.');
       } else {
         const newToken = generateToken(tokenInfo.id, tokenInfo.email);
         await sendConfirmationEmail(tokenInfo.email, newToken);
-        res
+        return res
           .status(400)
           .json('Token expired. A new one was generated. Check your email.');
       }
     } else {
-      res.status(401).json('Invalid Token.');
+      return res.status(401).json('Invalid Token.');
     }
   }
 };
