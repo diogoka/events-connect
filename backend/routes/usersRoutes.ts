@@ -6,6 +6,7 @@ import {
   editUser,
   matchStudentId,
   validateEmail,
+  resendValidationEmail,
 } from '../controllers/usersControllers';
 
 const usersRouter: Router = express.Router();
@@ -16,5 +17,6 @@ usersRouter.post('/', createUser);
 usersRouter.put('/', editUser);
 usersRouter.post('/checkStudentId', matchStudentId);
 usersRouter.post('/verify/:token', validateEmail);
+usersRouter.post('/resendVerifyEmail', resendValidationEmail);
 
 export default usersRouter;

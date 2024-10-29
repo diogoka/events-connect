@@ -160,3 +160,34 @@ export const validateEmail = async (
     }
   }
 };
+
+export const resendValidationEmail = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { email } = req.body;
+
+  try {
+    const user = await prisma.users.findUnique({
+      where: { email_user: email },
+      select: { is_verified_user: true, id_user: true },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: 'User not found, please check the email again.' });
+    }
+
+    if (user.is_verified_user) {
+      return res.status(403).json({ message: 'User already verified.' });
+    }
+
+    const newToken = generateToken(user.id_user, email);
+    await sendConfirmationEmail(email, newToken);
+    return res.status(200).json({ message: 'Verification email sent.' });
+  } catch (error) {
+    console.error('Error resending validation email:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
