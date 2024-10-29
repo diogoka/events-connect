@@ -30,6 +30,7 @@ import { LoginStatus } from '@/types/context.types';
 import { EventContext } from '@/context/eventContext';
 import PasswordResetModal from '@/components/login/password-reset-modal';
 import { ErrorMessage } from '../../types/types';
+import { ResendEmailModal } from '@/components/login/resend-email-modal';
 
 export default function LoginPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -57,6 +58,8 @@ export default function LoginPage() {
     error: false,
     message: '',
   });
+
+  const [resendVerificationEmail, setResendVerificationEmail] = useState(false);
 
   const getUserFromServer = (uid: string, provider: string) => {
     axios
@@ -303,28 +306,55 @@ export default function LoginPage() {
 
             <Typography align='center'>or</Typography>
 
-            <Box sx={{ display: 'flex', gap: '1.1rem' }}>
-              <Button
-                onClick={handleSignUpGoogle}
-                variant='outlined'
-                color='secondary'
-                endIcon={<FcGoogle />}
-                fullWidth
-              >
-                Sign Up
-              </Button>
-              <Button
-                onClick={() => route.push('/signup')}
-                variant='contained'
-                color='primary'
-                fullWidth
-              >
-                Sign Up
-              </Button>
-            </Box>
-          </Stack>
+          <Box sx={{ display: 'flex', gap: '1.1rem' }}>
+            <Button
+              onClick={handleSignUpGoogle}
+              variant='outlined'
+              color='secondary'
+              endIcon={<FcGoogle />}
+              fullWidth
+            >
+              Sign Up
+            </Button>
+            <Button
+              onClick={() => route.push('/signup')}
+              variant='contained'
+              color='primary'
+              fullWidth
+            >
+              Sign Up
+            </Button>
+          </Box>
+          <Typography
+            sx={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: '20px',
+              display: 'flex',
+              fontSize: '13px',
+            }}
+          >
+            If you haven’t received the verification email, click{' '}
+            <Typography
+              onClick={() => {
+                setResendVerificationEmail(true);
+              }}
+              color={theme.palette.info.main}
+              sx={{
+                cursor: 'pointer',
+                marginLeft: '4px',
+                fontSize: '13px',
+              }}
+            >
+              here.
+            </Typography>
+            <ResendEmailModal
+              isOpen={resendVerificationEmail}
+              handleClose={setResendVerificationEmail}
+            />
+          </Typography>
         </Stack>
-      </Box>
+      </Stack>
     </>
   );
 }
