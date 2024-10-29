@@ -198,155 +198,133 @@ export default function LoginPage() {
     }
   };
 
-  // useEffect(() => {
-  //   if (firebaseAccount && loginStatus === 'Signing up') {
-  //     signOut(getAuth());
-  //     setLoginStatus(LoginStatus.LoggedOut);
-  //   }
-  // }, [firebaseAccount, loginStatus]);
-
   return (
     <>
-      {!isMobile && (
-        <Box
-          width='100vw'
-          height='100vh'
-          position='absolute'
-          sx={{
-            inset: '0 auto auto 0',
-            backgroundImage: 'url("/auth-bg.png")',
-            backgroundSize: 'cover',
-          }}
-        >
-          {userServerError.error && (
-            <Alert sx={{ width: '28%', margin: '5%' }} severity='error'>
-              {userServerError.message}
-            </Alert>
-          )}
-        </Box>
-      )}
-
-      {userServerError.error && isMobile && (
-        <Alert sx={{ width: '80%', position: 'absolute' }} severity='error'>
-          {userServerError.message}
-        </Alert>
-      )}
-      <Stack
-        width={isMobile ? 'auto' : '600px'}
-        maxWidth={isMobile ? '345px' : 'auto'}
-        marginInline='auto'
-        padding={isMobile ? '5rem 0' : '3rem 6rem'}
-        borderRadius='0.75rem'
-        zIndex={100}
+      <Box
         sx={{
-          position: isMobile ? 'static' : 'absolute',
-          inset: isMobile ? '0' : '50% auto auto 50%',
-          transform: isMobile ? '' : 'translate(-50%, -50%)',
+          backgroundImage: isMobile ? '' : 'url("/auth-bg.png")',
+          backgroundSize: 'cover',
+          minHeight: isMobile ? '' : '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: isMobile ? 'flex-start' : 'center',
         }}
       >
-        <Container
+        <Stack
+          width={isMobile ? 'auto' : '600px'}
+          maxWidth={isMobile ? '345px' : 'auto'}
+          marginInline='auto'
+          padding={isMobile ? '5rem 0' : '3rem 6rem'}
+          borderRadius='0.75rem'
+          maxHeight={'fit-content'}
+          zIndex={100}
           sx={{
-            width: 'auto',
-            margin: 'auto',
-            padding: '0rem 2rem 2rem',
-            display: 'flex',
+            backgroundColor: '#FBF8FF',
           }}
         >
-          <Image
-            src='/cornestone-connect-logo-blue-wide.png'
-            width={744}
-            height={153}
-            alt='logo'
-            priority
-            style={{ width: '80%', height: 'auto', margin: 'auto' }}
-          />
-        </Container>
-        <Stack rowGap={'20px'}>
-          <form onSubmit={handleEmailLogin}>
-            <Stack rowGap={'20px'}>
-              <Stack rowGap={'10px'}>
-                <FormControl required>
-                  <TextField
-                    type='email'
-                    label='Email'
-                    onChange={(event) => setEmail(event.target.value)}
-                    required
+          <Container
+            sx={{
+              width: 'auto',
+              margin: 'auto',
+              padding: '0rem 2rem 2rem',
+              display: 'flex',
+            }}
+          >
+            <Image
+              src='/cornestone-connect-logo-blue-wide.png'
+              width={744}
+              height={153}
+              alt='logo'
+              priority
+              style={{ width: '80%', height: 'auto', margin: 'auto' }}
+            />
+          </Container>
+          <Stack rowGap={'20px'}>
+            <form onSubmit={handleEmailLogin}>
+              <Stack rowGap={'20px'}>
+                <Stack rowGap={'10px'}>
+                  <FormControl required>
+                    <TextField
+                      type='email'
+                      label='Email'
+                      onChange={(event) => setEmail(event.target.value)}
+                      required
+                    />
+                  </FormControl>
+                  <FormControl required>
+                    <PasswordInput
+                      label='Password'
+                      setPassword={setPassword}
+                      setter={setPassword}
+                      type='password'
+                      local='login'
+                      disabled={false}
+                    />
+                  </FormControl>
+                  <Typography
+                    onClick={() => {
+                      setIsPasswordReset(true);
+                    }}
+                    sx={{
+                      textAlign: 'right',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Forgot password?
+                  </Typography>
+                  <PasswordResetModal
+                    isPasswordReset={isPasswordReset}
+                    setIsPasswordReset={setIsPasswordReset}
                   />
-                </FormControl>
-                <FormControl required>
-                  <PasswordInput
-                    label='Password'
-                    setPassword={setPassword}
-                    setter={setPassword}
-                    type='password'
-                    local='login'
-                    disabled={false}
-                  />
-                </FormControl>
-                <Typography
-                  onClick={() => {
-                    setIsPasswordReset(true);
-                  }}
-                  color={theme.palette.info.main}
-                  sx={{
-                    textAlign: 'right',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Forgot password?
-                </Typography>
-                <PasswordResetModal
-                  isPasswordReset={isPasswordReset}
-                  setIsPasswordReset={setIsPasswordReset}
-                />
-              </Stack>
+                </Stack>
 
+                <Button
+                  type='submit'
+                  variant='contained'
+                  color='primary'
+                  fullWidth
+                >
+                  Login
+                </Button>
+              </Stack>
+            </form>
+
+            <Button
+              variant='outlined'
+              color='secondary'
+              startIcon={<FcGoogle />}
+              onClick={handleGoogleLogin}
+              sx={{
+                borderColor: theme.palette.secondary.light,
+              }}
+            >
+              Log in with Google
+            </Button>
+
+            <Typography align='center'>or</Typography>
+
+            <Box sx={{ display: 'flex', gap: '1.1rem' }}>
               <Button
-                type='submit'
+                onClick={handleSignUpGoogle}
+                variant='outlined'
+                color='secondary'
+                endIcon={<FcGoogle />}
+                fullWidth
+              >
+                Sign Up
+              </Button>
+              <Button
+                onClick={() => route.push('/signup')}
                 variant='contained'
                 color='primary'
                 fullWidth
               >
-                Login
+                Sign Up
               </Button>
-            </Stack>
-          </form>
-
-          <Button
-            variant='outlined'
-            color='secondary'
-            startIcon={<FcGoogle />}
-            onClick={handleGoogleLogin}
-            sx={{
-              borderColor: theme.palette.secondary.light,
-            }}
-          >
-            Log in with Google
-          </Button>
-
-          <Typography align='center'>or</Typography>
-
-          <Box sx={{ display: 'flex', gap: '1.1rem' }}>
-            <Button
-              onClick={handleSignUpGoogle}
-              variant='outlined'
-              color='secondary'
-              endIcon={<FcGoogle />}
-              fullWidth
-            >
-              Sign Up
-            </Button>
-            <Button
-              onClick={() => route.push('/signup')}
-              variant='contained'
-              color='primary'
-              fullWidth
-            >
-              Sign Up
-            </Button>
-          </Box>
+            </Box>
+          </Stack>
         </Stack>
-      </Stack>
+      </Box>
     </>
   );
 }

@@ -192,7 +192,7 @@ const AuthProvider = ({ children }: Props) => {
     return false;
   };
 
-  const getComponent = (laptopQuery: boolean) => {
+  const getComponent = (laptopQuery: boolean, pathname: string) => {
     switch (pageStatus) {
       case PageStatus.Loading:
         return (
@@ -202,7 +202,16 @@ const AuthProvider = ({ children }: Props) => {
         );
       case PageStatus.Ready:
         return (
-          <Box component='main' padding={laptopQuery ? '0 104px' : '0 24px'}>
+          <Box
+            component='main'
+            padding={
+              pathname === '/login' || pathname === '/'
+                ? 0
+                : laptopQuery
+                ? '0 104px'
+                : '0 24px'
+            }
+          >
             <Box flexGrow={1}>{children}</Box>
           </Box>
         );
@@ -214,7 +223,7 @@ const AuthProvider = ({ children }: Props) => {
   return (
     <>
       {isHeaderReady() && <Header />}
-      {getComponent(laptopQuery)}
+      {getComponent(laptopQuery, pathname)}
       {pathname !== '/' && <Footer laptopQuery={laptopQuery} />}
     </>
   );

@@ -24,6 +24,8 @@ type Props = {
 
 export default function Footer({ laptopQuery }: Props) {
   const pathname = usePathname();
+  const detailPathname = /^\/events\/\d+$/;
+  const isDetailPage = detailPathname.test(pathname);
 
   return (
     <Box
@@ -32,6 +34,7 @@ export default function Footer({ laptopQuery }: Props) {
       sx={{
         backgroundColor: '#4F5B92',
         padding: laptopQuery ? '40px 104px' : '40px 24px',
+        marginBottom: isDetailPage ? '108px' : '0',
       }}
     >
       <Box
@@ -67,8 +70,9 @@ export default function Footer({ laptopQuery }: Props) {
           }}
         >
           <Button
+            color='info'
+            variant='contained'
             sx={{
-              backgroundColor: '#DDE1FF',
               borderRadius: '6px',
               padding: '8px',
               fontSize: '1rem',

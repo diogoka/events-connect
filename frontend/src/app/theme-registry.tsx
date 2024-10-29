@@ -98,7 +98,7 @@ let theme = createTheme({
     primary: {
       light: alpha('#3875CB', 0.1),
       main: '#4F5B92',
-      dark: '#070F3D',
+      dark: '#3C466E',
       contrastText: '#fff',
     },
     secondary: {
@@ -108,10 +108,10 @@ let theme = createTheme({
       contrastText: '#fff',
     },
     info: {
-      light: '#accbf6',
-      main: '#3874CB',
-      dark: '#1053b1',
-      contrastText: '#fff',
+      light: '#F0F2FF',
+      main: '#DDE1FF',
+      dark: '#C2C7FF',
+      contrastText: '#000000',
     },
     error: {
       light: '#FFDAD6',

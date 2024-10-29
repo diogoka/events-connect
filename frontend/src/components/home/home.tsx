@@ -1,46 +1,48 @@
-import { Box, Typography, Stack, Container, Paper } from '@mui/material';
+'use client';
+import {
+  Box,
+  Typography,
+  Stack,
+  Container,
+  Paper,
+  useMediaQuery,
+  Skeleton,
+  Fade,
+} from '@mui/material';
 import ButtonsHomePage from '@/components/home/buttons';
 import Image from 'next/image';
-
-export async function getStaticProps() {
-  return {
-    props: {},
-    revalidate: 7200,
-  };
-}
+import { useState } from 'react';
 
 function HomePage() {
+  const laptopQuery = useMediaQuery('(min-width:1200px)');
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const randomBackground = (): number => {
-    return Math.floor(Math.random() * (10 - 1 + 1) + 1);
+    return Math.floor(Math.random() * 10) + 1;
   };
+
   return (
     <Box
       sx={{
-        width: '100vw',
+        width: '100%',
         height: '100vh',
-        position: 'fixed',
-        top: 0,
-        left: 0,
+        bgcolor: '#4F5B92',
         display: 'flex',
       }}
     >
       <Box
         sx={{
-          bgcolor: '#141D4F',
           width: {
             sm: '100%',
             lg: '50%',
           },
-
           backgroundImage: {
             sm: `url("/homeBackground${randomBackground()}.jpg")`,
             lg: 'none',
           },
-
           backgroundSize: {
             sm: 'cover',
           },
-
           backgroundPosition: {
             sm: 'center',
           },
@@ -52,7 +54,6 @@ function HomePage() {
         <Stack
           sx={{
             width: '79%',
-
             height: '100%',
             display: 'flex',
             justifyContent: 'center',
@@ -79,7 +80,7 @@ function HomePage() {
             >
               <Image
                 src='/cornestone-connect-logo-blue-wide.png'
-                width={744} //4.86
+                width={744}
                 height={153}
                 alt='logo'
                 priority
@@ -101,17 +102,44 @@ function HomePage() {
           </Paper>
         </Stack>
       </Box>
-      <Box
-        sx={{
-          width: {
-            sm: '0',
-            lg: '50%',
-          },
-          backgroundImage: `url("/homeBackground${randomBackground()}.jpg")`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      ></Box>
+
+      {laptopQuery && (
+        <Box
+          sx={{
+            width: '50%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'relative',
+          }}
+        >
+          {!imageLoaded && (
+            <Skeleton
+              variant='rectangular'
+              width='100%'
+              height='100%'
+              sx={{ position: 'absolute' }}
+              animation='wave'
+            />
+          )}
+          <Fade in={imageLoaded} timeout={1500}>
+            <Box component='span'>
+              <Image
+                src={`/homeBackground${randomBackground()}.jpg`}
+                alt='image'
+                layout='responsive'
+                width={900}
+                height={600}
+                style={{
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                }}
+                onLoadingComplete={() => setImageLoaded(true)}
+              />
+            </Box>
+          </Fade>
+        </Box>
+      )}
     </Box>
   );
 }

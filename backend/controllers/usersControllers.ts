@@ -30,7 +30,6 @@ export const getUsers = async (req: express.Request, res: express.Response) => {
 
 export const getUser = async (req: express.Request, res: express.Response) => {
   const userId = req.params.id;
-
   try {
     const user = await getUserById(userId);
     if (user) {
