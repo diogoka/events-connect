@@ -88,7 +88,7 @@ function EventList({
                   alignItems: 'center',
                   color: 'white',
                   backgroundColor: 'primary.main',
-                  width: laptopQuery ? '50%' : '100%',
+                  width: '100%',
                   height: '4rem',
                   padding: '1rem',
                   margin: '9rem 0',

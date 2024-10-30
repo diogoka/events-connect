@@ -212,6 +212,7 @@ export default function EventsPage() {
         setIsPastMonthEvents={setIsPastMonthEvents}
       />
       {isLoading ? (
+        // Need to change this to a proper loading component.
         <Box>LOADING</Box>
       ) : (
         <>
