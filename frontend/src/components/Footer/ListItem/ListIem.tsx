@@ -18,7 +18,6 @@ const ListItemFooter = ({ href, src, alt, size, width }: Props) => {
   return (
     <ListItem
       sx={{
-        // width: '30%',
         width: width,
       }}
     >
@@ -26,7 +25,6 @@ const ListItemFooter = ({ href, src, alt, size, width }: Props) => {
         <ListItemIcon
           sx={{
             display: 'flex',
-
             alignItems: 'center',
           }}
         >

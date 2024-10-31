@@ -27,6 +27,8 @@ export default function Footer({ laptopQuery }: Props) {
   const detailPathname = /^\/events\/\d+$/;
   const isDetailPage = detailPathname.test(pathname);
 
+  // Check if is logged in to change the destination.
+
   return (
     <Box
       component='footer'
@@ -118,14 +120,13 @@ export default function Footer({ laptopQuery }: Props) {
               sx={{
                 width: '100%',
                 display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: laptopQuery ? 'flex-start' : 'space-between',
-                rowGap: laptopQuery ? '0' : '20px',
-                columnGap: laptopQuery ? '16px' : '0',
+                columnGap: laptopQuery ? '16px' : '8px',
               }}
             >
               <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
                 <ListItemButton href='/events'>Home</ListItemButton>
+              </ListItem>
+              <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
                 <ListItemButton href='/user/my-events'>
                   My Events
                 </ListItemButton>
