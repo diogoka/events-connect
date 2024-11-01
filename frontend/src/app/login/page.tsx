@@ -125,31 +125,35 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    signInWithEmailAndPassword(getAuth(), email, password)
-      .then((result) => {
-        setFirebaseAccount({
-          uid: result.user.uid,
-          email: result.user.email,
-          providerData: result.user.providerData,
-          studentId: 0,
-        });
-        getUserFromServer(
-          result.user.uid,
-          result.user.providerData[0].providerId
-        );
-      })
-      .catch((error) => {
-        handleSetUserServerError(
-          { error: true, message: getErrorMessage(error.code) },
-          6
-        );
-      });
 
-    if (pathName === '/login') {
-      setShowedPage({
-        label: 'Events',
-        path: '/',
-      });
+    if (email && password) {
+      signInWithEmailAndPassword(getAuth(), email, password)
+        .then((result) => {
+          setFirebaseAccount({
+            uid: result.user.uid,
+            email: result.user.email,
+            providerData: result.user.providerData,
+            studentId: 0,
+          });
+          getUserFromServer(
+            result.user.uid,
+            result.user.providerData[0].providerId
+          );
+        })
+        .catch((error) => {
+          console.log('error', error);
+          handleSetUserServerError(
+            { error: true, message: getErrorMessage(error.code) },
+            6
+          );
+        });
+
+      if (pathName === '/login') {
+        setShowedPage({
+          label: 'Events',
+          path: '/',
+        });
+      }
     }
   };
 
@@ -201,12 +205,7 @@ export default function LoginPage() {
     }
   };
 
-  // useEffect(() => {
-  //   if (firebaseAccount && loginStatus === 'Signing up') {
-  //     signOut(getAuth());
-  //     setLoginStatus(LoginStatus.LoggedOut);
-  //   }
-  // }, [firebaseAccount, loginStatus]);
+  useEffect(() => {}, []);
 
   return (
     <>

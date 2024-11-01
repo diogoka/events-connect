@@ -109,7 +109,6 @@ export default function AuthProvider({
 
   useEffect(() => {
     initializeFirebase;
-
     const auth = getAuth();
 
     auth.onAuthStateChanged(async (firebaseAccount) => {
@@ -298,15 +297,17 @@ export default function AuthProvider({
   );
 }
 
-export const deleteAccount = async () => {
-  getAuth().onAuthStateChanged(async (firebaseAccount) => {
-    if (firebaseAccount) {
-      const deleted = await deleteUser(firebaseAccount!);
-    } else {
-      console.log('No user is authenticated.');
-    }
-  });
-};
+// Not deleting the account for now to avoid unexpected errors
+
+// export const deleteAccount = async () => {
+//   getAuth().onAuthStateChanged(async (firebaseAccount) => {
+//     if (firebaseAccount) {
+//       const deleted = await deleteUser(firebaseAccount!);
+//     } else {
+//       console.log('No user is authenticated.');
+//     }
+//   });
+// };
 
 function getPage(pathname: string): Page | undefined {
   return PAGES.find((PAGE: Page) => {
