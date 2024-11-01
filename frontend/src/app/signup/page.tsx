@@ -18,7 +18,7 @@ import { LoginStatus } from '@/types/context.types';
 import { getErrorMessage } from '@/auth/errors';
 import PasswordInput from '@/components/common/password-input';
 import NumberTextFieldInput from '@/components/common/noArrowsTextField';
-import { deleteAccount } from '@/auth/auth-provider';
+
 import ThreeDots from '@/components/animation/theeDots';
 
 import {
@@ -135,7 +135,6 @@ export default function SignUpPage() {
     //code 3 is email is not in the class365
 
     if (code === 3) {
-      await deleteAccount();
       setFirebaseAccount(null);
       setLoginStatus(LoginStatus.LoggedOut);
       handleMessage(
