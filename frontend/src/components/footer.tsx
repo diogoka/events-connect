@@ -17,6 +17,8 @@ import TikTokIconSvg from '../../public/icons/tiktokIcon.svg';
 import ListItemFooter from './Footer/ListItem/ListIem';
 
 import arrowIconSvg from '../../public/icons/arrowIconSvg.svg';
+import { UserContext } from '@/context/userContext';
+import { useContext } from 'react';
 
 type Props = {
   laptopQuery: boolean;
@@ -27,7 +29,9 @@ export default function Footer({ laptopQuery }: Props) {
   const detailPathname = /^\/events\/\d+$/;
   const isDetailPage = detailPathname.test(pathname);
 
-  // Check if is logged in to change the destination.
+  const { user } = useContext(UserContext);
+
+  console.log('user in footer', user);
 
   return (
     <Box
@@ -127,13 +131,13 @@ export default function Footer({ laptopQuery }: Props) {
                 <ListItemButton href='/events'>Home</ListItemButton>
               </ListItem>
               <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
-                <ListItemButton href='/user/my-events'>
+                <ListItemButton href={user ? '/user/my-events' : '/login'}>
                   My Events
                 </ListItemButton>
               </ListItem>
 
               <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
-                <ListItemButton href='https://www.google.com.br'>
+                <ListItemButton href={user ? '/user' : '/login'}>
                   Profile
                 </ListItemButton>
               </ListItem>

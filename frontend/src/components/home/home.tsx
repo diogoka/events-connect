@@ -27,7 +27,7 @@ function HomePage() {
     const img = new window.Image() as HTMLImageElement;
     img.src = bgImageUrl;
     img.onload = () => setBgLoading(false);
-  }, [bgImageUrl]);
+  }, [bgImageUrl, bgLoading]);
 
   return (
     <Box
