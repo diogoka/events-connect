@@ -48,7 +48,9 @@ export const getUser = async (req: express.Request, res: express.Response) => {
     });
 
     if (!userFoundByEmail) {
-      return res.status(401).json('User did not found.');
+      return res
+        .status(401)
+        .json('User not found. Did you finish the registration?');
     }
 
     if (!userFoundByEmail.is_verified_user) {
