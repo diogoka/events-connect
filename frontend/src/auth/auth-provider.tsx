@@ -132,10 +132,15 @@ export default function AuthProvider({
 
         // Get user data from server
         axios
-          .get(
+          .post(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${
               firebaseAccount!.uid
-            }`
+            }`,
+            {
+              provider: firebaseAccount!.providerData,
+              email: firebaseAccount!.email,
+            },
+            { headers: { 'Content-type': 'application/json' } }
           )
           .then((res: any) => {
             if (res.data) {
@@ -143,6 +148,7 @@ export default function AuthProvider({
               setFirebaseAccount((prevState) => {
                 return {
                   ...prevState!,
+                  uid: res.data.id_user,
                   studentId: res.data.student_id!,
                 };
               });

@@ -17,6 +17,8 @@ import { generateToken, checkToken } from '../helpers/tokenHandler';
 
 import { PrismaClient } from '@prisma/client';
 
+import { mapUserResponse } from '../utils/functions';
+
 const prisma = new PrismaClient();
 
 export const getUsers = async (req: express.Request, res: express.Response) => {
@@ -32,16 +34,36 @@ export const getUser = async (req: express.Request, res: express.Response) => {
   const userId = req.params.id;
 
   try {
-    const user = await getUserById(userId);
-    if (user) {
-      if (!user?.is_verified) {
+    const userFoundById = await getUserById(userId);
+    if (userFoundById) {
+      if (!userFoundById?.is_verified) {
         return res.status(401).send('Email is not verified.');
       } else {
-        return res.status(200).json(user);
+        return res.status(200).json(userFoundById);
       }
-    } else {
-      return res.status(401).json('You need to finish the registration.');
     }
+
+    const userFoundByEmail = await prisma.users.findUnique({
+      where: { email_user: req.body.email },
+    });
+
+    if (!userFoundByEmail) {
+      return res
+        .status(401)
+        .json('User not found. Did you finish the registration?');
+    }
+
+    if (!userFoundByEmail.is_verified_user) {
+      return res.status(401).json('Email is not verified.');
+    }
+
+    const updatedUser = await prisma.users.update({
+      where: { email_user: req.body.email },
+      data: { id_user: userId },
+      include: { users_type: true },
+    });
+
+    return res.status(200).json(mapUserResponse(updatedUser));
   } catch (err: any) {
     res.status(500).send(err.message);
   }
