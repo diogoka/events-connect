@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Box, Stack, Typography, useMediaQuery, Button } from '@mui/material';
 import { UserContext } from '@/context/userContext';
 import { PageContext } from '@/context/pageContext';
@@ -38,6 +38,8 @@ export default function EventPage() {
   const startTime = TimeFn(event?.date_event_start!);
   const endTime = TimeFn(event?.date_event_end!);
 
+  const router = useRouter();
+
   const getEvent = async () => {
     try {
       const { data } = await api.get(`/api/events/${EVENT_ID}`);
@@ -51,6 +53,14 @@ export default function EventPage() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleJoinEvent = () => {
+    if (!user) {
+      router.push('/login');
+    } else {
+      // New attendee
+    }
   };
 
   useEffect(() => {
@@ -150,7 +160,16 @@ export default function EventPage() {
               width={24}
               height={24}
             />
-            <Typography sx={{ textDecoration: 'underline', fontSize: '18px' }}>
+            <Typography
+              component='a'
+              sx={{
+                textDecoration: 'underline',
+                fontSize: '18px',
+                cursor: 'pointer',
+              }}
+              href={`https://maps.google.com/?q=${event?.location_event}`}
+              target='_blank'
+            >
               {event?.location_event}
             </Typography>
           </Box>
@@ -301,7 +320,11 @@ export default function EventPage() {
             </Typography>
             <Typography sx={{ fontSize: '16px' }}>person</Typography>
           </Box>
-          <Button variant='contained' sx={{ padding: '8px 16px' }}>
+          <Button
+            variant='contained'
+            sx={{ padding: '8px 16px' }}
+            onClick={handleJoinEvent}
+          >
             Join Event
           </Button>
         </Box>
