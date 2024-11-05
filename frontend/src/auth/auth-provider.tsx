@@ -40,7 +40,6 @@ const AuthProvider = ({ children }: Props) => {
 
   useEffect(() => {
     initializeFirebase;
-
     const auth = getAuth();
 
     auth.onAuthStateChanged(async (firebaseAccount) => {
@@ -64,10 +63,15 @@ const AuthProvider = ({ children }: Props) => {
 
         // Get user data from server
         axios
-          .get(
+          .post(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${
               firebaseAccount!.uid
-            }`
+            }`,
+            {
+              provider: firebaseAccount!.providerData,
+              email: firebaseAccount!.email,
+            },
+            { headers: { 'Content-type': 'application/json' } }
           )
           .then((res: any) => {
             if (res.data) {
@@ -75,6 +79,7 @@ const AuthProvider = ({ children }: Props) => {
               setFirebaseAccount((prevState) => {
                 return {
                   ...prevState!,
+                  uid: res.data.id_user,
                   studentId: res.data.student_id!,
                 };
               });
@@ -229,15 +234,17 @@ const AuthProvider = ({ children }: Props) => {
   );
 };
 
-export const deleteAccount = async () => {
-  getAuth().onAuthStateChanged(async (firebaseAccount) => {
-    if (firebaseAccount) {
-      const deleted = await deleteUser(firebaseAccount!);
-    } else {
-      console.log('No user is authenticated.');
-    }
-  });
-};
+// Not deleting the account for now to avoid unexpected errors
+
+// export const deleteAccount = async () => {
+//   getAuth().onAuthStateChanged(async (firebaseAccount) => {
+//     if (firebaseAccount) {
+//       const deleted = await deleteUser(firebaseAccount!);
+//     } else {
+//       console.log('No user is authenticated.');
+//     }
+//   });
+// };
 
 function getPage(pathname: string): Page | undefined {
   return PAGES.find((PAGE: Page) => {

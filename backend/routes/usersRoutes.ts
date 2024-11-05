@@ -11,12 +11,12 @@ import {
 
 const usersRouter: Router = express.Router();
 
-usersRouter.get('/', getUsers);
-usersRouter.get('/:id', getUser);
-usersRouter.post('/', createUser);
-usersRouter.put('/', editUser);
+usersRouter.post('/resendVerifyEmail', resendValidationEmail);
 usersRouter.post('/checkStudentId', matchStudentId);
 usersRouter.post('/verify/:token', validateEmail);
-usersRouter.post('/resendVerifyEmail', resendValidationEmail);
+usersRouter.post('/:id', getUser);
+usersRouter.get('/', getUsers);
+usersRouter.post('/', createUser);
+usersRouter.put('/', editUser);
 
 export default usersRouter;

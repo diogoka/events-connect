@@ -59,7 +59,6 @@ export default function PasswordResetModal(props: Props) {
           />
           <Button
             type='submit'
-            onClick={() => sendPasswordResetEmail(getAuth(), email)}
             variant='contained'
             sx={{ width: '100px', marginInline: 'auto' }}
           >

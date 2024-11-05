@@ -61,14 +61,19 @@ export default function LoginPage() {
 
   const [resendVerificationEmail, setResendVerificationEmail] = useState(false);
 
-  const getUserFromServer = (uid: string, provider: string) => {
+  const getUserFromServer = (uid: string, provider: string, email: string) => {
     axios
-      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${uid}`)
+      .post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${uid}`,
+        { provider, email },
+        { headers: { 'Content-type': 'application/json' } }
+      )
       .then((res: any) => {
         setUser(res.data);
         setFirebaseAccount((prevState) => {
           return {
             ...prevState!,
+            uid: res.data.id_user,
             studentId: res.data.student_id!,
           };
         });
@@ -125,31 +130,35 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    signInWithEmailAndPassword(getAuth(), email, password)
-      .then((result) => {
-        setFirebaseAccount({
-          uid: result.user.uid,
-          email: result.user.email,
-          providerData: result.user.providerData,
-          studentId: 0,
-        });
-        getUserFromServer(
-          result.user.uid,
-          result.user.providerData[0].providerId
-        );
-      })
-      .catch((error) => {
-        handleSetUserServerError(
-          { error: true, message: getErrorMessage(error.code) },
-          6
-        );
-      });
 
-    if (pathName === '/login') {
-      setShowedPage({
-        label: 'Events',
-        path: '/',
-      });
+    if (email && password) {
+      signInWithEmailAndPassword(getAuth(), email, password)
+        .then((result) => {
+          setFirebaseAccount({
+            uid: result.user.uid,
+            email: result.user.email,
+            providerData: result.user.providerData,
+            studentId: 0,
+          });
+          getUserFromServer(
+            result.user.uid,
+            result.user.providerData[0].providerId,
+            result.user.email!
+          );
+        })
+        .catch((error) => {
+          handleSetUserServerError(
+            { error: true, message: getErrorMessage(error.code) },
+            6
+          );
+        });
+
+      if (pathName === '/login') {
+        setShowedPage({
+          label: 'Events',
+          path: '/',
+        });
+      }
     }
   };
 
@@ -183,7 +192,8 @@ export default function LoginPage() {
         });
         getUserFromServer(
           result.user.uid,
-          result.user.providerData[0].providerId
+          result.user.providerData[0].providerId,
+          result.user.email!
         );
       })
       .catch((error) => {
@@ -201,12 +211,7 @@ export default function LoginPage() {
     }
   };
 
-  // useEffect(() => {
-  //   if (firebaseAccount && loginStatus === 'Signing up') {
-  //     signOut(getAuth());
-  //     setLoginStatus(LoginStatus.LoggedOut);
-  //   }
-  // }, [firebaseAccount, loginStatus]);
+  useEffect(() => {}, []);
 
   return (
     <>

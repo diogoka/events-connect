@@ -1,0 +1,16 @@
+export const mapUserResponse = (user: any) => ({
+  id: user.id_user,
+  roleId: user.id_user_type,
+  roleName: user.users_type?.role_user,
+  firstName: user.first_name_user,
+  lastName: user.last_name_user,
+  email: user.email_user,
+  postalCode: user.postal_code_user,
+  phone: user.phone_user,
+  provider: user.provider,
+  avatarURL: user.avatar_url,
+  courseId: 0,
+  courseName: '',
+  is_verified: user.is_verified_user,
+  student_id: user.student_id_user?.toString(),
+});
