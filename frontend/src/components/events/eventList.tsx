@@ -23,6 +23,7 @@ type Props = {
   isCalendarView?: boolean;
   pastEvents: boolean;
   attendedEvents?: AttendedEvent[];
+  query: boolean;
 };
 
 function EventList({
@@ -35,6 +36,7 @@ function EventList({
   isCalendarView = false,
   pastEvents,
   attendedEvents,
+  query,
 }: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
@@ -95,7 +97,9 @@ function EventList({
                   borderRadius: '5px',
                 }}
               >
-                {pastEvents
+                {query
+                  ? 'No events found'
+                  : pastEvents
                   ? `No past ${isUserPage ? 'attended' : ''} events`
                   : `No upcoming events ${isUserPage ? 'to attend' : ''}`}
               </Typography>

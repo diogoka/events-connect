@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useContext } from 'react';
-import { Box, useMediaQuery } from '@mui/material';
+import { Box, Skeleton, useMediaQuery } from '@mui/material';
 import EventList from '@/components/events/eventList';
 import SearchBar from '@/components/searchBar';
 import { UserContext } from '@/context/userContext';
@@ -28,8 +28,9 @@ export default function EventsPage() {
   const [isCalendarView, setIsCalendarView] = useState<boolean>(false);
   const [isPastMonthEvents, setIsPastMonthEvents] = useState(false);
   const [attendedEvents, setAttendedEvents] = useState<AttendedEvent[]>([]);
-
   const [eventsHappening, setEventsHappening] = useState<Event[]>([]);
+
+  const [query, setQuery] = useState(false);
 
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
@@ -159,6 +160,26 @@ export default function EventsPage() {
     return now >= startDate && now <= endDate;
   };
 
+  const searchEvents = async (text: string) => {
+    try {
+      setIsLoading(true);
+      const response = await api.post(
+        `/api/events/search/?past=${isPastEvents}&text=${text}`
+      );
+
+      setEvents(response.data);
+      if (text.length > 1) {
+        setQuery(true);
+      } else {
+        setQuery(false);
+      }
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isPastEvents) {
       if (isCalendarView) {
@@ -191,7 +212,7 @@ export default function EventsPage() {
         position: 'relative',
       }}
     >
-      <SearchBar searchEvents={() => {}} isDisabled={events.length === 0} />
+      <SearchBar searchEvents={searchEvents} clearSearchBar={isPastEvents} />
 
       {eventsHappening.length > 0 && (
         <EventsHappening
@@ -212,8 +233,9 @@ export default function EventsPage() {
         setIsPastMonthEvents={setIsPastMonthEvents}
       />
       {isLoading ? (
-        // Need to change this to a proper loading component.
-        <Box>LOADING</Box>
+        <Box sx={{ minHeight: '100%', minWidth: '100%', marginBottom: '18px' }}>
+          <Skeleton variant='rectangular' width={'100%'} height={722} />
+        </Box>
       ) : (
         <>
           <EventList
@@ -225,6 +247,7 @@ export default function EventsPage() {
             emptyList={emptyList}
             pastEvents={isPastEvents}
             isCalendarView={isCalendarView}
+            query={query}
           />
         </>
       )}

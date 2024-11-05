@@ -313,71 +313,44 @@ export const getAttendedEventsByUser = async (
   }
 };
 
-// Legacy Controllers
 export const searchEvents = async (
   req: express.Request,
   res: express.Response
 ) => {
   try {
-    const text = req.query.text !== undefined ? req.query.text : '';
-    const searchWords = text.toString().toLowerCase().split(' ');
-    const today = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const { text, past } = req.query;
+    const today = new Date();
 
-    let query = 'SELECT * FROM events WHERE ';
+    console.log('Text', text);
 
-    if (searchWords.length === 1) {
-      query += `LOWER(events.name_event) LIKE '%${searchWords[0]}%'`;
-    } else {
-      searchWords.forEach((word: string, key: number) => {
-        query +=
-          key === searchWords.length - 1
-            ? ` LOWER(events.name_event) LIKE '%${word}%'`
-            : ` LOWER(events.name_event) LIKE '%${word}%' AND`;
-      });
+    if (typeof text !== 'string') {
+      return res.status(400).json({ error: 'Search text must be a string' });
     }
 
-    query = req.query.past
-      ? `${query} and events.date_event_start < '%${today}%'`
-      : `${query} and events.date_event_start >= '%${today}%'`;
+    const dateFilter =
+      past === 'true'
+        ? { date_event_end: { lt: today } }
+        : { date_event_start: { gte: today } };
 
-    const events = req.query.past
-      ? await pool.query(query)
-      : await pool.query(query);
-
-    const ids =
-      events.rows.length !== 0
-        ? events.rows.map((val) => {
-            return val.id_event;
-          })
-        : null;
-
-    const tags = await pool.query(`
-      SELECT events.id_event, tags.name_tag FROM events
-      inner join events_tags on events.id_event = events_tags.id_event
-      inner join tags on events_tags.id_tag = tags.id_tag where events_tags.id_event in (${ids})
-      ORDER BY events.date_event_start ASC
-      `);
-
-    const id = req.query.id ? req.query.id : null;
-
-    if (id) {
-      let eventsByUser = events.rows.filter((event: any) => {
-        return event.id_owner === id;
-      });
-      return res.status(200).json({
-        events: eventsByUser,
-        tags: tags.rows,
-      });
-    } else {
-      return res.status(200).json({
-        events: events.rows,
-        tags: tags.rows,
-      });
-    }
-  } catch (err: any) {
-    res.status(500).send(err.message);
+    const events = await prisma.events.findMany({
+      where: {
+        name_event: {
+          contains: text,
+          mode: 'insensitive',
+        },
+        ...dateFilter,
+      },
+    });
+    res.status(200).json(events);
+  } catch (error) {
+    console.error('Error searching events:', error);
+    res
+      .status(500)
+      .json({ error: 'An error occurred while searching for events' });
   }
 };
+
+// Legacy Controllers
 
 export const getEventsByOwner = async (
   req: express.Request,

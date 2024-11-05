@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, ChangeEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 import { TextField, useMediaQuery, Grid, Button, Box } from '@mui/material';
 import IconItem from './icons/iconItem';
 import SearchIcon from '@mui/icons-material/Search';
@@ -8,32 +8,42 @@ import { InputAdornment } from '@mui/material';
 
 type Props = {
   searchEvents: (text: string) => void;
-  isDisabled: boolean;
   clearSearchBar?: boolean;
 };
 
-function SearchBar({ searchEvents, isDisabled, clearSearchBar }: Props) {
-  const [searchTerm, setSearchTerm] = useState<string>('');
+function SearchBar({ searchEvents, clearSearchBar }: Props) {
+  const [query, setQuery] = useState<string>('');
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
-  const handleSearch = (event: any) => {
-    event.preventDefault();
-    if (searchTerm === '') return;
-    searchEvents(searchTerm);
-  };
+  const useDebounce = (callback: Function, delay: number) => {
+    const timer = useRef<NodeJS.Timeout | null>(null);
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
+    return (...args: any[]) => {
+      if (timer.current) {
+        clearTimeout(timer.current);
+      }
+
+      timer.current = setTimeout(() => {
+        callback(...args);
+      }, delay);
+    };
   };
 
   useEffect(() => {
-    setSearchTerm('');
+    setQuery('');
   }, [clearSearchBar]);
 
   const gridContainerStyle = {
-    // marginTop: laptopQuery ? '5rem' : '3rem',
     marginBottom: laptopQuery ? '3rem' : '1rem',
     height: '3rem',
+  };
+
+  const debouncedSearch = useDebounce(searchEvents, 600);
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const text = event.target.value;
+    setQuery(text);
+    debouncedSearch(text);
   };
 
   return (
@@ -42,10 +52,9 @@ function SearchBar({ searchEvents, isDisabled, clearSearchBar }: Props) {
         sx={{ backgroundColor: '#EFEDF4', width: '100%', borderRadius: '6px' }}
       >
         <TextField
-          value={isDisabled ? '' : searchTerm}
+          value={query}
           onChange={handleInputChange}
           fullWidth
-          disabled={isDisabled}
           placeholder='Search for activities. E.g.: Tour.'
           variant='outlined'
           sx={{

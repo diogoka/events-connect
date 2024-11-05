@@ -35,9 +35,10 @@ eventsRouter.get('/past/user/:id', getPastEventsByUserId);
 
 eventsRouter.get('/attended/user/:id', getAttendedEventsByUser);
 
+eventsRouter.post('/search/', searchEvents);
+
 // Old
 eventsRouter.get('/owner/:id', getEventsByOwner);
-eventsRouter.get('/search/', searchEvents);
 
 eventsRouter.post('/new', createEvents);
 

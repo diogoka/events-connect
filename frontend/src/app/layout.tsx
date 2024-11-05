@@ -8,6 +8,7 @@ import { EventContextProvider } from '@/context/eventContext';
 import { DetailPageContextProvider } from '@/context/pageDetailContext';
 import AuthProvider from '@/auth/auth-provider';
 import { Box } from '@mui/material';
+import { SnackProvider } from '@/context/snackContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -38,15 +39,17 @@ export default function RootLayout({
         style={{ backgroundColor: '#FBF8FF' }}
       >
         <ThemeRegistry options={{ key: 'mui' }}>
-          <PageContextProvider>
-            <DetailPageContextProvider>
-              <UserContextProvider>
-                <EventContextProvider>
-                  <AuthProvider>{children}</AuthProvider>
-                </EventContextProvider>
-              </UserContextProvider>
-            </DetailPageContextProvider>
-          </PageContextProvider>
+          <SnackProvider>
+            <PageContextProvider>
+              <DetailPageContextProvider>
+                <UserContextProvider>
+                  <EventContextProvider>
+                    <AuthProvider>{children}</AuthProvider>
+                  </EventContextProvider>
+                </UserContextProvider>
+              </DetailPageContextProvider>
+            </PageContextProvider>
+          </SnackProvider>
         </ThemeRegistry>
       </Box>
     </html>

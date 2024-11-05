@@ -10,6 +10,7 @@ import EventImageWithDate from '../common/eventImageWithDate';
 import scheduleIconSvg from '../../../public/icons/scheduleIconSvg.svg';
 import shareIconSvg from '../../../public/icons/iosShareIconSvg.svg';
 import Image from 'next/image';
+import { useSnack } from '@/context/snackContext';
 
 type Props = {
   event: Event & {
@@ -39,10 +40,15 @@ const NewEventCard = ({
 
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  const { openSnackbar } = useSnack();
+
   const handleClickCard = () => router.push(`/events/${event.id_event}`);
 
-  const handleShareEvent = () => {
-    console.log('COPIED');
+  const handleShareEvent = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentURL = window.location.href;
+    navigator.clipboard.writeText(`${currentURL}/${event.id_event}`);
+    openSnackbar('URL copied!', 'success');
   };
 
   const handleSetLoadedImage = () => {
@@ -109,8 +115,8 @@ const NewEventCard = ({
               cursor: 'pointer',
             }}
             component={'button'}
-            onClick={() => {
-              handleShareEvent();
+            onClick={(event) => {
+              handleShareEvent(event);
             }}
           >
             <Image src={shareIconSvg} alt='share icon' width={25} height={25} />
