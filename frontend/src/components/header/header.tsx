@@ -13,7 +13,6 @@ export default function Header() {
         boxShadow: 'none',
         borderBottom: 'none',
         padding: '16px 24px',
-        marginBottom: '24px',
       }}
     >
       <Switcher sp={<HeaderMB />} pc={<HeaderPC />} />

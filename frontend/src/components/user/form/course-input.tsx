@@ -32,34 +32,37 @@ export default function CourseInput(props: Props) {
   return (
     <FormControl required fullWidth>
       {courses.length > 0 && (
-        <Select
-          id='course'
-          value={props.courseId}
-          defaultValue=''
-          onChange={(e) => props.setCourse(props.type, e.target.value)}
-          disabled={props.disabled}
-          sx={{
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-            backgroundColor: '#F5F2FA',
-            borderRadius: '6px',
-          }}
-        >
-          {courses.map((course: Course, index: number) => {
-            return (
-              <MenuItem key={index} value={course.id}>
-                {course.name}
-              </MenuItem>
-            );
-          })}
-        </Select>
+        <>
+          <InputLabel>Course</InputLabel>
+          <Select
+            id='course'
+            value={props.courseId}
+            onChange={(e) => props.setCourse(props.type, e.target.value)}
+            disabled={props.disabled}
+            label='Course *'
+            sx={{
+              '& .MuiOutlinedInput-notchedOutline': {
+                border: 'none',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                border: 'none',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                border: 'none',
+              },
+              backgroundColor: '#F5F2FA',
+              borderRadius: '6px',
+            }}
+          >
+            {courses.map((course: Course, index: number) => {
+              return (
+                <MenuItem key={index} value={course.id}>
+                  {course.name}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </>
       )}
     </FormControl>
   );

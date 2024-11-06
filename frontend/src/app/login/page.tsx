@@ -2,7 +2,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import axios from 'axios';
 import {
   useTheme,
   Stack,
@@ -13,7 +12,6 @@ import {
   Container,
   Box,
   useMediaQuery,
-  Alert,
 } from '@mui/material';
 import { FcGoogle } from 'react-icons/fc';
 import PasswordInput from '@/components/common/password-input';
@@ -29,8 +27,10 @@ import { UserContext } from '@/context/userContext';
 import { LoginStatus } from '@/types/context.types';
 import { EventContext } from '@/context/eventContext';
 import PasswordResetModal from '@/components/login/password-reset-modal';
-import { ErrorMessage } from '../../types/types';
 import { ResendEmailModal } from '@/components/login/resend-email-modal';
+import { useSnack } from '@/context/snackContext';
+
+import { api } from '@/services/api';
 
 export default function LoginPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -39,74 +39,46 @@ export default function LoginPage() {
 
   const theme = useTheme();
 
-  const {
-    setUser,
-    setFirebaseAccount,
-    setLoginStatus,
-    firebaseAccount,
-    error,
-    setError,
-    loginStatus,
-  } = useContext(UserContext);
+  const { setUser, setFirebaseAccount, setLoginStatus } =
+    useContext(UserContext);
 
   const { pathName, setShowedPage } = useContext(EventContext);
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isPasswordReset, setIsPasswordReset] = useState<boolean>(false);
-  const [userServerError, setUserServerError] = useState<ErrorMessage>({
-    error: false,
-    message: '',
-  });
-
   const [resendVerificationEmail, setResendVerificationEmail] = useState(false);
 
-  const getUserFromServer = (uid: string, provider: string, email: string) => {
-    axios
-      .post(
+  const { openSnackbar } = useSnack();
+
+  const getUserFromServer = async (
+    uid: string,
+    provider: string,
+    email: string
+  ) => {
+    try {
+      const response = await api.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${uid}`,
         { provider, email },
         { headers: { 'Content-type': 'application/json' } }
-      )
-      .then((res: any) => {
-        setUser(res.data);
-        setFirebaseAccount((prevState) => {
-          return {
-            ...prevState!,
-            uid: res.data.id_user,
-            studentId: res.data.student_id!,
-          };
-        });
-
-        setLoginStatus(LoginStatus.LoggedIn);
-        route.replace('/events');
-      })
-      .catch((error: any) => {
-        if (
-          error.response.data === 'You need to finish the registration.' &&
-          provider === 'password'
-        ) {
-          setUserServerError({
-            error: true,
-            message:
-              'You need to finish the registration. You are being redirected to finish it.',
-          });
-
-          setTimeout(() => {
-            setLoginStatus(LoginStatus.SigningUp);
-            route.replace('/signup/register');
-          }, 8000);
-        } else {
-          signOut(getAuth());
-          setFirebaseAccount(null);
-          setUser(null);
-          setLoginStatus(LoginStatus.LoggedOut);
-          handleSetUserServerError(
-            { error: true, message: error.response.data },
-            6
-          );
-        }
+      );
+      setUser(response.data);
+      setFirebaseAccount((prevState) => {
+        return {
+          ...prevState!,
+          uid: response.data.id_user,
+          studentId: response.data.student_id!,
+        };
       });
+      setLoginStatus(LoginStatus.LoggedIn);
+      route.replace('/events');
+    } catch (error: any) {
+      openSnackbar(error.response.data, 'error');
+      signOut(getAuth());
+      setFirebaseAccount(null);
+      setUser(null);
+      setLoginStatus(LoginStatus.LoggedOut);
+    }
   };
 
   const handleSignUpGoogle = async () => {
@@ -124,13 +96,12 @@ export default function LoginPage() {
       })
       .catch((error: any) => {
         setFirebaseAccount(null);
-        setUserServerError({ error: true, message: error });
+        openSnackbar(getErrorMessage(error.code), 'error');
       });
   };
 
   const handleEmailLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     if (email && password) {
       signInWithEmailAndPassword(getAuth(), email, password)
         .then((result) => {
@@ -147,10 +118,7 @@ export default function LoginPage() {
           );
         })
         .catch((error) => {
-          handleSetUserServerError(
-            { error: true, message: getErrorMessage(error.code) },
-            6
-          );
+          openSnackbar(getErrorMessage(error.code), 'error');
         });
 
       if (pathName === '/login') {
@@ -160,24 +128,6 @@ export default function LoginPage() {
         });
       }
     }
-  };
-
-  const handleSetUserServerError = (
-    errorObject: ErrorMessage,
-    seconds: number = 5
-  ): void => {
-    setUserServerError({
-      error: errorObject.error,
-      message: errorObject.message,
-    });
-
-    setTimeout(() => {
-      setUserServerError({
-        error: false,
-        message: '',
-      });
-    }, seconds * 1000);
-    setError({ error: false, message: '' });
   };
 
   const handleGoogleLogin = async () => {
@@ -196,12 +146,7 @@ export default function LoginPage() {
           result.user.email!
         );
       })
-      .catch((error) => {
-        handleSetUserServerError(
-          { error: true, message: getErrorMessage(error.code) },
-          6
-        );
-      });
+      .catch((error) => {});
 
     if (pathName === '/login') {
       setShowedPage({
@@ -210,8 +155,6 @@ export default function LoginPage() {
       });
     }
   };
-
-  useEffect(() => {}, []);
 
   return (
     <>
@@ -264,6 +207,21 @@ export default function LoginPage() {
                       label='Email'
                       onChange={(event) => setEmail(event.target.value)}
                       required
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': {
+                            border: 'none',
+                          },
+                          '&:hover fieldset': {
+                            border: 'none',
+                          },
+                          '&.Mui-focused fieldset': {
+                            border: 'none',
+                          },
+                        },
+                        backgroundColor: '#F5F2FA',
+                        borderRadius: '6px',
+                      }}
                     />
                   </FormControl>
                   <FormControl required>
@@ -306,12 +264,23 @@ export default function LoginPage() {
             </form>
 
             <Button
-              variant='outlined'
               color='secondary'
               startIcon={<FcGoogle />}
               onClick={handleGoogleLogin}
               sx={{
-                borderColor: theme.palette.secondary.light,
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    border: 'none',
+                  },
+                  '&:hover fieldset': {
+                    border: 'none',
+                  },
+                  '&.Mui-focused fieldset': {
+                    border: 'none',
+                  },
+                },
+                backgroundColor: '#F5F2FA',
+                borderRadius: '6px',
               }}
             >
               Log in with Google
@@ -322,10 +291,24 @@ export default function LoginPage() {
             <Box sx={{ display: 'flex', gap: '1.1rem' }}>
               <Button
                 onClick={handleSignUpGoogle}
-                variant='outlined'
                 color='secondary'
                 endIcon={<FcGoogle />}
                 fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      border: 'none',
+                    },
+                    '&:hover fieldset': {
+                      border: 'none',
+                    },
+                    '&.Mui-focused fieldset': {
+                      border: 'none',
+                    },
+                  },
+                  backgroundColor: '#F5F2FA',
+                  borderRadius: '6px',
+                }}
               >
                 Sign Up
               </Button>

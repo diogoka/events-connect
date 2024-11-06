@@ -8,8 +8,6 @@ import React, {
 } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-import Slide from '@mui/material/Slide';
-import { SlideProps } from '@mui/material';
 
 type SnackContextProps = {
   openSnackbar: (
@@ -17,6 +15,7 @@ type SnackContextProps = {
     severity?: 'success' | 'error' | 'warning' | 'info'
   ) => void;
   closeSnackbar: () => void;
+  isOpen: boolean;
 };
 
 const SnackContext = createContext<SnackContextProps | undefined>(undefined);
@@ -41,12 +40,10 @@ export const SnackProvider: React.FC<{ children: ReactNode }> = ({
     setSnack((prev) => ({ ...prev, message: '', open: false }));
   };
 
-  const transitionLeft = (props: SlideProps) => {
-    return <Slide {...props} direction='left' />;
-  };
-
   return (
-    <SnackContext.Provider value={{ openSnackbar, closeSnackbar }}>
+    <SnackContext.Provider
+      value={{ openSnackbar, closeSnackbar, isOpen: snack.open }}
+    >
       {children}
       <Snackbar
         open={snack.open}

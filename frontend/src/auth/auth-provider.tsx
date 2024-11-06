@@ -185,11 +185,11 @@ const AuthProvider = ({ children }: Props) => {
   }, [pathname, loginStatus]);
 
   const isHeaderReady = (): boolean => {
+    const hideHeaderPaths = ['/signup', '/login', '/verification', '/'];
+
     if (
       pathname.length > 0 &&
-      pathname !== '/login' &&
-      pathname !== '/verification' &&
-      pathname !== '/' &&
+      !hideHeaderPaths.includes(pathname) &&
       pageStatus === PageStatus.Ready
     ) {
       return true;
@@ -210,7 +210,9 @@ const AuthProvider = ({ children }: Props) => {
           <Box
             component='main'
             padding={
-              pathname === '/login' || pathname === '/'
+              pathname === '/login' ||
+              pathname === '/' ||
+              pathname === '/signup'
                 ? 0
                 : laptopQuery
                 ? '0 104px'

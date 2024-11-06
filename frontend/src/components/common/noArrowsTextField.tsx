@@ -51,6 +51,21 @@ const NumberTextFieldInput = (props: Props) => {
         props.setStudentID(props.type, parseInt(event.target.value));
       }}
       disabled={props.disabled}
+      sx={{
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            border: 'none',
+          },
+          '&:hover fieldset': {
+            border: 'none',
+          },
+          '&.Mui-focused fieldset': {
+            border: 'none',
+          },
+        },
+        backgroundColor: '#F5F2FA',
+        borderRadius: '6px',
+      }}
     />
   );
 };
