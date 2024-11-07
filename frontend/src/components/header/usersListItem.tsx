@@ -8,10 +8,7 @@ type Props = {
   role: string;
 };
 
-const UsersBtns = [
-  { label: 'My Profile', path: '/user' },
-  { label: 'My Events', path: '/user/my-events' },
-];
+const UsersBtns = [{ label: 'My Events', path: '/user' }];
 
 export default function UsersListItem({ toggleMenu, role }: Props) {
   const router = useRouter();

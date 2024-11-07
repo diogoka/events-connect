@@ -1,106 +1,150 @@
 'use client';
-import { useContext, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Stack, Chip, Avatar, Box, Typography } from '@mui/material';
+import { useEffect, useState, useContext } from 'react';
 import { UserContext } from '@/context/userContext';
-import { PageContext } from '@/context/pageContext';
-import { PageStatus } from '@/types/context.types';
-import UserInfoItem from '@/components/user/user-info-item';
-import { useMediaQuery } from '@mui/material';
-
-import mailIconSvg from '../../../public/icons/mailIcon.svg';
-import graduationIconSvg from '../../../public/icons/graduationIconSvg.svg';
-import editIconSvg from '../../../public/icons/editIcon.svg';
-import Image from 'next/image';
+import EventList from '@/components/events/eventList';
+import SearchBar from '@/components/searchBar';
+import { Typography, Box, useMediaQuery } from '@mui/material';
+import { CurrentUser, Event } from '@/types/pages.types';
+import { api } from '@/services/api';
+import SwitchViews from '@/components/events/switchViews';
 import React from 'react';
+import Profile from '@/components/user/profile';
 
-export default function UserPage() {
-  const isMobile = useMediaQuery('(max-width: 768px)');
+function UserPage() {
+  const { user } = useContext(UserContext);
 
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [events, setEvents] = useState<Array<Event>>([]);
+  const laptopQuery = useMediaQuery('(min-width:769px)');
+  const [numberOfEvents, setNumberOfEvents] = useState(0);
+  const [isPastEvents, setIsPastEvents] = useState<boolean>(false);
+  const [emptyList, setEmptyList] = useState(false);
 
-  const { user, firebaseAccount } = useContext(UserContext);
-  const { setPageStatus } = useContext(PageContext);
+  const currentUser: CurrentUser = {
+    id: user?.id ? user!.id : '',
+    role: user?.roleName ? user!.roleName : '',
+  };
+
+  const getUserUpcomingEvents = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(
+        `/api/events/upcoming/user/${user?.id}/?start=${numberOfEvents}&qnt=6`
+      );
+      setEvents(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserPastEvents = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(
+        `/api/events/past/user/${user?.id}/?start=${numberOfEvents}&qnt=6`
+      );
+      setEvents(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoadMoreEvents = async () => {
+    try {
+      if (!isPastEvents) {
+        const {
+          data: { events },
+        } = await api.get(
+          `/api/events/upcoming/?start=${numberOfEvents + 6}&qnt=6`
+        );
+        if (events.length !== 6) {
+          setEvents(events);
+          setEmptyList(true);
+        } else if (events.length === 6) {
+          setEmptyList(true);
+        } else {
+          setEvents((prev) => [...prev, events]);
+        }
+        setNumberOfEvents((prev) => prev + 6);
+      } else {
+        const {
+          data: { events },
+        } = await api.get(
+          `/api/events/past/?start=${numberOfEvents + 6}&qnt=6`
+        );
+
+        if (events.length === 6) {
+          setEvents((prev) => [...prev, ...events]);
+          setEmptyList(false);
+        } else {
+          setEmptyList(true);
+        }
+        setNumberOfEvents((prev) => prev + 6);
+      }
+    } catch (error) {}
+  };
 
   useEffect(() => {
-    setPageStatus(PageStatus.Ready);
-  });
+    if (isPastEvents) {
+      getUserPastEvents();
+    } else {
+      getUserUpcomingEvents();
+    }
+  }, [isPastEvents]);
+
+  if (!user) return;
 
   return (
-    <>
-      <Stack
-        alignItems='center'
-        rowGap='24px'
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        position: 'relative',
+      }}
+    >
+      <Profile />
+      <Typography
         sx={{
-          backgroundColor: 'white',
-          borderRadius: '6px',
-          padding: '24px',
-          position: 'relative',
-          marginBottom: '90px',
+          width: '100%',
+          textAlign: 'start',
+          fontSize: '28px',
+          fontWeight: 700,
+          marginTop: '24px',
         }}
       >
-        <Avatar
-          src={`${
-            user?.provider === 'password'
-              ? user.avatarURL
-              : firebaseAccount?.photoURL
-          }`}
-          alt={user?.firstName}
-          sx={{
-            width: isMobile ? '7.5rem' : '10rem',
-            height: isMobile ? '7.5rem' : '10rem',
-            fontSize: isMobile ? '3rem' : '4rem',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            paddingRight: '24px',
-            paddingTop: '24px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-          }}
-          component={'button'}
-          onClick={() => router.push('/user/edit')}
-        >
-          <Image src={editIconSvg} width={24} height={24} alt='edit icon' />
-          <Typography
-            sx={{ fontSize: '18px', fontWeight: 500, color: '#4F5B92' }}
-          >
-            Edit
-          </Typography>
-        </Box>
+        My Events
+      </Typography>
 
-        {user?.roleName !== 'student' && (
-          <Chip
-            label={user?.roleName}
-            variant='filled'
-            color='error'
-            sx={{
-              fontWeight: 'bold',
-              textTransform: 'capitalize',
-            }}
+      <SwitchViews
+        pastEvents={isPastEvents}
+        setPastEvents={setIsPastEvents}
+        isDesktop={laptopQuery}
+        isUserPage={true}
+      />
+      {isLoading ? (
+        <Box>LOADING</Box>
+      ) : (
+        <>
+          <EventList
+            events={events}
+            setEvents={setEvents}
+            user={currentUser}
+            handleLoadMoreEvents={handleLoadMoreEvents}
+            emptyList={emptyList}
+            pastEvents={isPastEvents}
+            isUserPage
+            query={false}
           />
-        )}
-
-        <UserInfoItem
-          value={user ? `${user!.firstName + ' ' + user!.lastName}` : ''}
-          type='TITLE'
-        />
-        <UserInfoItem
-          src={graduationIconSvg}
-          value={user ? user!.courseName : ''}
-          size='LARGE'
-        />
-        <UserInfoItem src={mailIconSvg} value={user ? user!.email : ''} />
-      </Stack>
-    </>
+        </>
+      )}
+    </Box>
   );
 }
+
+export default UserPage;

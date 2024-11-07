@@ -107,7 +107,7 @@ function UserEvents() {
         position: 'relative',
       }}
     >
-      <SearchBar searchEvents={() => {}} isDisabled={events.length === 0} />
+      <SearchBar searchEvents={() => {}} />
       <Typography
         sx={{
           width: '100%',
@@ -138,6 +138,7 @@ function UserEvents() {
             emptyList={emptyList}
             pastEvents={isPastEvents}
             isUserPage
+            query={false}
           />
         </>
       )}

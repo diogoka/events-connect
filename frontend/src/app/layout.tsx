@@ -35,8 +35,9 @@ export default function RootLayout({
       <Box
         component='body'
         position='relative'
-        height={'100%'}
-        style={{ backgroundColor: '#FBF8FF' }}
+        style={{
+          backgroundColor: '#FBF8FF',
+        }}
       >
         <ThemeRegistry options={{ key: 'mui' }}>
           <SnackProvider>

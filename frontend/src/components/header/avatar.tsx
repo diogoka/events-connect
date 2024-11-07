@@ -1,12 +1,15 @@
 import React from 'react';
-import Switcher from '../common/switcher';
 import { useState, useContext } from 'react';
 import { UserContext } from '@/context/userContext';
 import { Avatar, IconButton, Drawer, Box } from '@mui/material';
 import Hamburger from './hamburger';
 import Dropdown from './dropdown';
 
-export default function AvatarIcon() {
+type Props = {
+  laptopQuery: boolean;
+};
+
+export default function AvatarIcon({ laptopQuery }: Props) {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const { user, firebaseAccount } = useContext(UserContext);
   const toggleMenu = (isMenuOpen: boolean) => {
@@ -23,10 +26,10 @@ export default function AvatarIcon() {
   };
 
   return (
-    <Switcher
-      sp={
-        <Box sx={{ minWidth: '40px', maxWidth: '40px' }}>
-          <IconButton onClick={() => toggleMenu(true)} sx={{ p: 0 }}>
+    <>
+      {laptopQuery ? (
+        <>
+          <IconButton onClick={handleClick} size='large' sx={{ padding: '0' }}>
             <Avatar
               alt={user?.firstName}
               src={`${
@@ -36,37 +39,31 @@ export default function AvatarIcon() {
               }`}
             />
           </IconButton>
-          <Drawer
-            anchor='right'
-            open={isMenuOpen}
-            onClose={() => toggleMenu(false)}
-          >
-            <Hamburger toggleMenu={toggleMenu} />
-          </Drawer>
-        </Box>
-      }
-      pc={
-        <>
-          <IconButton
-            onClick={handleClick}
-            size='small'
-            sx={{ ml: 2 }}
-            aria-controls={open ? 'account-menu' : undefined}
-            aria-haspopup='true'
-            aria-expanded={open ? 'true' : undefined}
-          >
-            <Avatar
-              alt={user?.firstName}
-              src={`${
-                user?.provider === 'password'
-                  ? user.avatarURL
-                  : firebaseAccount?.photoURL
-              }`}
-            ></Avatar>
-          </IconButton>
           <Dropdown anchorEl={anchorEl} open={open} handleClose={handleClose} />
         </>
-      }
-    />
+      ) : (
+        <>
+          <Box>
+            <IconButton onClick={() => toggleMenu(true)} sx={{ p: 0 }}>
+              <Avatar
+                alt={user?.firstName}
+                src={`${
+                  user?.provider === 'password'
+                    ? user.avatarURL
+                    : firebaseAccount?.photoURL
+                }`}
+              />
+            </IconButton>
+            <Drawer
+              anchor='right'
+              open={isMenuOpen}
+              onClose={() => toggleMenu(false)}
+            >
+              <Hamburger toggleMenu={toggleMenu} />
+            </Drawer>
+          </Box>
+        </>
+      )}
+    </>
   );
 }
