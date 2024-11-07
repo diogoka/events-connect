@@ -7,7 +7,7 @@ import {
   deleteAttendee,
   newReview,
   getReviews,
-  getEventsByOwner,
+  getUpcomingEventsByOwner,
   searchEvents,
   getPastEvents,
   getEventById,
@@ -17,6 +17,7 @@ import {
   getPastEventsOfMonth,
   getUpcomingMonthEvents,
   getAttendedEventsByUser,
+  getPastEventsByOwner,
 } from '../controllers/eventsControllers';
 
 const eventsRouter: Router = express.Router();
@@ -37,13 +38,14 @@ eventsRouter.get('/attended/user/:id', getAttendedEventsByUser);
 
 eventsRouter.post('/search/', searchEvents);
 
-// Old
-eventsRouter.get('/owner/:id', getEventsByOwner);
-
 eventsRouter.post('/new', createEvents);
+eventsRouter.get('/owner/:id', getUpcomingEventsByOwner);
+eventsRouter.get('/owner/past/:id', getPastEventsByOwner);
 
 eventsRouter.post('/attendee', newAttendee);
 eventsRouter.delete('/attendee', deleteAttendee);
+
+// Old
 
 eventsRouter.put('/:id', updateEvents);
 

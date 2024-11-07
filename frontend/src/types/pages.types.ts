@@ -102,3 +102,16 @@ export interface UserEditInfo extends User {
 export type AttendedEvent = {
   id_event: number;
 };
+
+// New Types
+
+export type AttendeeType = {
+  first_name_user: string;
+  last_name_user: string;
+  avatar_url: string;
+  id_user: string;
+};
+
+export type EventAttendee = {
+  users: AttendeeType;
+};

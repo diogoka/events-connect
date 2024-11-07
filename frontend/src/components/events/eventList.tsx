@@ -24,6 +24,7 @@ type Props = {
   pastEvents: boolean;
   attendedEvents?: AttendedEvent[];
   query: boolean;
+  isOrganizer?: boolean;
 };
 
 function EventList({
@@ -37,17 +38,17 @@ function EventList({
   pastEvents,
   attendedEvents,
   query,
+  isOrganizer = false,
 }: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
-
-  const deleteEvent = async (id: number) => {
-    const newEvents = await events.filter((event) => event.id_event !== id);
-    setEvents(newEvents);
-  };
 
   const checkAttendance = (id: number) => {
     const isAttended = attendedEvents!.some((event) => event.id_event === id);
     return isAttended;
+  };
+
+  const checkOwnership = (idEventOwner: string) => {
+    return user.id === idEventOwner;
   };
 
   return (
@@ -109,6 +110,10 @@ function EventList({
                   ? true
                   : checkAttendance(event.id_event);
 
+                const isOwner = isOrganizer
+                  ? checkOwnership(event.id_owner)
+                  : false;
+
                 return (
                   <NewEventCard
                     key={index}
@@ -117,6 +122,7 @@ function EventList({
                     isAttending={attended}
                     laptopQuery={laptopQuery}
                     pastEvent={pastEvents}
+                    isOwner={isOwner}
                   />
                 );
               })

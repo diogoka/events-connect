@@ -9,6 +9,7 @@ type Props = {
   handleLoadedImage: () => void;
   isAttending: boolean;
   pastEvent: boolean;
+  isOwner: boolean;
 };
 
 const EventImageWithDate = ({
@@ -18,6 +19,7 @@ const EventImageWithDate = ({
   handleLoadedImage,
   isAttending,
   pastEvent,
+  isOwner,
 }: Props) => {
   return (
     <Box sx={{ position: 'relative' }}>
@@ -74,7 +76,9 @@ const EventImageWithDate = ({
           marginTop: '8px',
         }}
       >
-        {isAttending && <Chip type={pastEvent ? 'ATTENDED' : 'ENROLLED'} />}
+        {isAttending && !isOwner && (
+          <Chip type={pastEvent ? 'ATTENDED' : 'ENROLLED'} />
+        )}
       </Box>
     </Box>
   );

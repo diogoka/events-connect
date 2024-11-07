@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -11,6 +11,7 @@ import scheduleIconSvg from '../../../public/icons/scheduleIconSvg.svg';
 import shareIconSvg from '../../../public/icons/iosShareIconSvg.svg';
 import Image from 'next/image';
 import { useSnack } from '@/context/snackContext';
+import CardButton from './newEventCardButton';
 
 type Props = {
   event: Event & {
@@ -23,6 +24,7 @@ type Props = {
   isAttending?: boolean;
   laptopQuery: boolean;
   pastEvent: boolean;
+  isOwner: boolean;
 };
 
 const NewEventCard = ({
@@ -31,6 +33,7 @@ const NewEventCard = ({
   isAttending = false,
   laptopQuery,
   pastEvent,
+  isOwner,
 }: Props) => {
   const startTime = TimeFn(event.date_event_start);
   const endTime = TimeFn(event.date_event_end);
@@ -42,7 +45,19 @@ const NewEventCard = ({
 
   const { openSnackbar } = useSnack();
 
-  const handleClickCard = () => router.push(`/events/${event.id_event}`);
+  const handleClickCard = () => {
+    if (isOwner) {
+      return pastEvent
+        ? console.log('Download Attendees')
+        : console.log('Edit Event');
+    } else {
+      return pastEvent
+        ? console.log('not owner, rate')
+        : isAttending
+        ? console.log('cancel')
+        : router.push(`/events/${event.id_event}`);
+    }
+  };
 
   const handleShareEvent = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -75,6 +90,7 @@ const NewEventCard = ({
         handleLoadedImage={handleSetLoadedImage}
         isAttending={isAttending}
         pastEvent={pastEvent}
+        isOwner={isOwner}
       />
       <CardContent
         sx={{
@@ -121,23 +137,12 @@ const NewEventCard = ({
           >
             <Image src={shareIconSvg} alt='share icon' width={25} height={25} />
           </Box>
-          <Button
-            sx={{
-              backgroundColor: '#DDE1FF',
-              borderRadius: '6px',
-              padding: '8px',
-              fontSize: '1rem',
-              '&:disabled': {
-                backgroundColor: 'rgba(27, 27, 33, 0.12)',
-              },
-            }}
-            disabled={isAttending}
-            onClick={() => {
-              handleClickCard();
-            }}
-          >
-            Join
-          </Button>
+          <CardButton
+            isAttending={isAttending}
+            isPastEvent={pastEvent}
+            isOwner={isOwner}
+            handleClickCard={handleClickCard}
+          />
         </Box>
       </CardContent>
     </Card>

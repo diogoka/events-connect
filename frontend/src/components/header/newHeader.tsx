@@ -18,13 +18,13 @@ const NewHeader = ({ laptopQuery }: Props) => {
     router.push('/events/new');
   };
   return (
-    <Box>
+    <Box sx={{ display: 'flex' }}>
       {user ? (
         <>
           {user.roleId === 1 && laptopQuery && (
             <Button
               variant='contained'
-              sx={{ marginRight: '12px', padding: '0 12px' }}
+              sx={{ marginRight: '12px', padding: '0 12px', minWidth: '150px' }}
               onClick={onNewEventClick}
             >
               + New Event

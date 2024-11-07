@@ -5,6 +5,7 @@ export type Attendee = {
     first_name_user: string;
     last_name_user: string;
     avatarURL?: string;
+    id_user: string;
   };
 };
 

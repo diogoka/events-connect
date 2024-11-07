@@ -19,6 +19,8 @@ import scheduleIconSvgDetail from '../../../../public/icons/scheduleIconSvgDetai
 import groupIconSvg from '../../../../public/icons/groupIconSvg.svg';
 import nearMeIconSvg from '../../../../public/icons/nearMeIconSvg.svg';
 
+import { EventAttendee } from '@/types/pages.types';
+
 export default function EventPage() {
   const { notFound } = useContext(PageContext);
   const { user } = useContext(UserContext);
@@ -26,8 +28,7 @@ export default function EventPage() {
   const [event, setEvent] = useState<Event>();
   const [attendees, setAttendees] = useState<Attendee[]>([] as Attendee[]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  const [applied, setApplied] = useState<boolean>(false);
+  const [isAttending, setIsAttending] = useState(false);
 
   const params = useParams();
 
@@ -44,7 +45,12 @@ export default function EventPage() {
     try {
       const { data } = await api.get(`/api/events/${EVENT_ID}`);
       setEvent(data.event);
-
+      const isAttending = await checkAttendance(
+        data.event.attendees,
+        user?.id!
+      );
+      console.log('is', isAttending);
+      setIsAttending(isAttending);
       setAttendees(data.event.attendees);
     } catch (error) {
       console.log(error);
@@ -55,17 +61,62 @@ export default function EventPage() {
     setIsModalOpen(false);
   };
 
-  const handleJoinEvent = () => {
+  const handleClickEvent = async () => {
     if (!user) {
       router.push('/login');
     } else {
-      // New attendee
+      try {
+        if (isAttending) {
+          await api.delete('api/events/attendee', {
+            data: {
+              eventId: EVENT_ID,
+              userId: user.id,
+            },
+          });
+
+          const updateAttendees = deleteAttendee(attendees, user.id);
+          setAttendees(await updateAttendees);
+          setIsAttending(false);
+        } else {
+          await api.post(
+            'api/events/attendee',
+            {
+              eventId: EVENT_ID,
+              userId: user.id,
+            },
+            { headers: { 'Content-type': 'application/json' } }
+          );
+        }
+        setIsAttending(true);
+        await getEvent();
+      } catch (error) {}
     }
+  };
+
+  const checkAttendance = async (
+    attendeesList: EventAttendee[],
+    userId: string
+  ) => {
+    let isAttending = false;
+    attendeesList.map(({ users }) => {
+      if (users.id_user === userId) {
+        isAttending = true;
+      }
+    });
+    return isAttending;
+  };
+
+  const deleteAttendee = async (attendeesList: Attendee[], userId: string) => {
+    const updatedList = attendeesList.filter(
+      ({ users }) => users.id_user !== userId
+    );
+
+    return updatedList;
   };
 
   useEffect(() => {
     getEvent();
-  }, [applied]);
+  }, [isAttending]);
 
   return (
     <>
@@ -322,10 +373,18 @@ export default function EventPage() {
           </Box>
           <Button
             variant='contained'
-            sx={{ padding: '8px 16px' }}
-            onClick={handleJoinEvent}
+            sx={{
+              padding: '8px 16px',
+
+              backgroundColor: isAttending ? '#FFDAD6' : '#4F5B92',
+              color: isAttending ? '#410002' : '#FFFFFF',
+              '&:hover': {
+                backgroundColor: isAttending ? '#FFB6B3' : '#B8C1FF',
+              },
+            }}
+            onClick={handleClickEvent}
           >
-            Join Event
+            {isAttending ? 'Cancel' : 'Join Event'}
           </Button>
         </Box>
       </Box>

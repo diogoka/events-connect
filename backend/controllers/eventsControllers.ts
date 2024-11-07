@@ -184,6 +184,7 @@ export const getEventById = async (
                 first_name_user: true,
                 last_name_user: true,
                 avatar_url: true,
+                id_user: true,
               },
             },
           },
@@ -321,8 +322,6 @@ export const searchEvents = async (
     const { text, past } = req.query;
     const today = new Date();
 
-    console.log('Text', text);
-
     if (typeof text !== 'string') {
       return res.status(400).json({ error: 'Search text must be a string' });
     }
@@ -350,56 +349,6 @@ export const searchEvents = async (
   }
 };
 
-// Legacy Controllers
-
-export const getEventsByOwner = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  try {
-    const owner_id = req.params.id;
-    let query = '';
-    const today = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-    if (req.query.past) {
-      query = `
-        SELECT * FROM events WHERE events.id_owner = '${owner_id}' and events.date_event_start < '${today}' ORDER BY events.date_event_start ASC;
-      `;
-    } else {
-      query = `
-        SELECT * FROM events WHERE events.id_owner = '${owner_id}' and events.date_event_start > '${today}' ORDER BY events.date_event_start ASC;
-      `;
-    }
-
-    const events = await pool.query(query);
-
-    let tags: any = [];
-    if (events.rows.length !== 0) {
-      const ids = events.rows.map((val) => val.id_event);
-      tags = await pool.query(`
-        SELECT 
-          events.id_event, 
-          tags.name_tag 
-        FROM 
-          events
-        INNER JOIN 
-          events_tags ON events.id_event = events_tags.id_event
-        INNER JOIN 
-          tags ON events_tags.id_tag = tags.id_tag 
-        WHERE 
-          events.id_event IN (${ids.join(',')});
-      `);
-    }
-
-    res.status(200).json({
-      events: events.rows,
-      tags: tags.rows,
-    });
-  } catch (err: any) {
-    res.status(500).send(err.message);
-  }
-};
-
 export const createEvents = async (
   req: express.Request,
   res: express.Response
@@ -418,39 +367,178 @@ export const createEvents = async (
   } = req.body;
 
   try {
-    dates.forEach(async (date: Date) => {
-      const events = await pool.query(
-        `
-        INSERT INTO
-        events (id_owner, name_event, description_event, date_event_start, date_event_end, location_event, capacity_event, price_event, category_event, image_url_event)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-        RETURNING *;
-      `,
-        [
-          owner,
-          title,
-          description,
-          date.dateStart,
-          date.dateEnd,
-          location,
-          spots,
-          price,
-          category,
-          imageURL,
-        ]
-      );
-
-      tagId.forEach((id: string) => {
-        pool.query(
-          `INSERT INTO events_tags (id_event, id_tag) VALUES ('${events.rows[0].id_event}','${id}') RETURNING *;`
-        );
-      });
+    const createdEvent = await prisma.events.create({
+      data: {
+        id_owner: owner,
+        name_event: title,
+        description_event: description,
+        date_event_start: new Date(dates[0].dateStart),
+        date_event_end: new Date(dates[0].dateEnd),
+        location_event: location,
+        capacity_event: spots,
+        price_event: price,
+        image_url_event: imageURL,
+        category_event: category,
+      },
     });
-    res.status(201).json();
-  } catch (err: any) {
-    res.status(500).send(err.message);
+
+    if (tagId && tagId.length > 0) {
+      const tagLinks = tagId.map((tag: { id: number }) => ({
+        id_event: createdEvent.id_event,
+        id_tag: tag.id,
+      }));
+
+      await prisma.events_tags.createMany({
+        data: tagLinks,
+      });
+    }
+
+    res
+      .status(201)
+      .json({ message: 'Event created successfully', createdEvent });
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ error: 'Failed to create event' });
   }
 };
+
+export const getUpcomingEventsByOwner = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const id = req.params.id;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  try {
+    const createdEvents = await prisma.events.findMany({
+      where: {
+        id_owner: id,
+        AND: [
+          {
+            date_event_start: {
+              gte: today,
+            },
+          },
+        ],
+      },
+    });
+
+    const attendingEvents = await prisma.attendees.findMany({
+      where: { id_user: id },
+      select: { events: true },
+    });
+
+    const attendingEventsArray = attendingEvents.map((item) => item.events);
+
+    const upcomingAttendingEvents = attendingEventsArray.filter(
+      (event) => event.date_event_start >= today
+    );
+
+    const events = [...createdEvents, ...upcomingAttendingEvents];
+
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch the events' });
+  }
+};
+
+export const getPastEventsByOwner = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const id = req.params.id;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  try {
+    const createdEvents = await prisma.events.findMany({
+      where: {
+        id_owner: id,
+        AND: [
+          {
+            date_event_start: {
+              lte: today,
+            },
+          },
+        ],
+      },
+    });
+
+    const attendingEvents = await prisma.attendees.findMany({
+      where: { id_user: id },
+      select: { events: true },
+    });
+
+    const attendingEventsArray = attendingEvents.map((item) => item.events);
+
+    const upcomingAttendingEvents = attendingEventsArray.filter(
+      (event) => event.date_event_start <= today
+    );
+
+    const events = [...createdEvents, ...upcomingAttendingEvents];
+
+    console.log('events', events);
+
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch the events' });
+  }
+};
+
+export const newAttendee = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { userId, eventId } = req.body;
+  try {
+    const newAttendee = await prisma.attendees.create({
+      data: {
+        id_event: +eventId,
+        id_user: userId,
+      },
+    });
+
+    res.status(201).json(newAttendee);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const deleteAttendee = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { userId, eventId } = req.body;
+
+  if (!userId || !eventId) {
+    return res
+      .status(400)
+      .json({ message: 'User ID and Event ID are required.' });
+  }
+
+  try {
+    const deletedAttendee = await prisma.attendees.deleteMany({
+      where: {
+        id_user: userId,
+        id_event: +eventId,
+      },
+    });
+
+    if (deletedAttendee.count === 0) {
+      return res.status(404).json({ message: 'Attendee not found.' });
+    }
+
+    return res.status(200).json(deleteAttendee);
+  } catch (error) {
+    console.error('Error deleting attendee:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+// Legacy Controllers
 
 export const updateEvents = async (
   req: express.Request,
@@ -536,77 +624,6 @@ export const deleteEvents = async (
     } catch (err: any) {
       res.status(500).send(err.message);
     }
-  }
-};
-
-export const newAttendee = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  if (!req.body.id_event || !req.body.id_user) {
-    res.status(400).send('Missing parameters');
-    return;
-  }
-  const { id_event, id_user } = req.body;
-  try {
-    const updateAvailableSpots = await pool.query(
-      `UPDATE events SET capacity_event = capacity_event - 1 WHERE id_event = $1 RETURNING *;`,
-      [id_event]
-    );
-
-    const events = await pool.query(
-      `INSERT INTO
-          attendees (id_event, id_user)
-         VALUES
-          ($1, $2)
-         RETURNING
-         *;
-         `,
-      [id_event, id_user]
-    );
-
-    const getAttendeeInfo = await pool.query(
-      'SELECT * FROM users where id_user = $1',
-      [id_user]
-    );
-
-    // await sendTicket(id_event, id_user);
-
-    res.status(201).json(getAttendeeInfo.rows);
-  } catch (err: any) {
-    res.status(500).send(err.message);
-  }
-};
-
-export const deleteAttendee = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  if (!req.body.id_event || !req.body.id_user) {
-    res.status(400).send('Missing parameters');
-    return;
-  }
-  const { id_event, id_user } = req.body;
-  try {
-    const updateAvailableSpots = await pool.query(
-      `UPDATE events SET capacity_event = capacity_event + 1 WHERE id_event = $1 RETURNING *;`,
-      [id_event]
-    );
-
-    const events = await pool.query(
-      `DELETE FROM
-          attendees
-         WHERE
-          id_event = $1 AND id_user = $2
-         RETURNING
-         *;
-         `,
-      [id_event, id_user]
-    );
-
-    res.status(200).json(events.rows);
-  } catch (err: any) {
-    res.status(500).send(err.message);
   }
 };
 

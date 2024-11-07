@@ -3,7 +3,7 @@ import { useEffect, useState, useContext } from 'react';
 import { UserContext } from '@/context/userContext';
 import EventList from '@/components/events/eventList';
 import SearchBar from '@/components/searchBar';
-import { Typography, Box, useMediaQuery } from '@mui/material';
+import { Typography, Box, useMediaQuery, Skeleton } from '@mui/material';
 import { CurrentUser, Event } from '@/types/pages.types';
 import { api } from '@/services/api';
 import SwitchViews from '@/components/events/switchViews';
@@ -53,6 +53,21 @@ function UserPage() {
     }
   };
 
+  const getUpcomingOrganizerEvents = async () => {
+    try {
+      const response = await api.get(`/api/events/owner/${user?.id}`);
+
+      setEvents(response.data);
+    } catch (error) {}
+  };
+
+  const getPastOrganizerEvents = async () => {
+    try {
+      const response = await api.get(`/api/events/owner/past/${user?.id}`);
+      setEvents(response.data);
+    } catch (error) {}
+  };
+
   const handleLoadMoreEvents = async () => {
     try {
       if (!isPastEvents) {
@@ -89,10 +104,18 @@ function UserPage() {
   };
 
   useEffect(() => {
-    if (isPastEvents) {
-      getUserPastEvents();
+    if (user && user.roleId === 1) {
+      if (isPastEvents) {
+        getPastOrganizerEvents();
+      } else {
+        getUpcomingOrganizerEvents();
+      }
     } else {
-      getUserUpcomingEvents();
+      if (isPastEvents) {
+        getUserPastEvents();
+      } else {
+        getUserUpcomingEvents();
+      }
     }
   }, [isPastEvents]);
 
@@ -128,7 +151,9 @@ function UserPage() {
         isUserPage={true}
       />
       {isLoading ? (
-        <Box>LOADING</Box>
+        <Box sx={{ minHeight: '100%', minWidth: '100%', marginBottom: '18px' }}>
+          <Skeleton variant='rectangular' width={'100%'} height={722} />
+        </Box>
       ) : (
         <>
           <EventList
@@ -140,6 +165,7 @@ function UserPage() {
             pastEvents={isPastEvents}
             isUserPage
             query={false}
+            isOrganizer={currentUser.role === 'organizer'}
           />
         </>
       )}
