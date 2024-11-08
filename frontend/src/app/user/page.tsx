@@ -149,6 +149,7 @@ function UserPage() {
         setPastEvents={setIsPastEvents}
         isDesktop={laptopQuery}
         isUserPage={true}
+        isOrganizer={currentUser.role === 'organizer'}
       />
       {isLoading ? (
         <Box sx={{ minHeight: '100%', minWidth: '100%', marginBottom: '18px' }}>

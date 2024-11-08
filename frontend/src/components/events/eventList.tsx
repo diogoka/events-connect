@@ -40,6 +40,7 @@ function EventList({
   query,
   isOrganizer = false,
 }: Props) {
+  console.log('is User Page', isUserPage);
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
   const checkAttendance = (id: number) => {
@@ -123,6 +124,7 @@ function EventList({
                     laptopQuery={laptopQuery}
                     pastEvent={pastEvents}
                     isOwner={isOwner}
+                    isUserPage={isUserPage}
                   />
                 );
               })

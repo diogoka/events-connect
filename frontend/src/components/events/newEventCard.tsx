@@ -25,6 +25,7 @@ type Props = {
   laptopQuery: boolean;
   pastEvent: boolean;
   isOwner: boolean;
+  isUserPage: boolean;
 };
 
 const NewEventCard = ({
@@ -34,6 +35,7 @@ const NewEventCard = ({
   laptopQuery,
   pastEvent,
   isOwner,
+  isUserPage,
 }: Props) => {
   const startTime = TimeFn(event.date_event_start);
   const endTime = TimeFn(event.date_event_end);
@@ -45,17 +47,34 @@ const NewEventCard = ({
 
   const { openSnackbar } = useSnack();
 
-  const handleClickCard = () => {
-    if (isOwner) {
-      return pastEvent
-        ? console.log('Download Attendees')
-        : console.log('Edit Event');
+  const handleClickCard = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/events/${event.id_event}`);
+  };
+
+  const handleClickButtonCard = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (isUserPage) {
+      if (pastEvent) {
+        if (isOwner) {
+          console.log('Download Attendees');
+        } else {
+          console.log('Rate event');
+        }
+      } else {
+        if (isOwner) {
+          console.log('Edit');
+        } else {
+          console.log('Cancel');
+        }
+      }
     } else {
-      return pastEvent
-        ? console.log('not owner, rate')
-        : isAttending
-        ? console.log('cancel')
-        : router.push(`/events/${event.id_event}`);
+      if (pastEvent && isAttending) {
+        console.log('RATE');
+      } else {
+        router.push(`/events/${event.id_event}`);
+      }
     }
   };
 
@@ -81,7 +100,7 @@ const NewEventCard = ({
         padding: 0,
       }}
       component={'button'}
-      onClick={() => handleClickCard()}
+      onClick={(e) => handleClickCard(e)}
     >
       <EventImageWithDate
         imageLoaded={imageLoaded}
@@ -123,10 +142,11 @@ const NewEventCard = ({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              marginRight: '1.5rem',
+
               background: 'transparent',
               backgroundColor: 'transparent',
               padding: 0,
+              paddingRight: '18px',
               border: 0,
               cursor: 'pointer',
             }}
@@ -141,7 +161,8 @@ const NewEventCard = ({
             isAttending={isAttending}
             isPastEvent={pastEvent}
             isOwner={isOwner}
-            handleClickCard={handleClickCard}
+            handleClickButtonCard={handleClickButtonCard}
+            isUserPage={isUserPage}
           />
         </Box>
       </CardContent>

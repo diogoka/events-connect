@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Box, Stack, Typography, useMediaQuery, Button } from '@mui/material';
 import { UserContext } from '@/context/userContext';
 import { PageContext } from '@/context/pageContext';
-import { Attendee, Event, OtherInfo } from '@/types/types';
+import { Attendee, Event } from '@/types/types';
 import Image from 'next/image';
 import { monthDayFn, TimeFn } from '@/common/functions';
 import Avatar from '@mui/material/Avatar';
@@ -21,6 +21,8 @@ import nearMeIconSvg from '../../../../public/icons/nearMeIconSvg.svg';
 
 import { EventAttendee } from '@/types/pages.types';
 
+import CardButton from '@/components/events/newEventCardButton';
+
 export default function EventPage() {
   const { notFound } = useContext(PageContext);
   const { user } = useContext(UserContext);
@@ -29,9 +31,10 @@ export default function EventPage() {
   const [attendees, setAttendees] = useState<Attendee[]>([] as Attendee[]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isAttending, setIsAttending] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [isPastEvent, setIsPastEvent] = useState(false);
 
   const params = useParams();
-
   const EVENT_ID = params.id;
   const laptopQuery = useMediaQuery('(max-width:769px)');
 
@@ -45,16 +48,27 @@ export default function EventPage() {
     try {
       const { data } = await api.get(`/api/events/${EVENT_ID}`);
       setEvent(data.event);
+
       const isAttending = await checkAttendance(
         data.event.attendees,
         user?.id!
       );
-      console.log('is', isAttending);
+      const isOwner = await checkOwnerShip(data.event.id_owner);
+      const isPast = checkIfPastEvent(data.event.date_event_end); // Check if the event is in the past
+      setIsOwner(isOwner!);
       setIsAttending(isAttending);
+      setIsPastEvent(isPast); // Set the past event state
       setAttendees(data.event.attendees);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  // Check if the event is in the past by comparing event end date with current date
+  const checkIfPastEvent = (eventEndDate: string) => {
+    const currentDate = new Date();
+    const eventDate = new Date(eventEndDate);
+    return eventDate < currentDate; // Returns true if event is in the past
   };
 
   const handleCloseModal = () => {
@@ -110,8 +124,13 @@ export default function EventPage() {
     const updatedList = attendeesList.filter(
       ({ users }) => users.id_user !== userId
     );
-
     return updatedList;
+  };
+
+  const checkOwnerShip = async (eventOwnerId: string) => {
+    if (user) {
+      return user.id === eventOwnerId;
+    }
   };
 
   useEffect(() => {
@@ -371,21 +390,15 @@ export default function EventPage() {
             </Typography>
             <Typography sx={{ fontSize: '16px' }}>person</Typography>
           </Box>
-          <Button
-            variant='contained'
-            sx={{
-              padding: '8px 16px',
 
-              backgroundColor: isAttending ? '#FFDAD6' : '#4F5B92',
-              color: isAttending ? '#410002' : '#FFFFFF',
-              '&:hover': {
-                backgroundColor: isAttending ? '#FFB6B3' : '#B8C1FF',
-              },
-            }}
-            onClick={handleClickEvent}
-          >
-            {isAttending ? 'Cancel' : 'Join Event'}
-          </Button>
+          <CardButton
+            isUserPage={true}
+            isOwner={isOwner}
+            isAttending={isAttending}
+            isPastEvent={isPastEvent}
+            handleClickButtonCard={handleClickEvent}
+            isDetail
+          />
         </Box>
       </Box>
     </>

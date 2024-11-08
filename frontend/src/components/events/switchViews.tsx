@@ -15,6 +15,7 @@ type Props = {
   getPastEventsOfMonth?: () => void;
   isPastMonthEvents?: boolean;
   setIsPastMonthEvents?: Dispatch<SetStateAction<boolean>>;
+  isOrganizer: boolean;
 };
 
 const SwitchViews = ({
@@ -27,6 +28,7 @@ const SwitchViews = ({
   getPastEventsOfMonth,
   isPastMonthEvents,
   setIsPastMonthEvents,
+  isOrganizer,
 }: Props) => {
   const handleMonthPastEventsClick = () => {
     getPastEventsOfMonth!();
@@ -98,7 +100,7 @@ const SwitchViews = ({
               padding: 0,
             }}
           >
-            {isUserPage ? 'Attended' : ' Previous'}
+            {isOrganizer ? 'Previous' : isUserPage ? 'Attended' : 'Previous'}
           </Typography>
         )}
       </Box>
