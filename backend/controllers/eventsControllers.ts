@@ -536,6 +536,44 @@ export const deleteAttendee = async (
   }
 };
 
+export const getEventAttendees = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const id = req.params.id;
+
+  console.log('eventId', id);
+
+  try {
+    const attendees = await prisma.attendees.findMany({
+      where: { id_event: +id },
+      select: {
+        events: {
+          select: {
+            name_event: true,
+            location_event: true,
+            date_event_start: true,
+          },
+        },
+        users: {
+          select: {
+            first_name_user: true,
+            last_name_user: true,
+            email_user: true,
+            student_id_user: true,
+            users_courses: true,
+          },
+        },
+      },
+    });
+
+    console.log(attendees);
+    res.status(200).json(attendees);
+  } catch (error) {
+    res.status(500);
+  }
+};
+
 // Legacy Controllers
 
 export const updateEvents = async (
@@ -598,27 +636,6 @@ export const updateEvents = async (
       });
 
       res.status(200).json({});
-    } catch (err: any) {
-      res.status(500).send(err.message);
-    }
-  }
-};
-
-export const deleteEvents = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  const id = parseInt(req.params.id);
-
-  if (!id) {
-    res.status(404).send('Delete events failed');
-  } else {
-    try {
-      const events = await pool.query(
-        `DELETE FROM events WHERE id_event = $1 RETURNING *;`,
-        [id]
-      );
-      res.status(200).json(events.rows);
     } catch (err: any) {
       res.status(500).send(err.message);
     }

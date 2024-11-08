@@ -2,7 +2,6 @@ import express, { Router } from 'express';
 import {
   createEvents,
   updateEvents,
-  deleteEvents,
   newAttendee,
   deleteAttendee,
   newReview,
@@ -18,6 +17,7 @@ import {
   getUpcomingMonthEvents,
   getAttendedEventsByUser,
   getPastEventsByOwner,
+  getEventAttendees,
 } from '../controllers/eventsControllers';
 
 const eventsRouter: Router = express.Router();
@@ -45,11 +45,11 @@ eventsRouter.get('/owner/past/:id', getPastEventsByOwner);
 eventsRouter.post('/attendee', newAttendee);
 eventsRouter.delete('/attendee', deleteAttendee);
 
+eventsRouter.get('/attendee/:id', getEventAttendees);
+
 // Old
 
 eventsRouter.put('/:id', updateEvents);
-
-eventsRouter.delete('/:id', deleteEvents);
 
 eventsRouter.post('/review/new', newReview);
 eventsRouter.get('/reviews/:id', getReviews);
