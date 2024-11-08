@@ -28,3 +28,10 @@ export type EventDateString = {
   date_event_start: string;
   date_event_end: string;
 };
+
+// New
+
+export type EventModalType = {
+  isOpen: boolean;
+  eventId: number;
+};

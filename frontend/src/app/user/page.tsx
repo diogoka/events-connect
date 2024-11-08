@@ -14,7 +14,7 @@ function UserPage() {
   const { user } = useContext(UserContext);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [events, setEvents] = useState<Array<Event>>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const laptopQuery = useMediaQuery('(min-width:769px)');
   const [numberOfEvents, setNumberOfEvents] = useState(0);
   const [isPastEvents, setIsPastEvents] = useState<boolean>(false);

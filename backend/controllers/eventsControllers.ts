@@ -480,8 +480,6 @@ export const getPastEventsByOwner = async (
 
     const events = [...createdEvents, ...upcomingAttendingEvents];
 
-    console.log('events', events);
-
     res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch the events' });

@@ -22,6 +22,10 @@ import nearMeIconSvg from '../../../../public/icons/nearMeIconSvg.svg';
 import { EventAttendee } from '@/types/pages.types';
 
 import CardButton from '@/components/events/newEventCardButton';
+import NewEventModal from '@/components/events/newEventModal';
+import { EventModalType } from '@/types/components.types';
+import ModalAttendParticipation from '@/components/event/modal-attend-participation';
+import { useSnack } from '@/context/snackContext';
 
 export default function EventPage() {
   const { notFound } = useContext(PageContext);
@@ -42,7 +46,16 @@ export default function EventPage() {
   const startTime = TimeFn(event?.date_event_start!);
   const endTime = TimeFn(event?.date_event_end!);
 
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState<EventModalType>({
+    eventId: 0,
+    isOpen: false,
+  });
+
+  const [isAttendModalOpen, setIsAttendModalOpen] = useState(false);
+
   const router = useRouter();
+
+  const { openSnackbar } = useSnack();
 
   const getEvent = async () => {
     try {
@@ -54,56 +67,69 @@ export default function EventPage() {
         user?.id!
       );
       const isOwner = await checkOwnerShip(data.event.id_owner);
-      const isPast = checkIfPastEvent(data.event.date_event_end); // Check if the event is in the past
+      const isPast = checkIfPastEvent(data.event.date_event_end);
       setIsOwner(isOwner!);
       setIsAttending(isAttending);
-      setIsPastEvent(isPast); // Set the past event state
+      setIsPastEvent(isPast);
       setAttendees(data.event.attendees);
     } catch (error) {
       console.log(error);
     }
   };
 
-  // Check if the event is in the past by comparing event end date with current date
   const checkIfPastEvent = (eventEndDate: string) => {
     const currentDate = new Date();
     const eventDate = new Date(eventEndDate);
-    return eventDate < currentDate; // Returns true if event is in the past
+    return eventDate < currentDate;
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
+  const handleDeleteAttendee = async () => {
+    try {
+      await api.delete('api/events/attendee', {
+        data: {
+          eventId: EVENT_ID,
+          userId: user!.id,
+        },
+      });
+      const updateAttendees = deleteAttendee(attendees, user!.id);
+      setAttendees(await updateAttendees);
+      setIsAttending(false);
+    } catch (error) {}
+  };
+
+  const handleAddAttendee = async () => {
+    try {
+      await api.post(
+        'api/events/attendee',
+        {
+          eventId: EVENT_ID,
+          userId: user!.id,
+        },
+        { headers: { 'Content-type': 'application/json' } }
+      );
+      setIsAttending(true);
+      await getEvent();
+      openSnackbar('You have successfully applied to this event', 'success');
+    } catch (error) {}
+  };
+
   const handleClickEvent = async () => {
     if (!user) {
       router.push('/login');
     } else {
-      try {
-        if (isAttending) {
-          await api.delete('api/events/attendee', {
-            data: {
-              eventId: EVENT_ID,
-              userId: user.id,
-            },
-          });
-
-          const updateAttendees = deleteAttendee(attendees, user.id);
-          setAttendees(await updateAttendees);
-          setIsAttending(false);
+      if (isAttending) {
+        openModal(+EVENT_ID);
+      } else {
+        if (event?.price_event! > 0) {
+          openAttendingModal();
         } else {
-          await api.post(
-            'api/events/attendee',
-            {
-              eventId: EVENT_ID,
-              userId: user.id,
-            },
-            { headers: { 'Content-type': 'application/json' } }
-          );
+          handleAddAttendee();
         }
-        setIsAttending(true);
-        await getEvent();
-      } catch (error) {}
+      }
     }
   };
 
@@ -132,6 +158,21 @@ export default function EventPage() {
       return user.id === eventOwnerId;
     }
   };
+
+  const openModal = (eventId: number) => {
+    setIsCancelModalOpen({ eventId: eventId, isOpen: true });
+  };
+
+  const closeModal = (eventId: number) => {
+    setIsCancelModalOpen({ eventId: 0, isOpen: false });
+  };
+
+  const openAttendingModal = () => {
+    console.log('Open');
+    setIsAttendModalOpen(true);
+  };
+
+  const closeAttendModal = () => setIsAttendModalOpen(false);
 
   useEffect(() => {
     getEvent();
@@ -400,6 +441,18 @@ export default function EventPage() {
             isDetail
           />
         </Box>
+        <NewEventModal
+          isOpen={isCancelModalOpen}
+          user={{ id: user?.id, role: user?.roleName }}
+          closeModal={closeModal}
+          handleDeleteAttendees={handleDeleteAttendee}
+        />
+        <ModalAttendParticipation
+          isOpen={isAttendModalOpen}
+          onClose={closeAttendModal}
+          laptopQuery={laptopQuery}
+          addAttendee={handleAddAttendee}
+        />
       </Box>
     </>
   );

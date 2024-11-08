@@ -70,12 +70,12 @@ const CardButton = ({
               ? '#FFFAA0'
               : isAttending && isUserPage
               ? '#FFDAD6'
-              : '#DDE1FF',
+              : '#4F5B92',
             color: isOwner
               ? 'black'
               : isAttending && isUserPage
               ? '#410002'
-              : 'inherit',
+              : '#FFFF',
             '&:hover': {
               backgroundColor: isOwner
                 ? '#FFD700'

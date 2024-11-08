@@ -1,18 +1,20 @@
 'use client';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { AttendedEvent, Events as Event } from '@/types/pages.types';
-import { Dispatch, SetStateAction, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import NewEventCard from './newEventCard';
 
-import SwitchViews from './switchViews';
 import EventCalendarView from './eventCalendarView';
 import React from 'react';
 import MobileEventCalendarView from './mobileEventCalendarView';
+import NewEventModal from './newEventModal';
+
+import { EventModalType } from '@/types/components.types';
 
 type Props = {
   events: Event[];
-  setEvents: (events: Event[]) => void;
+  setEvents: Dispatch<SetStateAction<Event[]>>;
   user: {
     id: string | undefined;
     role: string | undefined;
@@ -40,8 +42,12 @@ function EventList({
   query,
   isOrganizer = false,
 }: Props) {
-  console.log('is User Page', isUserPage);
   const laptopQuery = useMediaQuery('(min-width:769px)');
+
+  const [isModalOpen, setIsModalOpen] = useState<EventModalType>({
+    eventId: 0,
+    isOpen: false,
+  });
 
   const checkAttendance = (id: number) => {
     const isAttended = attendedEvents!.some((event) => event.id_event === id);
@@ -50,6 +56,18 @@ function EventList({
 
   const checkOwnership = (idEventOwner: string) => {
     return user.id === idEventOwner;
+  };
+
+  const openModal = (eventId: number) => {
+    setIsModalOpen({ eventId: eventId, isOpen: true });
+  };
+
+  const closeModal = (eventId: number) => {
+    setIsModalOpen({ eventId: 0, isOpen: false });
+
+    setEvents((prevEvents: Event[]) =>
+      prevEvents.filter((event) => event.id_event !== eventId)
+    );
   };
 
   return (
@@ -125,6 +143,7 @@ function EventList({
                     pastEvent={pastEvents}
                     isOwner={isOwner}
                     isUserPage={isUserPage}
+                    openModal={openModal}
                   />
                 );
               })
@@ -132,6 +151,7 @@ function EventList({
           </>
         )}
       </Stack>
+      <NewEventModal isOpen={isModalOpen} user={user} closeModal={closeModal} />
 
       {events.length !== 0 && !isCalendarView && (
         <Button

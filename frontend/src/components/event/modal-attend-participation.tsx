@@ -25,16 +25,17 @@ function ModalAttendParticipation({
   };
 
   const buttonStyle = {
-    width: '40%',
-    height: '2rem',
+    width: '140px',
+    padding: '8px 16px',
   };
 
   const deleteButtonStyle = {
-    width: '40%',
-    height: '2rem',
-    bgcolor: '#D22B2B',
+    bgcolor: '#FFDAD6',
+    color: '#410002',
+    width: '140px',
+    padding: '8px 16px',
     '&:hover': {
-      bgcolor: 'darkred',
+      backgroundColor: '#FFC7C0',
     },
   };
 
@@ -43,12 +44,18 @@ function ModalAttendParticipation({
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: laptopQuery ? '90%' : '30%',
+
     bgcolor: 'white',
     border: '1px solid #000',
     boxShadow: 24,
     p: 4,
     borderRadius: '5px',
+    width: 450,
+    height: 210,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   };
 
   useEffect(() => {
@@ -74,6 +81,7 @@ function ModalAttendParticipation({
             alignItems='center'
             justifyContent='center'
             columnGap='.125rem'
+            marginBottom='12px'
           >
             <RiErrorWarningFill
               style={{
@@ -90,7 +98,7 @@ function ModalAttendParticipation({
               Payment Required!
             </Typography>
           </Stack>
-          <Typography sx={{ textAlign: 'center' }}>
+          <Typography sx={{ textAlign: 'center', marginBottom: '12px' }}>
             Please follow the instruction for payment.
           </Typography>
           <Box sx={iconContainer}>

@@ -1,5 +1,5 @@
 'use client';
-import React, { use, useState } from 'react';
+import React, { Dispatch, SetStateAction, use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -12,6 +12,7 @@ import shareIconSvg from '../../../public/icons/iosShareIconSvg.svg';
 import Image from 'next/image';
 import { useSnack } from '@/context/snackContext';
 import CardButton from './newEventCardButton';
+import NewEventModal from './newEventModal';
 
 type Props = {
   event: Event & {
@@ -26,6 +27,7 @@ type Props = {
   pastEvent: boolean;
   isOwner: boolean;
   isUserPage: boolean;
+  openModal: (id: number) => void;
 };
 
 const NewEventCard = ({
@@ -36,6 +38,7 @@ const NewEventCard = ({
   pastEvent,
   isOwner,
   isUserPage,
+  openModal,
 }: Props) => {
   const startTime = TimeFn(event.date_event_start);
   const endTime = TimeFn(event.date_event_end);
@@ -50,6 +53,11 @@ const NewEventCard = ({
   const handleClickCard = (e: React.MouseEvent) => {
     e.stopPropagation();
     router.push(`/events/${event.id_event}`);
+  };
+
+  const openCancelModal = () => {
+    console.log('open');
+    openModal(event.id_event);
   };
 
   const handleClickButtonCard = (e: React.MouseEvent) => {
@@ -67,6 +75,7 @@ const NewEventCard = ({
           console.log('Edit');
         } else {
           console.log('Cancel');
+          openCancelModal();
         }
       }
     } else {
