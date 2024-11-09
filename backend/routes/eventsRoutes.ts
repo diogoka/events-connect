@@ -42,10 +42,9 @@ eventsRouter.post('/new', createEvents);
 eventsRouter.get('/owner/:id', getUpcomingEventsByOwner);
 eventsRouter.get('/owner/past/:id', getPastEventsByOwner);
 
+eventsRouter.get('/attendee/:id', getEventAttendees);
 eventsRouter.post('/attendee', newAttendee);
 eventsRouter.delete('/attendee', deleteAttendee);
-
-eventsRouter.get('/attendee/:id', getEventAttendees);
 
 // Old
 

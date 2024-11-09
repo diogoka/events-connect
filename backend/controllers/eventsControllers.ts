@@ -542,10 +542,8 @@ export const getEventAttendees = async (
 ) => {
   const id = req.params.id;
 
-  console.log('eventId', id);
-
   try {
-    const attendees = await prisma.attendees.findMany({
+    const rawData = await prisma.attendees.findMany({
       where: { id_event: +id },
       select: {
         events: {
@@ -561,16 +559,32 @@ export const getEventAttendees = async (
             last_name_user: true,
             email_user: true,
             student_id_user: true,
-            users_courses: true,
+            users_courses: {
+              select: {
+                courses: { select: { name_course: true } },
+              },
+            },
           },
         },
       },
     });
 
-    console.log(attendees);
-    res.status(200).json(attendees);
-  } catch (error) {
-    res.status(500);
+    const event = rawData[0].events;
+    const attendees: any = [];
+    rawData.forEach((item) => {
+      const course = item.users.users_courses[0].courses.name_course;
+      const studentId = item.users.student_id_user.toString();
+      const attendee = {
+        ...item.users,
+        users_courses: course,
+        student_id_user: studentId,
+      };
+      attendees.push(attendee);
+    });
+
+    return res.status(200).json({ event: event, attendees: [...attendees] });
+  } catch (error: any) {
+    return res.status(500).json(error.message);
   }
 };
 
