@@ -541,7 +541,6 @@ export const getEventAttendees = async (
   res: express.Response
 ) => {
   const id = req.params.id;
-
   try {
     const rawData = await prisma.attendees.findMany({
       where: { id_event: +id },
@@ -568,6 +567,10 @@ export const getEventAttendees = async (
         },
       },
     });
+
+    if (rawData.length <= 0) {
+      return res.status(200).json([]);
+    }
 
     const event = rawData[0].events;
     const attendees: any = [];

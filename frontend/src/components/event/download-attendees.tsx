@@ -1,76 +1,156 @@
-import { Button } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
-import { Event } from '@/types/types';
+
 import { weekDayFn, TimeFn, monthDayFn } from '@/common/functions';
 
-type Props = {
-  eventData?: Event;
-};
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import CircularProgress from '@mui/material/CircularProgress';
+import { api } from '@/services/api';
 
-function DownloadAttendees({ eventData }: Props) {
-  const [download, setDownload] = useState(false);
+import { AttendeesListType } from '@/types/components.types';
+import { Box, Button, Typography } from '@mui/material';
+import { useSnack } from '@/context/snackContext';
+
+type Props = { eventId: number };
+
+function DownloadAttendees({ eventId }: Props) {
   const [eventToDownload, setEventToDownload] = useState<Array<Array<string>>>(
     []
   );
+  const [eventName, setEventName] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [readyToDownload, setReadyToDownload] = useState<boolean>(false);
 
-  const [eventName, setEventName] = useState(
-    eventData ? eventData.name_event : ''
-  );
+  const [noAttendees, setNoAttendees] = useState(false);
 
-  const linesCSV = async (data: Event) => {
-    const weekDay = weekDayFn(data.date_event_start!);
-    const time = TimeFn(data.date_event_start!);
-    const month = monthDayFn(data.date_event_start!);
+  const { openSnackbar } = useSnack();
 
-    const newDataArray: any = [
-      ['Event name: ', data.name_event],
-      ['Event Location: ', data.location_event],
+  const prepareCSV = (data: AttendeesListType) => {
+    const weekDay = weekDayFn(data.event.date_event_start);
+    const time = TimeFn(data.event.date_event_start);
+    const month = monthDayFn(data.event.date_event_start);
+    const downloadCSV: any = [
+      ['Event name: ', data.event.name_event],
+      ['Event Location: ', data.event.location_event],
       ['Date: ', `${weekDay}, ${month}, ${time}`],
       ['First Name', 'Last Name', 'Course', 'Email', 'Student ID'],
     ];
 
-    await data.attendees?.forEach((attendee) => {
-      newDataArray.push([
-        attendee.firstName,
-        attendee.lastName,
-        attendee.course,
-        attendee.email,
-        attendee.studentId,
+    data.attendees.forEach((attendee) => {
+      downloadCSV.push([
+        attendee.first_name_user,
+        attendee.last_name_user,
+        attendee.users_courses,
+        attendee.email_user,
+        attendee.student_id_user,
       ]);
     });
 
-    await setEventToDownload(newDataArray);
+    setEventToDownload(downloadCSV);
+    setEventName(data.event.name_event);
+    setReadyToDownload(true);
+  };
+
+  const getAttendeesList = async () => {
+    try {
+      const response = await api.get(`api/events/attendee/${eventId}`);
+      const data = response.data;
+
+      if (response.data.length === 0) {
+        openSnackbar('There is no attendees for this event.', 'info');
+        setNoAttendees(true);
+      } else {
+        prepareCSV({
+          event: data.event,
+          attendees: data.attendees,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching attendees list:', error);
+    }
+  };
+
+  const handleDownloadClick = async (
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) => {
+    e.stopPropagation();
+    setLoading(true);
+    setReadyToDownload(false);
+    await getAttendeesList();
+    setLoading(false);
   };
 
   useEffect(() => {
-    eventData ? linesCSV(eventData!) : '';
-  }, [eventData]);
+    console.log(eventId);
+  }, []);
 
   return (
-    <Button
-      type='submit'
-      variant='outlined'
-      fullWidth
-      sx={{
-        color: '#228B22',
-        borderColor: '#228B22',
-      }}
-    >
-      <CSVLink
-        data={eventToDownload}
-        filename={`Attendees Report ${eventName}.csv`}
-        className='btn btn-primary'
-        target='_blank'
-        style={{
-          textDecoration: 'none',
-          color: '#228B22',
-          borderColor: '#228B22',
-        }}
-      >
-        Download Attendees
-      </CSVLink>
-    </Button>
+    <>
+      {loading ? (
+        <CircularProgress size={24} />
+      ) : noAttendees ? (
+        <Box
+          sx={{
+            borderRadius: '6px',
+            color: '#2C1229',
+            padding: '8px',
+            fontSize: '1rem',
+            backgroundColor: '#FFD7F3',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Typography sx={{ fontWeight: 'bold' }}>No attendees</Typography>
+        </Box>
+      ) : readyToDownload ? (
+        <CSVLink
+          data={eventToDownload}
+          filename={`Attendees Report ${eventName}.csv`}
+          className='btn btn-primary'
+          target='_blank'
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none',
+            color: '#454B1B',
+            borderRadius: '6px',
+            backgroundColor: '#AFE1AF',
+            fontSize: '1rem',
+            padding: '8px',
+          }}
+          onClick={(e: any) => {
+            openSnackbar('Attendees List Downloaded.', 'success');
+            e.stopPropagation();
+          }}
+        >
+          <ArrowDownwardIcon fontSize='small' />
+          <Typography sx={{ fontWeight: 'bold' }}>Attendees</Typography>
+        </CSVLink>
+      ) : (
+        <Button
+          onClick={(e: any) => handleDownloadClick(e)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none',
+            color: '#454B1B',
+            borderRadius: '6px',
+            backgroundColor: '#AFE1AF',
+            fontSize: '1rem',
+            padding: '8px',
+            fontWeight: 'bold',
+            '&:hover': {
+              backgroundColor: '#92C892',
+            },
+          }}
+        >
+          Get Attendees List
+        </Button>
+      )}
+    </>
   );
 }
 

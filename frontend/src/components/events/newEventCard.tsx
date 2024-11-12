@@ -13,6 +13,10 @@ import Image from 'next/image';
 import { useSnack } from '@/context/snackContext';
 import CardButton from './newEventCardButton';
 import NewEventModal from './newEventModal';
+import DownloadAttendees from '../event/download-attendees';
+import { api } from '@/services/api';
+
+import { AttendeesListType } from '@/types/components.types';
 
 type Props = {
   event: Event & {
@@ -44,6 +48,10 @@ const NewEventCard = ({
   const endTime = TimeFn(event.date_event_end);
   const monthAndDay = monthDayFn(event.date_event_start);
 
+  const [attendeesList, setAttendeesList] = useState<AttendeesListType>(
+    {} as AttendeesListType
+  );
+
   const router = useRouter();
 
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -56,7 +64,6 @@ const NewEventCard = ({
   };
 
   const openCancelModal = () => {
-    console.log('open');
     openModal(event.id_event);
   };
 
@@ -66,7 +73,6 @@ const NewEventCard = ({
     if (isUserPage) {
       if (pastEvent) {
         if (isOwner) {
-          console.log('Download Attendees');
         } else {
           console.log('Rate event');
         }
@@ -166,13 +172,17 @@ const NewEventCard = ({
           >
             <Image src={shareIconSvg} alt='share icon' width={25} height={25} />
           </Box>
-          <CardButton
-            isAttending={isAttending}
-            isPastEvent={pastEvent}
-            isOwner={isOwner}
-            handleClickButtonCard={handleClickButtonCard}
-            isUserPage={isUserPage}
-          />
+          {isOwner && pastEvent ? (
+            <DownloadAttendees eventId={event.id_event} />
+          ) : (
+            <CardButton
+              isAttending={isAttending}
+              isPastEvent={pastEvent}
+              isOwner={isOwner}
+              handleClickButtonCard={handleClickButtonCard}
+              isUserPage={isUserPage}
+            />
+          )}
         </Box>
       </CardContent>
     </Card>
