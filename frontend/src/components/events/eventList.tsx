@@ -11,6 +11,7 @@ import MobileEventCalendarView from './mobileEventCalendarView';
 import NewEventModal from './newEventModal';
 
 import { EventModalType } from '@/types/components.types';
+import NewEventReviewModal from './newEventReviewModal';
 
 type Props = {
   events: Event[];
@@ -68,6 +69,14 @@ function EventList({
     setEvents((prevEvents: Event[]) =>
       prevEvents.filter((event) => event.id_event !== eventId)
     );
+  };
+
+  const closeReviewModal = () => {
+    setIsModalOpen({ eventId: 0, isOpen: false });
+  };
+
+  const openReviewModal = (eventId: number) => {
+    setIsModalOpen({ eventId: eventId, isOpen: true });
   };
 
   return (
@@ -152,6 +161,11 @@ function EventList({
         )}
       </Stack>
       <NewEventModal isOpen={isModalOpen} user={user} closeModal={closeModal} />
+      <NewEventReviewModal
+        isOpen={isModalOpen}
+        user={user}
+        closeModal={closeReviewModal}
+      />
 
       {events.length !== 0 && !isCalendarView && (
         <Button

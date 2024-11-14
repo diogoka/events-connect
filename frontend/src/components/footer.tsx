@@ -31,8 +31,6 @@ export default function Footer({ laptopQuery }: Props) {
 
   const { user } = useContext(UserContext);
 
-  console.log('user in footer', user);
-
   return (
     <Box
       component='footer'

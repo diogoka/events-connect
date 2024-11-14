@@ -80,10 +80,6 @@ function DownloadAttendees({ eventId }: Props) {
     setLoading(false);
   };
 
-  useEffect(() => {
-    console.log(eventId);
-  }, []);
-
   return (
     <>
       {loading ? (

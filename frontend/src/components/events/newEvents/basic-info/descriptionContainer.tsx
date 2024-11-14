@@ -56,37 +56,8 @@ export default function DescriptionContainer({
         onChange={(value) => {
           changeDesc(value);
         }}
-      />
-
-      {/* Old TextField: */}
-      {/* <TextField
-        id='description'
-        variant='outlined'
-        placeholder='Please enter description'
-        fullWidth
-        color='secondary'
-        type='textarea'
-        multiline
-        rows={isMobile ? 5 : 8}
         value={createdEvent.description_event}
-        onChange={changeDesc}
-        sx={{ position: 'relative' }}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment
-              position='end'
-              sx={{
-                color: countedDesc < 0 ? 'red' : '#CACFD2',
-                position: 'absolute',
-                bottom: '1rem',
-                right: '1rem',
-              }}
-            >
-              {countedDesc}
-            </InputAdornment>
-          ),
-        }}
-      /> */}
+      />
     </Stack>
   );
 }

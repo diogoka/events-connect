@@ -354,45 +354,47 @@ export const createEvents = async (
   res: express.Response
 ) => {
   const {
-    owner,
-    title,
-    description,
-    dates,
-    location,
-    spots,
-    price,
-    tagId,
-    category,
-    imageURL,
+    id_owner,
+    name_event,
+    description_event,
+    date_event_start,
+    date_event_end,
+    capacity_event,
+    location_event,
+    price_event,
+    tags,
+    category_event,
+    image_event,
   } = req.body;
 
   try {
     const createdEvent = await prisma.events.create({
       data: {
-        id_owner: owner,
-        name_event: title,
-        description_event: description,
-        date_event_start: new Date(dates[0].dateStart),
-        date_event_end: new Date(dates[0].dateEnd),
-        location_event: location,
-        capacity_event: spots,
-        price_event: price,
-        image_url_event: imageURL,
-        category_event: category,
+        id_owner: id_owner,
+        name_event: name_event,
+        description_event,
+        date_event_start,
+        date_event_end,
+        capacity_event,
+        location_event,
+        price_event,
+        category_event,
+        image_url_event: image_event,
       },
     });
 
-    if (tagId && tagId.length > 0) {
-      const tagLinks = tagId.map((tag: { id: number }) => ({
-        id_event: createdEvent.id_event,
-        id_tag: tag.id,
-      }));
+    if (tags && tags.length > 0) {
+      const tagsToAdd = tags.map(
+        (tag: { id_tag: number; name_tag: string }) => ({
+          id_event: createdEvent.id_event,
+          id_tag: tag.id_tag,
+        })
+      );
 
       await prisma.events_tags.createMany({
-        data: tagLinks,
+        data: tagsToAdd,
       });
     }
-
     res
       .status(201)
       .json({ message: 'Event created successfully', createdEvent });
@@ -591,6 +593,43 @@ export const getEventAttendees = async (
   }
 };
 
+export const newReview = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { id_event, id_user, review } = req.body;
+
+  try {
+    const newReview = await prisma.reviews.create({
+      data: {
+        id_user: id_user,
+        description_review: review.description,
+        rating: review.rating,
+        date_review: review.date_review,
+      },
+    });
+
+    await prisma.events_reviews.create({
+      data: {
+        id_event: id_event,
+        id_review: newReview.id_review,
+      },
+    });
+
+    return res.status(201).json({
+      message: 'Review created successfully!',
+      review: newReview,
+    });
+  } catch (error: any) {
+    console.error('Error creating review:', error);
+
+    return res.status(500).json({
+      message: 'An error occurred while creating the review.',
+      error: error.message,
+    });
+  }
+};
+
 // Legacy Controllers
 
 export const updateEvents = async (
@@ -656,58 +695,6 @@ export const updateEvents = async (
     } catch (err: any) {
       res.status(500).send(err.message);
     }
-  }
-};
-
-export const newReview = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  if (!req.body.id_event || !req.body.id_user || !req.body.review) {
-    res.status(400).send('Missing parameters');
-    return;
-  }
-
-  const { id_event, id_user, review } = req.body;
-  try {
-    const newReview = await pool.query(
-      `INSERT INTO reviews (id_user, description_review, rating, date_review)
-         VALUES ($1, $2, $3, $4)
-         RETURNING *`,
-      [id_user, review.description, review.rating, review.date_review]
-    );
-    const eventReview = await newEventReview(
-      id_event,
-      newReview.rows[0].id_review
-    );
-    const getAvatarURL = await pool.query(
-      `SELECT avatar_url FROM users WHERE id_user = $1`,
-      [id_user]
-    );
-
-    const avatarURL = getAvatarURL.rows[0].avatar_url;
-
-    const responseObj = {
-      ...newReview.rows[0],
-      avatar_url: avatarURL,
-    };
-    res.status(201).json(responseObj);
-  } catch (err: any) {
-    res.status(500).send(err.message);
-  }
-};
-
-const newEventReview = async (id_event: Number, id_review: Number) => {
-  try {
-    const newEventReview = await pool.query(
-      `INSERT INTO events_reviews (id_event, id_review)
-         VALUES ($1, $2)`,
-      [id_event, id_review]
-    );
-
-    return newEventReview.rows;
-  } catch (err: any) {
-    return err.message;
   }
 };
 

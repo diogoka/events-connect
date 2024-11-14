@@ -9,6 +9,7 @@ import { api } from '@/services/api';
 import SwitchViews from '@/components/events/switchViews';
 import React from 'react';
 import Profile from '@/components/user/profile';
+import { useSnack } from '@/context/snackContext';
 
 function UserPage() {
   const { user } = useContext(UserContext);
@@ -25,6 +26,8 @@ function UserPage() {
     role: user?.roleName ? user!.roleName : '',
   };
 
+  const { openSnackbar } = useSnack();
+
   const getUserUpcomingEvents = async () => {
     try {
       setIsLoading(true);
@@ -33,7 +36,8 @@ function UserPage() {
       );
       setEvents(data);
     } catch (error) {
-      console.log(error);
+      openSnackbar('Something went wrong', 'error');
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +51,8 @@ function UserPage() {
       );
       setEvents(data);
     } catch (error) {
-      console.log(error);
+      openSnackbar('Something went wrong', 'error');
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }

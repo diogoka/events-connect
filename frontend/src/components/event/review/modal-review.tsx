@@ -79,7 +79,9 @@ export default function ModalRating({
   };
 
   const handleNewReview = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.stopPropagation();
     event.preventDefault();
+
     const data = { event_id, user_id, review };
 
     if (review.rating < 1) {

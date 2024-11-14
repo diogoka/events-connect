@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Input, Typography } from '@mui/material';
+import { Box, Button, Input, Typography } from '@mui/material';
 import Image from 'next/image';
 import CollectionsIcon from '@mui/icons-material/Collections';
 
@@ -21,15 +21,19 @@ export default function ImageContainer({
   const renderImage = (imgTemporary: string, imgURL: string) => {
     if (imgTemporary || imgURL) {
       return (
-        <Image
-          src={imgTemporary ? imgTemporary : imgURL}
-          alt=''
-          width={380}
-          height={220}
-          style={{
-            objectFit: 'cover',
-          }}
-        />
+        <Box sx={{ width: '100%' }}>
+          <Image
+            src={imgTemporary ? imgTemporary : imgURL}
+            alt=''
+            width={380}
+            height={220}
+            style={{
+              objectFit: 'cover',
+              objectPosition: 'top',
+              width: '100%',
+            }}
+          />
+        </Box>
       );
     } else {
       return <></>;
@@ -41,12 +45,12 @@ export default function ImageContainer({
       {renderImage(tempImage, imageURL)}
       <Button
         component='label'
-        variant='outlined'
+        variant='contained'
         startIcon={<CollectionsIcon />}
         color='info'
         fullWidth
         sx={{
-          width: isMobile ? '100%' : '40%',
+          width: '100%',
         }}
       >
         {tempImage || imageURL ? 'Edit Image' : 'Add Image'}

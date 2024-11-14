@@ -16,6 +16,7 @@ import React from 'react';
 import SwitchViews from '@/components/events/switchViews';
 import { getYear, getMonth } from 'date-fns';
 import EventsHappening from '@/components/events/eventHappening';
+import { useSnack } from '@/context/snackContext';
 
 export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +39,8 @@ export default function EventsPage() {
     id: user?.id!,
     role: user?.roleName!,
   };
+
+  const { openSnackbar } = useSnack();
 
   const getUpcomingEvents = async () => {
     try {
@@ -65,7 +68,8 @@ export default function EventsPage() {
         setAttendedEvents(data);
       }
     } catch (error) {
-      console.log(error);
+      openSnackbar('Something went wrong. Try again later', 'error');
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +89,8 @@ export default function EventsPage() {
         setAttendedEvents(data);
       }
     } catch (error) {
-      console.log(error);
+      openSnackbar('Something went wrong. Try again later', 'error');
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -231,6 +236,7 @@ export default function EventsPage() {
         getPastEventsOfMonth={getPastEventsOfMonth}
         isPastMonthEvents={isPastMonthEvents}
         setIsPastMonthEvents={setIsPastMonthEvents}
+        isOrganizer={currentUser.role === 'organizer'}
       />
       {isLoading ? (
         <Box sx={{ minHeight: '100%', minWidth: '100%', marginBottom: '18px' }}>

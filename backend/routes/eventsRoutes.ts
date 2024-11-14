@@ -45,12 +45,12 @@ eventsRouter.get('/owner/past/:id', getPastEventsByOwner);
 eventsRouter.get('/attendee/:id', getEventAttendees);
 eventsRouter.post('/attendee', newAttendee);
 eventsRouter.delete('/attendee', deleteAttendee);
+eventsRouter.post('/review/new', newReview);
 
 // Old
 
 eventsRouter.put('/:id', updateEvents);
 
-eventsRouter.post('/review/new', newReview);
 eventsRouter.get('/reviews/:id', getReviews);
 
 export default eventsRouter;

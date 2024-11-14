@@ -67,6 +67,10 @@ const NewEventCard = ({
     openModal(event.id_event);
   };
 
+  const openReviewModal = () => {
+    openModal(event.id_event);
+  };
+
   const handleClickButtonCard = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -74,19 +78,18 @@ const NewEventCard = ({
       if (pastEvent) {
         if (isOwner) {
         } else {
-          console.log('Rate event');
+          openReviewModal();
         }
       } else {
         if (isOwner) {
           console.log('Edit');
         } else {
-          console.log('Cancel');
           openCancelModal();
         }
       }
     } else {
       if (pastEvent && isAttending) {
-        console.log('RATE');
+        openReviewModal();
       } else {
         router.push(`/events/${event.id_event}`);
       }

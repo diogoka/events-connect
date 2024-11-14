@@ -73,7 +73,7 @@ export default function EventPage() {
       setIsPastEvent(isPast);
       setAttendees(data.event.attendees);
     } catch (error) {
-      console.log(error);
+      openSnackbar(`Something wrong. Try again later.${error}`, 'error');
     }
   };
 
@@ -168,7 +168,6 @@ export default function EventPage() {
   };
 
   const openAttendingModal = () => {
-    console.log('Open');
     setIsAttendModalOpen(true);
   };
 
