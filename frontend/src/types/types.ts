@@ -35,6 +35,7 @@ export type Event = {
   date_event_start?: string;
   date_event_end?: string;
   attendees?: Array<Attendee>;
+  id_event?: number;
 };
 
 export type EventData = {

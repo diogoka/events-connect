@@ -158,6 +158,8 @@ export const getUpcomingMonthEvents = async (
       },
     });
 
+    console.log('Up of the month', events);
+
     res.status(200).json(events);
   } catch (error) {
     console.error('Error fetching upcoming events:', error);
@@ -194,6 +196,7 @@ export const getEventById = async (
             tags: {
               select: {
                 name_tag: true,
+                id_tag: true,
               },
             },
           },
@@ -233,16 +236,23 @@ export const getUpcomingEventsByUserId = async (
       (event) => event.date_event_start >= today
     );
 
-    if (upcomingEvents.length > 6) {
-      const start = parseInt(queryParams.start);
-      const quantity = parseInt(queryParams.qnt);
-      const slicedEvents = upcomingEvents.slice(start, quantity);
+    const sortedEvents = upcomingEvents.sort(
+      (a, b) =>
+        new Date(a.date_event_start).getTime() -
+        new Date(b.date_event_start).getTime()
+    );
+
+    if (sortedEvents.length > 6) {
+      const start = parseInt(queryParams.start, 10) || 0;
+      const quantity = parseInt(queryParams.qnt, 10) || 6;
+      const slicedEvents = sortedEvents.slice(start, start + quantity);
       res.status(200).json(slicedEvents);
     } else {
-      res.status(200).json(upcomingEvents);
+      res.status(200).json(sortedEvents);
     }
   } catch (error: any) {
-    res.status(505).json(error.message);
+    console.error('Error fetching events:', error);
+    res.status(500).json({ error: 'Failed to fetch events' });
   }
 };
 
@@ -272,16 +282,23 @@ export const getPastEventsByUserId = async (
       (event) => event.date_event_start <= today
     );
 
-    if (pastEvents.length > 6) {
-      const start = parseInt(queryParams.start);
-      const quantity = parseInt(queryParams.qnt);
-      const slicedEvents = pastEvents.slice(start, quantity);
+    const sortedPastEvents = pastEvents.sort(
+      (a, b) =>
+        new Date(b.date_event_start).getTime() -
+        new Date(a.date_event_start).getTime()
+    );
+
+    if (sortedPastEvents.length > 6) {
+      const start = parseInt(queryParams.start, 10) || 0;
+      const quantity = parseInt(queryParams.qnt, 10) || 6;
+      const slicedEvents = sortedPastEvents.slice(start, start + quantity);
       res.status(200).json(slicedEvents);
     } else {
-      res.status(200).json(pastEvents);
+      res.status(200).json(sortedPastEvents);
     }
   } catch (error: any) {
-    res.status(505).json(error.message);
+    console.error('Error fetching past events:', error);
+    res.status(500).json({ error: 'Failed to fetch past events' });
   }
 };
 
@@ -630,73 +647,82 @@ export const newReview = async (
   }
 };
 
-// Legacy Controllers
-
 export const updateEvents = async (
   req: express.Request,
   res: express.Response
 ) => {
-  const id = parseInt(req.params.id);
-
+  const id = req.params.id;
   const {
-    title,
-    description,
-    dates,
-    location,
-    spots,
-    price,
-    image,
-    tagId,
-    category,
-    imageURL,
+    id_owner,
+    name_event,
+    description_event,
+    date_event_start,
+    date_event_end,
+    capacity_event,
+    location_event,
+    price_event,
+    category_event,
+    image_event,
+    tags,
   } = req.body;
 
-  if (!id) {
-    res.status(404).send('Update events failed');
-  } else {
-    try {
-      const numberOfAttendees = await pool.query(
-        `SELECT COUNT(*) FROM attendees WHERE id_event = $1`,
-        [id]
-      );
+  try {
+    const existingEvent = await prisma.events.findUnique({
+      where: { id_event: +id },
+    });
 
-      const updatedSpots = (spots: number) => {
-        const count = parseInt(numberOfAttendees.rows[0].count);
-        return spots - count;
-      };
+    if (!existingEvent) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
 
-      dates.forEach(async (date: Date) => {
-        const events = await pool.query(
-          `UPDATE events SET name_event = $1, description_event = $2, date_event_start = $3, date_event_end = $4, location_event = $5, capacity_event = $6, price_event = $7, category_event = $8, image_url_event = $9 WHERE id_event = $10 RETURNING *`,
-          [
-            title,
-            description,
-            date.dateStart,
-            date.dateEnd,
-            location,
-            updatedSpots(spots),
-            price,
-            category,
-            imageURL,
-            id,
-          ]
-        );
+    if (existingEvent.id_owner !== id_owner) {
+      return res
+        .status(403)
+        .json({ error: 'You are not authorized to update this event' });
+    }
 
-        await pool.query(`DELETE FROM events_tags WHERE id_event = $1`, [id]);
-        tagId.forEach(async (tag: number) => {
-          await pool.query(
-            `INSERT INTO events_tags (id_event, id_tag) VALUES ($1, $2) RETURNING *;`,
-            [id, tag]
-          );
-        });
+    const updatedEvent = await prisma.events.update({
+      where: { id_event: +id },
+      data: {
+        name_event,
+        description_event,
+        date_event_start,
+        date_event_end,
+        capacity_event,
+        location_event,
+        price_event,
+        category_event,
+        image_url_event: image_event,
+      },
+    });
+
+    if (tags && tags.length > 0) {
+      await prisma.events_tags.deleteMany({
+        where: { id_event: +id },
       });
 
-      res.status(200).json({});
-    } catch (err: any) {
-      res.status(500).send(err.message);
+      const tagsToAdd = tags.map(
+        (tag: { id_tag: number; name_tag: string }) => ({
+          id_event: +id,
+          id_tag: tag.id_tag,
+        })
+      );
+
+      await prisma.events_tags.createMany({
+        data: tagsToAdd,
+      });
     }
+
+    res
+      .status(200)
+      .json({ message: 'Event updated successfully', updatedEvent });
+  } catch (error) {
+    console.error('Error updating event:', error);
+    res.status(500).json({ error: 'Failed to update event' });
   }
 };
+
+// Legacy Controllers
 
 export const getReviews = async (
   req: express.Request,

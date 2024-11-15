@@ -32,6 +32,7 @@ export default function NewEventPage() {
   };
 
   const eventValidation = () => {
+    console.log(createdEvent);
     const errors: string[] = [];
 
     if (!createdEvent.name_event.trim()) {
@@ -63,7 +64,7 @@ export default function NewEventPage() {
       errors.push('Event category is required.');
     }
 
-    if (!image) {
+    if (!image && createdEvent.image_event === '') {
       errors.push('Event image is required.');
     }
 

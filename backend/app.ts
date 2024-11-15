@@ -10,7 +10,7 @@ import 'dotenv/config';
 
 const corsOptions = {
   origin: '*',
-  methods: 'GET, POST, PUT, DELETE',
+  methods: 'GET, POST, PUT, DELETE, PATCH',
 };
 
 type Express = express.Application;

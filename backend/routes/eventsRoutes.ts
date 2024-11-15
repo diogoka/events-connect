@@ -46,10 +46,9 @@ eventsRouter.get('/attendee/:id', getEventAttendees);
 eventsRouter.post('/attendee', newAttendee);
 eventsRouter.delete('/attendee', deleteAttendee);
 eventsRouter.post('/review/new', newReview);
+eventsRouter.patch('/:id', updateEvents);
 
 // Old
-
-eventsRouter.put('/:id', updateEvents);
 
 eventsRouter.get('/reviews/:id', getReviews);
 

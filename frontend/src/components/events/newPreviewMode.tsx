@@ -45,6 +45,8 @@ const NewPreviewMode = ({ setToForm, ownerId }: Props) => {
   const { openSnackbar } = useSnack();
 
   const router = useRouter();
+
+  console.log('CREATED EVENT', createdEvent);
   const createNewEvent = async (e: React.MouseEvent) => {
     e.preventDefault();
 
@@ -55,6 +57,7 @@ const NewPreviewMode = ({ setToForm, ownerId }: Props) => {
       name_event,
       price_event,
       capacity_event,
+      event_id,
       ...rest
     } = createdEvent;
     const dateStart = dates[0].dateStart.toISOString();
@@ -62,27 +65,54 @@ const NewPreviewMode = ({ setToForm, ownerId }: Props) => {
 
     try {
       setIsLoading(true);
-      const url = await uploadImage(image!, createdEvent.name_event);
-      const response = await api.post('api/events/new', {
-        id_owner: ownerId,
-        name_event,
-        ...rest,
-        image_event: url,
-        price_event: +price_event,
-        capacity_event: +capacity_event,
-        tags: [
-          ...selectedTags,
-          { id_tag: modality.id_tag, name_tag: modality.name_tag },
-        ],
-        date_event_start: new Date(dateStart),
-        date_event_end: new Date(dateEnd),
-      });
-      openSnackbar(`${response.data.message}`, 'success');
+
+      if (event_id) {
+        let url = '';
+        if (image) {
+          url = await uploadImage(image!, createdEvent.name_event);
+        }
+
+        const response = await api.patch(`api/events/${event_id}`, {
+          id_owner: ownerId,
+          name_event,
+          ...rest,
+          image_event: url ? url : createdEvent.image_event,
+          price_event: +price_event,
+          capacity_event: +capacity_event,
+          tags: [
+            ...selectedTags,
+            { id_tag: modality.id_tag, name_tag: modality.name_tag },
+          ],
+          date_event_start: new Date(dateStart),
+          date_event_end: new Date(dateEnd),
+        });
+        openSnackbar(`${response.data.message}`, 'success');
+      } else {
+        const url = await uploadImage(image!, createdEvent.name_event);
+        const response = await api.post('api/events/new', {
+          id_owner: ownerId,
+          name_event,
+          ...rest,
+          image_event: url,
+
+          price_event: +price_event,
+          capacity_event: +capacity_event,
+          tags: [
+            ...selectedTags,
+            { id_tag: modality.id_tag, name_tag: modality.name_tag },
+          ],
+          date_event_start: new Date(dateStart),
+          date_event_end: new Date(dateEnd),
+        });
+        openSnackbar(`${response.data.message}`, 'success');
+      }
+
       setTimeout(() => {
         dispatch({
           type: 'RESET',
           payload: initialState,
         });
+
         openSnackbar('Redirecting', 'info');
         router.push('/events');
       }, 3500);
@@ -103,7 +133,11 @@ const NewPreviewMode = ({ setToForm, ownerId }: Props) => {
           }}
         >
           <Image
-            src={URL.createObjectURL(image!)}
+            src={
+              createdEvent.image_event.length > 0
+                ? createdEvent.image_event
+                : URL.createObjectURL(image!)
+            }
             alt='image'
             width={380}
             height={220}

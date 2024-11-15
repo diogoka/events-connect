@@ -20,6 +20,7 @@ type Props = {
   isOpen: EventModalType;
   user: { id: string | undefined; role: string | undefined };
   closeModal: () => void;
+  laptopQuery: boolean;
 };
 
 const style = {
@@ -39,7 +40,12 @@ const style = {
   alignItems: 'center',
 };
 
-const NewEventReviewModal = ({ isOpen, user, closeModal }: Props) => {
+const NewEventReviewModal = ({
+  isOpen,
+  user,
+  closeModal,
+  laptopQuery,
+}: Props) => {
   const [open, setOpen] = useState<boolean>(isOpen.isOpen);
   const { openSnackbar } = useSnack();
 

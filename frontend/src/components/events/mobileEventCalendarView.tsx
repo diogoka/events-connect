@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { format, isAfter, isSameDay, isSameMonth } from 'date-fns';
+import { format } from 'date-fns';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -29,6 +29,28 @@ const MobileEventCalendarView = ({ events }: Props) => {
     };
 
   const handleDetailClick = (id: number) => router.push(`/events/${id}`);
+
+  const groupedEvents = events.reduce((acc, event) => {
+    const eventStartDate = new Date(event.date_event_start);
+    const formattedDate = format(eventStartDate, 'yyyy-MM-dd');
+
+    if (!acc[formattedDate]) {
+      acc[formattedDate] = [];
+    }
+    acc[formattedDate].push(event);
+    return acc;
+  }, {} as Record<string, Event[]>);
+
+  const sortedGroupedEvents = Object.entries(groupedEvents)
+    .map(([date, events]) => ({
+      date,
+      events: events.sort(
+        (a, b) =>
+          new Date(a.date_event_start).getTime() -
+          new Date(b.date_event_start).getTime()
+      ),
+    }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
     <Box
@@ -62,27 +84,27 @@ const MobileEventCalendarView = ({ events }: Props) => {
               borderRadius: '6px',
             }}
           >
-            <Typography>No past events on this month</Typography>
+            <Typography>No past events this month</Typography>
           </Box>
         </Box>
       ) : (
-        events.map((event) => {
-          const eventStartDate = new Date(event.date_event_start);
+        sortedGroupedEvents.map(({ date, events }) => {
+          const eventStartDate = new Date(events[0].date_event_start);
           const dayNumber = format(eventStartDate, 'd');
           const dayOfWeek = format(eventStartDate, 'EEEE');
-          const panelId = `panel${event.id_event}`;
+          const panelId = `panel${date}`;
 
           return (
             <Accordion
-              key={event.id_event}
+              key={panelId}
               expanded={expanded === panelId}
               onChange={handleChange(panelId)}
               sx={{ backgroundColor: 'inherit', padding: '12px 0' }}
               elevation={0}
             >
               <AccordionSummary
-                aria-controls={`panel${event.id_event}-content`}
-                id={`panel${event.id_event}-header`}
+                aria-controls={`panel${panelId}-content`}
+                id={`panel${panelId}-header`}
                 expandIcon={
                   <Image
                     src={expanded === panelId ? removeIconSvg : plusIconSvg}
@@ -107,25 +129,33 @@ const MobileEventCalendarView = ({ events }: Props) => {
                   backgroundColor: '#F5F2FA',
                   borderRadius: '8px',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: '16px',
+                  flexDirection: 'column',
+                  gap: '8px',
                   padding: '8px 16px',
                 }}
               >
-                <Typography>{event.name_event}</Typography>
-                <Button
-                  sx={{
-                    backgroundColor: '#DDE1FF',
-                    color: '#08164B',
-                    padding: '8px 16px',
-                  }}
-                  onClick={() => {
-                    handleDetailClick(event.id_event);
-                  }}
-                >
-                  Details
-                </Button>
+                {events.map((event) => (
+                  <Box
+                    key={event.id_event}
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Typography>{event.name_event}</Typography>
+                    <Button
+                      sx={{
+                        backgroundColor: '#DDE1FF',
+                        color: '#08164B',
+                        padding: '8px 16px',
+                      }}
+                      onClick={() => handleDetailClick(event.id_event)}
+                    >
+                      Details
+                    </Button>
+                  </Box>
+                ))}
               </AccordionDetails>
             </Accordion>
           );

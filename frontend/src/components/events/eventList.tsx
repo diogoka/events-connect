@@ -160,11 +160,17 @@ function EventList({
           </>
         )}
       </Stack>
-      <NewEventModal isOpen={isModalOpen} user={user} closeModal={closeModal} />
+      <NewEventModal
+        isOpen={isModalOpen}
+        user={user}
+        closeModal={closeModal}
+        laptopQuery={laptopQuery}
+      />
       <NewEventReviewModal
         isOpen={isModalOpen}
         user={user}
         closeModal={closeReviewModal}
+        laptopQuery={laptopQuery}
       />
 
       {events.length !== 0 && !isCalendarView && (

@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Modal, Box, Typography, Stack } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { RiErrorWarningFill } from 'react-icons/ri';
+import { width } from '@mui/system';
 
 type Props = {
   isOpen: boolean;
@@ -44,13 +45,12 @@ function ModalAttendParticipation({
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-
+    width: laptopQuery ? 400 : 450,
     bgcolor: 'white',
     border: '1px solid #000',
     boxShadow: 24,
     p: 4,
     borderRadius: '5px',
-    width: 450,
     height: 210,
     display: 'flex',
     flexDirection: 'column',

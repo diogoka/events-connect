@@ -1,5 +1,11 @@
 'use client';
-import React, { Dispatch, SetStateAction, use, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  use,
+  useContext,
+  useState,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -12,11 +18,12 @@ import shareIconSvg from '../../../public/icons/iosShareIconSvg.svg';
 import Image from 'next/image';
 import { useSnack } from '@/context/snackContext';
 import CardButton from './newEventCardButton';
-import NewEventModal from './newEventModal';
+
 import DownloadAttendees from '../event/download-attendees';
-import { api } from '@/services/api';
 
 import { AttendeesListType } from '@/types/components.types';
+import { EventContext } from '@/context/eventContext';
+import dayjs from 'dayjs';
 
 type Props = {
   event: Event & {
@@ -56,6 +63,8 @@ const NewEventCard = ({
 
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  const { createdEvent, dispatch, setImage, image } = useContext(EventContext);
+
   const { openSnackbar } = useSnack();
 
   const handleClickCard = (e: React.MouseEvent) => {
@@ -73,7 +82,6 @@ const NewEventCard = ({
 
   const handleClickButtonCard = (e: React.MouseEvent) => {
     e.stopPropagation();
-
     if (isUserPage) {
       if (pastEvent) {
         if (isOwner) {
@@ -82,7 +90,7 @@ const NewEventCard = ({
         }
       } else {
         if (isOwner) {
-          console.log('Edit');
+          router.push(`/events/${event.id_event}`);
         } else {
           openCancelModal();
         }

@@ -26,10 +26,19 @@ import NewEventModal from '@/components/events/newEventModal';
 import { EventModalType } from '@/types/components.types';
 import ModalAttendParticipation from '@/components/event/modal-attend-participation';
 import { useSnack } from '@/context/snackContext';
+import { EventContext } from '@/context/eventContext';
+
+import dayjs, { Dayjs } from 'dayjs';
+
+import { Tag } from '@/types/types';
+import DownloadAttendees from '@/components/event/download-attendees';
+import NewEventReviewModal from '@/components/events/newEventReviewModal';
 
 export default function EventPage() {
   const { notFound } = useContext(PageContext);
   const { user } = useContext(UserContext);
+
+  const { dispatch } = useContext(EventContext);
 
   const [event, setEvent] = useState<Event>();
   const [attendees, setAttendees] = useState<Attendee[]>([] as Attendee[]);
@@ -37,6 +46,11 @@ export default function EventPage() {
   const [isAttending, setIsAttending] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isPastEvent, setIsPastEvent] = useState(false);
+
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState<EventModalType>({
+    eventId: 0,
+    isOpen: false,
+  });
 
   const params = useParams();
   const EVENT_ID = params.id;
@@ -56,6 +70,14 @@ export default function EventPage() {
   const router = useRouter();
 
   const { openSnackbar } = useSnack();
+
+  const closeReviewModal = () => {
+    setIsReviewModalOpen({ eventId: 0, isOpen: false });
+  };
+
+  const openReviewModal = (eventId: number) => {
+    setIsReviewModalOpen({ eventId: eventId, isOpen: true });
+  };
 
   const getEvent = async () => {
     try {
@@ -117,17 +139,68 @@ export default function EventPage() {
     } catch (error) {}
   };
 
+  type TagType = {
+    id_tag: number;
+    name_tag: string;
+  };
+
+  const checkModality = (data: Tag[]) => {
+    let modality: Tag = {} as Tag;
+    let tagsArray: TagType[] = [];
+
+    data.forEach(({ tags }: Tag) => {
+      if (tags.id_tag === 16 || tags.id_tag === 17 || tags.id_tag === 18) {
+        modality = { tags: { id_tag: tags.id_tag, name_tag: tags.name_tag } };
+      } else {
+        tagsArray.push({ id_tag: tags.id_tag!, name_tag: tags.name_tag! });
+      }
+    });
+    return { modality, tagsArray };
+  };
+
   const handleClickEvent = async () => {
     if (!user) {
       router.push('/login');
     } else {
-      if (isAttending) {
-        openModal(+EVENT_ID);
+      if (isOwner) {
+        if (event) {
+          const { modality, tagsArray } = checkModality(event.events_tags);
+          const dateStart: Dayjs = dayjs(event.date_event_start);
+          const dateEnd: Dayjs = dayjs(event.date_event_end);
+          dispatch({
+            type: 'UPDATE_ALL_FIELDS',
+            payload: {
+              name_event: event.name_event,
+              description_event: event.description_event,
+              capacity_event: +event.capacity_event,
+              location_event: event.location_event,
+              price_event: +event.price_event,
+              category_event: event.category_event,
+              image_event: event.image_url_event,
+              modality: {
+                id_tag: modality.tags.id_tag!,
+                name_tag: modality.tags.name_tag!,
+              },
+              selectedTags: tagsArray,
+              dates: [{ dateStart, dateEnd }],
+              event_id: event.id_event,
+            },
+          });
+        }
+        router.push('/events/new');
       } else {
-        if (event?.price_event! > 0) {
-          openAttendingModal();
+        if (isPastEvent) {
+          openReviewModal(event?.id_event!);
         } else {
-          handleAddAttendee();
+          if (isAttending) {
+            openModal(+EVENT_ID);
+          } else {
+            if (event?.price_event! > 0) {
+              openAttendingModal();
+            } else {
+              handleAddAttendee();
+            }
+          }
         }
       }
     }
@@ -431,26 +504,37 @@ export default function EventPage() {
             <Typography sx={{ fontSize: '16px' }}>person</Typography>
           </Box>
 
-          <CardButton
-            isUserPage={true}
-            isOwner={isOwner}
-            isAttending={isAttending}
-            isPastEvent={isPastEvent}
-            handleClickButtonCard={handleClickEvent}
-            isDetail
-          />
+          {isOwner && isPastEvent ? (
+            <DownloadAttendees eventId={event!.id_event!} />
+          ) : (
+            <CardButton
+              isUserPage={true}
+              isOwner={isOwner}
+              isAttending={isAttending}
+              isPastEvent={isPastEvent}
+              handleClickButtonCard={handleClickEvent}
+              isDetail
+            />
+          )}
         </Box>
         <NewEventModal
           isOpen={isCancelModalOpen}
           user={{ id: user?.id, role: user?.roleName }}
           closeModal={closeModal}
           handleDeleteAttendees={handleDeleteAttendee}
+          laptopQuery={laptopQuery}
         />
         <ModalAttendParticipation
           isOpen={isAttendModalOpen}
           onClose={closeAttendModal}
           laptopQuery={laptopQuery}
           addAttendee={handleAddAttendee}
+        />
+        <NewEventReviewModal
+          isOpen={isReviewModalOpen}
+          user={{ id: user?.id, role: user?.roleName }}
+          closeModal={closeReviewModal}
+          laptopQuery={laptopQuery}
         />
       </Box>
     </>
