@@ -158,8 +158,6 @@ export const getUpcomingMonthEvents = async (
       },
     });
 
-    console.log('Up of the month', events);
-
     res.status(200).json(events);
   } catch (error) {
     console.error('Error fetching upcoming events:', error);

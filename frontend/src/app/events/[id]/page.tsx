@@ -4,7 +4,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Box, Stack, Typography, useMediaQuery, Button } from '@mui/material';
 import { UserContext } from '@/context/userContext';
-import { PageContext } from '@/context/pageContext';
 import { Attendee, Event } from '@/types/types';
 import Image from 'next/image';
 import { monthDayFn, TimeFn } from '@/common/functions';
@@ -35,7 +34,6 @@ import DownloadAttendees from '@/components/event/download-attendees';
 import NewEventReviewModal from '@/components/events/newEventReviewModal';
 
 export default function EventPage() {
-  const { notFound } = useContext(PageContext);
   const { user } = useContext(UserContext);
 
   const { dispatch } = useContext(EventContext);

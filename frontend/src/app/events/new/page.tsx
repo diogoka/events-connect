@@ -32,7 +32,6 @@ export default function NewEventPage() {
   };
 
   const eventValidation = () => {
-    console.log(createdEvent);
     const errors: string[] = [];
 
     if (!createdEvent.name_event.trim()) {

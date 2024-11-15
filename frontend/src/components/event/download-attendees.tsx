@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { CSVLink } from 'react-csv';
 
 import { weekDayFn, TimeFn, monthDayFn } from '@/common/functions';
@@ -143,7 +143,7 @@ function DownloadAttendees({ eventId }: Props) {
             },
           }}
         >
-          Get Attendees List
+          Get Atte. List
         </Button>
       )}
     </>

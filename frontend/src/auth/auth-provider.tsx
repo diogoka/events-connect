@@ -4,7 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 import { initializeFirebase } from '@/auth/firebase';
 
-import { getAuth, deleteUser, signOut } from 'firebase/auth';
+import { getAuth, signOut } from 'firebase/auth';
 import { Box, useMediaQuery } from '@mui/material';
 import { UserContext } from '@/context/userContext';
 import { PageContext } from '@/context/pageContext';

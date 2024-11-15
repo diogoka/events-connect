@@ -46,7 +46,6 @@ const NewPreviewMode = ({ setToForm, ownerId }: Props) => {
 
   const router = useRouter();
 
-  console.log('CREATED EVENT', createdEvent);
   const createNewEvent = async (e: React.MouseEvent) => {
     e.preventDefault();
 

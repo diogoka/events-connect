@@ -8,7 +8,7 @@ import {
   format,
   isSameMonth,
 } from 'date-fns';
-import { Box, Modal, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { Event } from '@/types/pages.types';
 import Holidays from 'date-holidays';
 import { useRouter } from 'next/navigation';

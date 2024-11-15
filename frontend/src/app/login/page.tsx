@@ -146,7 +146,9 @@ export default function LoginPage() {
           result.user.email!
         );
       })
-      .catch((error) => {});
+      .catch((error) => {
+        openSnackbar(`Something went wrong. ${error}`, 'warning');
+      });
 
     if (pathName === '/login') {
       setShowedPage({

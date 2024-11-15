@@ -1,5 +1,5 @@
 'use client';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { AttendedEvent, Events as Event } from '@/types/pages.types';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -73,10 +73,6 @@ function EventList({
 
   const closeReviewModal = () => {
     setIsModalOpen({ eventId: 0, isOpen: false });
-  };
-
-  const openReviewModal = (eventId: number) => {
-    setIsModalOpen({ eventId: eventId, isOpen: true });
   };
 
   return (

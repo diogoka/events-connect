@@ -47,6 +47,9 @@ const MultipleEventsOneDayModal = ({ isOpen, handleClose, events }: Props) => {
                 isAttending={false}
                 laptopQuery={false}
                 pastEvent={false}
+                isOwner={false}
+                isUserPage={false}
+                openModal={() => {}}
               />
             );
           })}

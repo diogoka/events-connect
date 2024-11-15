@@ -1,5 +1,4 @@
 import express from 'express';
-import pool from './db/db';
 import usersRouter from './routes/usersRoutes';
 import coursesRouter from './routes/coursesRoutes';
 import eventsRouter from './routes/eventsRoutes';

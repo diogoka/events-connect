@@ -106,7 +106,7 @@ export default function EventsPage() {
 
       setEvents(data);
     } catch (error) {
-      console.log(error);
+      openSnackbar(`Something went wrong ${error}`, 'warning');
     }
   };
 
@@ -120,7 +120,7 @@ export default function EventsPage() {
 
       setEvents(data);
     } catch (error) {
-      console.log(error);
+      openSnackbar(`Something went wrong ${error}`, 'warning');
     }
   };
 
@@ -179,7 +179,7 @@ export default function EventsPage() {
         setQuery(false);
       }
     } catch (error) {
-      console.log('error', error);
+      openSnackbar(`Something went wrong ${error}`, 'warning');
     } finally {
       setIsLoading(false);
     }

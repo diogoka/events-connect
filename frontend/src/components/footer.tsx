@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Divider } from '@mui/material';
+import { Box, Typography, Button, Divider, Link } from '@mui/material';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -216,7 +216,11 @@ export default function Footer({ laptopQuery }: Props) {
 
       <Typography sx={{ marginTop: '40px', color: 'white' }}>
         ©️ 2024 Cornerstone Connect All Rights Reserved. Design by Thifany
-        Brito. Developed by Diogo Almeida.{' '}
+        Brito. Developed by{' '}
+        <Link href='https://diogoka.dev/' sx={{ color: 'white' }}>
+          Diogo de Almeida
+        </Link>
+        .
       </Typography>
     </Box>
   );
