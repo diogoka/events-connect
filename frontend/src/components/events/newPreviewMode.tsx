@@ -268,7 +268,7 @@ const NewPreviewMode = ({ setToForm, ownerId }: Props) => {
         </Stack>
 
         <Box sx={{ width: '100%' }}>
-          <Typography sx={{ fontSize: '18px' }}>
+          <Typography sx={{ fontSize: '18px' }} component={'div'}>
             <pre
               style={{
                 fontFamily: 'inherit',

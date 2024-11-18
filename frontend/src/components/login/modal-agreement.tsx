@@ -57,7 +57,7 @@ const ModalAgreement = ({ openModal, handleClose }: Props) => {
               X
             </Button>
           </Box>
-          <Typography component='div'>
+          <Box>
             <pre
               style={{
                 whiteSpace: 'pre-wrap',
@@ -69,7 +69,7 @@ const ModalAgreement = ({ openModal, handleClose }: Props) => {
             >
               {agreement}
             </pre>
-          </Typography>
+          </Box>
         </Box>
       </Modal>
     </>
