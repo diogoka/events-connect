@@ -490,7 +490,7 @@ export default function EventPage() {
         </Stack>
 
         <Box sx={{ width: '100%' }}>
-          <Typography sx={{ fontSize: '18px' }}>
+          <Typography sx={{ fontSize: '18px' }} component={'div'}>
             {isLoading || !event ? (
               <>
                 <FadeSkeleton variant='text' width='100%' height='200px ' />
