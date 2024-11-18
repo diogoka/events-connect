@@ -9,7 +9,7 @@ import {
   isSameMonth,
 } from 'date-fns';
 import { Box, Typography } from '@mui/material';
-import { Event } from '@/types/pages.types';
+import { AttendedEvent, Event } from '@/types/pages.types';
 import Holidays from 'date-holidays';
 import { useRouter } from 'next/navigation';
 import MultipleEventsOneDayModal from './multipleEventsOneDayModal';
@@ -18,6 +18,8 @@ const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 type Props = {
   eventsToCalendar: Event[];
+  user: { id: string | undefined; role: string | undefined };
+  attendedEvents: AttendedEvent[] | undefined;
 };
 
 type DayEvent = {
@@ -29,7 +31,11 @@ type EventByDateObject = {
   [key: string]: DayEvent[];
 };
 
-const EventCalendarView = ({ eventsToCalendar }: Props) => {
+const EventCalendarView = ({
+  eventsToCalendar,
+  user,
+  attendedEvents,
+}: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [eventsModal, setEventsModal] = useState<Event[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -53,7 +59,10 @@ const EventCalendarView = ({ eventsToCalendar }: Props) => {
     if (!acc[eventDate]) {
       acc[eventDate] = [];
     }
-    acc[eventDate].push({ name: event.name_event, id: event.id_event });
+    acc[eventDate].push({
+      name: event.name_event,
+      id: event.id_event,
+    });
     return acc;
   }, {});
 
@@ -103,6 +112,8 @@ const EventCalendarView = ({ eventsToCalendar }: Props) => {
         isOpen={isModalOpen}
         handleClose={handleClose}
         events={eventsModal}
+        attendedEvents={attendedEvents}
+        user={user}
       />
       <Box sx={{ width: '100%', paddingBottom: '104px' }}>
         <Typography
@@ -158,6 +169,7 @@ const EventCalendarView = ({ eventsToCalendar }: Props) => {
             {days.map((day, index) => {
               const eventDate = format(day, 'yyyy-MM-dd');
               const dayEvents = eventsByDate[eventDate] || [];
+
               const activityMessage =
                 dayEvents.length === 0
                   ? ''
@@ -232,7 +244,7 @@ const EventCalendarView = ({ eventsToCalendar }: Props) => {
                     </Typography>
                     <Typography
                       sx={{
-                        fontSize: '40px',
+                        fontSize: '25px',
                         color: isSameMonth(day, today) ? '#1B1B21' : '#aaa',
                         fontWeight: 500,
                         textAlign: 'start',

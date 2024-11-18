@@ -30,8 +30,9 @@ export default function EventsPage() {
   const [isPastMonthEvents, setIsPastMonthEvents] = useState(false);
   const [attendedEvents, setAttendedEvents] = useState<AttendedEvent[]>([]);
   const [eventsHappening, setEventsHappening] = useState<Event[]>([]);
-
   const [query, setQuery] = useState(false);
+  const [attendingEvents, setAttendingEvents] =
+    useState<{ id_event: number }[]>();
 
   const laptopQuery = useMediaQuery('(min-width:769px)');
 

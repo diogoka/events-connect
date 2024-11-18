@@ -45,6 +45,8 @@ function EventList({
 }: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
+  console.log('ATTENDED', attendedEvents);
+
   const [isModalOpen, setIsModalOpen] = useState<EventModalType>({
     eventId: 0,
     isOpen: false,
@@ -83,7 +85,7 @@ function EventList({
           display: 'flex',
           alignItems: 'center',
           marginTop: '0',
-          justifyContent: events.length > 2 ? 'space-between' : 'flex-start',
+          justifyContent: 'flex-start',
         }}
         useFlexGap
         flexWrap='wrap'
@@ -100,7 +102,11 @@ function EventList({
             }}
           >
             {laptopQuery ? (
-              <EventCalendarView eventsToCalendar={events} />
+              <EventCalendarView
+                eventsToCalendar={events}
+                attendedEvents={attendedEvents}
+                user={user}
+              />
             ) : (
               <MobileEventCalendarView events={events} />
             )}

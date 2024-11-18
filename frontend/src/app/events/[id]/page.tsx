@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Box, Stack, Typography, useMediaQuery, Button } from '@mui/material';
+import {
+  Box,
+  Stack,
+  Typography,
+  useMediaQuery,
+  Button,
+  Skeleton,
+  Fade,
+} from '@mui/material';
 import { UserContext } from '@/context/userContext';
 import { Attendee, Event } from '@/types/types';
 import Image from 'next/image';
@@ -32,6 +40,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { Tag } from '@/types/types';
 import DownloadAttendees from '@/components/event/download-attendees';
 import NewEventReviewModal from '@/components/events/newEventReviewModal';
+import FadeSkeleton from '@/components/common/fadeSkeleton';
 
 export default function EventPage() {
   const { user } = useContext(UserContext);
@@ -50,6 +59,15 @@ export default function EventPage() {
     isOpen: false,
   });
 
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState<EventModalType>({
+    eventId: 0,
+    isOpen: false,
+  });
+
+  const [isAttendModalOpen, setIsAttendModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const params = useParams();
   const EVENT_ID = params.id;
   const laptopQuery = useMediaQuery('(max-width:769px)');
@@ -58,15 +76,7 @@ export default function EventPage() {
   const startTime = TimeFn(event?.date_event_start!);
   const endTime = TimeFn(event?.date_event_end!);
 
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState<EventModalType>({
-    eventId: 0,
-    isOpen: false,
-  });
-
-  const [isAttendModalOpen, setIsAttendModalOpen] = useState(false);
-
   const router = useRouter();
-
   const { openSnackbar } = useSnack();
 
   const closeReviewModal = () => {
@@ -94,6 +104,9 @@ export default function EventPage() {
       setAttendees(data.event.attendees);
     } catch (error) {
       openSnackbar(`Something wrong. Try again later.${error}`, 'error');
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -260,12 +273,39 @@ export default function EventPage() {
           sx={{
             minWidth: '100%',
             minHeight: '208px',
-            backgroundImage: `url(${event?.image_url_event})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            borderRadius: '4px',
+            position: 'relative',
           }}
-        ></Box>
+        >
+          {!imageLoaded && (
+            <Skeleton
+              variant='rectangular'
+              width='100%'
+              height='208px'
+              animation='wave'
+              sx={{
+                borderRadius: '4px',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+              }}
+            />
+          )}
+          <Fade in={imageLoaded} timeout={1500} easing='ease-in'>
+            <Box
+              component='img'
+              src={event?.image_url_event || ''}
+              alt='Event Ima ge'
+              onLoad={() => setImageLoaded(true)}
+              sx={{
+                display: imageLoaded ? 'block' : 'none',
+                width: '100%',
+                height: '208px',
+                objectFit: 'cover',
+                borderRadius: '4px',
+              }}
+            />
+          </Fade>
+        </Box>
         <Box
           sx={{
             display: 'flex',
@@ -276,7 +316,11 @@ export default function EventPage() {
           <Typography
             sx={{ fontSize: '36px', fontWeight: 700, textAlign: 'center' }}
           >
-            {event?.name_event}
+            {isLoading || !event ? (
+              <FadeSkeleton variant='text' width='600px' height='100%' />
+            ) : (
+              <>{event?.name_event}</>
+            )}
           </Typography>
         </Box>
 
@@ -299,8 +343,17 @@ export default function EventPage() {
                 height={24}
                 width={24}
               />
-
-              <Typography sx={{ fontSize: '18px' }}>{monthAndDay}</Typography>
+              {isLoading || !event ? (
+                <>
+                  <FadeSkeleton variant='text' width='100%' height='70px' />
+                </>
+              ) : (
+                <>
+                  <Typography sx={{ fontSize: '18px' }}>
+                    {monthAndDay}
+                  </Typography>
+                </>
+              )}
             </Box>
             <Box
               sx={{
@@ -319,9 +372,19 @@ export default function EventPage() {
                 height={24}
                 width={24}
               />
-              <Typography sx={{ fontSize: '18px' }}>
-                {startTime.replace(/\s+/g, '')} to {endTime.replace(/\s+/g, '')}
-              </Typography>
+
+              {isLoading || !event ? (
+                <>
+                  <FadeSkeleton variant='text' width='100%' height='70px' />
+                </>
+              ) : (
+                <>
+                  <Typography sx={{ fontSize: '18px' }}>
+                    {startTime.replace(/\s+/g, '')} to{' '}
+                    {endTime.replace(/\s+/g, '')}
+                  </Typography>
+                </>
+              )}
             </Box>
           </Box>
           <Box
@@ -341,18 +404,27 @@ export default function EventPage() {
               width={24}
               height={24}
             />
-            <Typography
-              component='a'
-              sx={{
-                textDecoration: 'underline',
-                fontSize: '18px',
-                cursor: 'pointer',
-              }}
-              href={`https://maps.google.com/?q=${event?.location_event}`}
-              target='_blank'
-            >
-              {event?.location_event}
-            </Typography>
+
+            {isLoading || !event ? (
+              <>
+                <FadeSkeleton variant='text' width='100%' height='70px' />
+              </>
+            ) : (
+              <>
+                <Typography
+                  component='a'
+                  sx={{
+                    textDecoration: 'underline',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                  }}
+                  href={`https://maps.google.com/?q=${event?.location_event}`}
+                  target='_blank'
+                >
+                  {event?.location_event}
+                </Typography>
+              </>
+            )}
           </Box>
           <Box
             sx={{
@@ -360,68 +432,84 @@ export default function EventPage() {
               backgroundColor: '#F5F2FA',
               borderRadius: '8px',
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
               padding: '16px',
+              gap: '10px',
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <Image
-                src={groupIconSvg}
-                alt='group icon'
-                width={24}
-                height={24}
-              />
+            <Image src={groupIconSvg} alt='group icon' width={24} height={24} />
 
-              {attendees?.length === 0 ? (
-                <Typography sx={{ fontSize: '18px' }}>
-                  No Attendees yet
-                </Typography>
-              ) : (
-                <AvatarGroup max={5}>
-                  {attendees.map((attendee, index) => (
-                    <Avatar
-                      key={index}
-                      alt={'avatar'}
-                      src={attendee.users.avatarURL}
-                    />
-                  ))}
-                </AvatarGroup>
-              )}
-            </Box>
-
-            {attendees.length > 0 && (
-              <Button
-                sx={{ fontSize: '18px', padding: '0 4px' }}
-                onClick={() => {
-                  setIsModalOpen(true);
-                }}
-              >
-                All Attendees
-              </Button>
+            {isLoading || !event ? (
+              <>
+                <FadeSkeleton
+                  variant='rectangular'
+                  width='100%'
+                  height='40px'
+                />
+              </>
+            ) : (
+              <>
+                {attendees.length === 0 ? (
+                  <>
+                    <Typography sx={{ fontSize: '18px' }}>
+                      No Attendees yet
+                    </Typography>
+                  </>
+                ) : (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      width: '100%',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <AvatarGroup max={5}>
+                      {attendees.map((attendee, index) => (
+                        <Avatar
+                          key={index}
+                          alt={'avatar'}
+                          src={attendee.users.avatarURL}
+                        />
+                      ))}
+                    </AvatarGroup>
+                    <Button
+                      sx={{ fontSize: '18px', padding: '0 4px' }}
+                      onClick={() => {
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      All Attendees
+                    </Button>
+                  </Box>
+                )}
+              </>
             )}
           </Box>
         </Stack>
 
         <Box sx={{ width: '100%' }}>
           <Typography sx={{ fontSize: '18px' }}>
-            <pre
-              style={{
-                fontFamily: 'inherit',
-                margin: 0,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}
-              dangerouslySetInnerHTML={{
-                __html: event?.description_event || '',
-              }}
-            />
+            {isLoading || !event ? (
+              <>
+                <FadeSkeleton variant='text' width='100%' height='200px ' />
+              </>
+            ) : (
+              <>
+                <pre
+                  style={{
+                    fontFamily: 'inherit',
+                    margin: 0,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: event?.description_event || '',
+                  }}
+                />
+              </>
+            )}
           </Typography>
         </Box>
         <Stack gap={'16px'} sx={{ marginBottom: '150px' }}>
@@ -429,16 +517,71 @@ export default function EventPage() {
             Activity Location
           </Typography>
           <Box sx={{ width: '100%' }}>
-            <MapWithMarker location={event?.location_event!} />
+            {isLoading || !event ? (
+              <>
+                <FadeSkeleton
+                  variant='rectangular'
+                  width='100%'
+                  height='500px'
+                />
+              </>
+            ) : (
+              <>
+                <MapWithMarker location={event?.location_event!} />
+              </>
+            )}
           </Box>
 
           <Box sx={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
             <Typography sx={{ fontSize: '18px' }}>Tags</Typography>
 
             <Box sx={{ display: 'flex', gap: '12px' }}>
-              {event?.events_tags.map(({ tags }, index) => (
+              {isLoading || !event ? (
+                <>
+                  <FadeSkeleton
+                    variant='rectangular'
+                    width='100%'
+                    height='70px'
+                  />
+                </>
+              ) : (
+                <>
+                  {event?.events_tags.map(({ tags }, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: '#DFE1F9',
+                        padding: '8px',
+                        borderRadius: '6px',
+                        maxWidth: 'fit-content',
+                      }}
+                    >
+                      <Typography sx={{ fontSize: '18x', fontWeight: 500 }}>
+                        {tags.name_tag}
+                      </Typography>
+                    </Box>
+                  ))}
+                </>
+              )}
+            </Box>
+          </Box>
+          <Box sx={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
+            <Typography sx={{ fontSize: '18px' }}>Categories</Typography>
+
+            {isLoading || !event ? (
+              <>
+                <FadeSkeleton
+                  variant='rectangular'
+                  width='100%'
+                  height='70px'
+                />
+              </>
+            ) : (
+              <>
                 <Box
-                  key={index}
                   sx={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -450,29 +593,11 @@ export default function EventPage() {
                   }}
                 >
                   <Typography sx={{ fontSize: '18x', fontWeight: 500 }}>
-                    {tags.name_tag}
+                    {event?.category_event}
                   </Typography>
                 </Box>
-              ))}
-            </Box>
-          </Box>
-          <Box sx={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
-            <Typography sx={{ fontSize: '18px' }}>Categories</Typography>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: '#DFE1F9',
-                padding: '8px',
-                borderRadius: '6px',
-                maxWidth: 'fit-content',
-              }}
-            >
-              <Typography sx={{ fontSize: '18x', fontWeight: 500 }}>
-                {event?.category_event}
-              </Typography>
-            </Box>
+              </>
+            )}
           </Box>
         </Stack>
       </Stack>
@@ -496,10 +621,25 @@ export default function EventPage() {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'baseline' }}>
-            <Typography sx={{ fontSize: '40px', fontWeight: 700 }}>
-              ${event?.price_event}/
-            </Typography>
-            <Typography sx={{ fontSize: '16px' }}>person</Typography>
+            {isLoading || !event ? (
+              <Skeleton
+                width={82}
+                height={60}
+                animation={'wave'}
+                variant='text'
+              />
+            ) : (
+              <>
+                <Typography sx={{ fontSize: '40px', fontWeight: 700 }}>
+                  {event?.price_event! <= 0
+                    ? 'Free'
+                    : `$${event?.price_event}/`}
+                </Typography>
+                {event?.price_event! > 0 && (
+                  <Typography sx={{ fontSize: '16px' }}>person</Typography>
+                )}
+              </>
+            )}
           </Box>
 
           {isOwner && isPastEvent ? (
