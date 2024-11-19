@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -45,9 +44,7 @@ import FadeSkeleton from '@/components/common/fadeSkeleton';
 
 export default function EventPage() {
   const { user } = useContext(UserContext);
-
   const { dispatch } = useContext(EventContext);
-
   const [event, setEvent] = useState<Event>();
   const [attendees, setAttendees] = useState<Attendee[]>([] as Attendee[]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -111,11 +108,8 @@ export default function EventPage() {
     }
   };
 
-  const checkIfPastEvent = (eventEndDate: string) => {
-    const currentDate = new Date();
-    const eventDate = new Date(eventEndDate);
-    return eventDate < currentDate;
-  };
+  const checkIfPastEvent = (eventEndDate: string) =>
+    dayjs(eventEndDate).isBefore(dayjs());
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -269,11 +263,13 @@ export default function EventPage() {
         open={isModalOpen}
         handleClose={handleCloseModal}
       />
+      {/* Stack for entire page. */}
       <Stack rowGap={'40px'}>
+        {/* Image */}
         <Box
           sx={{
             minWidth: '100%',
-            minHeight: '208px',
+            minHeight: '268px',
             position: 'relative',
           }}
         >
@@ -281,7 +277,7 @@ export default function EventPage() {
             <Skeleton
               variant='rectangular'
               width='100%'
-              height='208px'
+              height='268px'
               animation='wave'
               sx={{
                 borderRadius: '4px',
@@ -300,14 +296,14 @@ export default function EventPage() {
               sx={{
                 display: imageLoaded ? 'block' : 'none',
                 width: '100%',
-                height: '208px',
+                height: '268px',
                 objectFit: 'cover',
-                // objectPosition: 'top',
                 borderRadius: '4px',
               }}
             />
           </Fade>
         </Box>
+        {/* Title */}
         <Box
           sx={{
             display: 'flex',
@@ -325,20 +321,23 @@ export default function EventPage() {
             )}
           </Typography>
         </Box>
-
-        <Stack gap={1} direction={laptopQuery ? 'column' : 'row'}>
+        {/* Event information */}
+        <Stack
+          gap={laptopQuery ? 1 : 0}
+          direction={laptopQuery ? 'column' : 'row'}
+        >
           <Box
             sx={{
               width: '100%',
               display: 'flex',
-              gap: '8px',
+              gap: laptopQuery ? '8px' : '0px',
             }}
           >
             <Box
               sx={{
                 width: '50%',
                 backgroundColor: '#F5F2FA',
-                borderRadius: '8px',
+                borderRadius: laptopQuery ? '8px' : '8px 0 0 8px',
                 display: 'flex',
                 alignItems: 'center',
                 padding: '16px',
@@ -368,7 +367,7 @@ export default function EventPage() {
               sx={{
                 width: '50%',
                 backgroundColor: '#F5F2FA',
-                borderRadius: '8px',
+                borderRadius: laptopQuery ? '8px' : '0',
                 display: 'flex',
                 alignItems: 'center',
                 padding: '16px',
@@ -400,7 +399,7 @@ export default function EventPage() {
             sx={{
               width: '100%',
               backgroundColor: '#F5F2FA',
-              borderRadius: '8px',
+              borderRadius: laptopQuery ? '8px' : '0',
               display: 'flex',
               alignItems: 'center',
               padding: '16px',
@@ -439,7 +438,7 @@ export default function EventPage() {
             sx={{
               width: laptopQuery ? '100%' : '50%',
               backgroundColor: '#F5F2FA',
-              borderRadius: '8px',
+              borderRadius: laptopQuery ? '8px' : '0',
               display: 'flex',
               alignItems: 'center',
               padding: '16px',
@@ -468,7 +467,7 @@ export default function EventPage() {
             sx={{
               width: '100%',
               backgroundColor: '#F5F2FA',
-              borderRadius: '8px',
+              borderRadius: laptopQuery ? '8px' : '0 8px 8px 0',
               display: 'flex',
               justifyContent: 'flex-start',
               alignItems: 'center',
@@ -526,7 +525,7 @@ export default function EventPage() {
             )}
           </Box>
         </Stack>
-
+        {/* Description */}
         <Box sx={{ width: '100%' }}>
           <Typography sx={{ fontSize: '18px' }} component={'div'}>
             {isLoading || !event ? (
@@ -550,6 +549,7 @@ export default function EventPage() {
             )}
           </Typography>
         </Box>
+        {/* Location, tags and categories */}
         <Stack gap={'16px'} sx={{ marginBottom: '150px' }}>
           <Typography sx={{ fontSize: '24px', fontWeight: 700 }}>
             Activity Location
@@ -639,6 +639,8 @@ export default function EventPage() {
           </Box>
         </Stack>
       </Stack>
+
+      {/* Sticky bar for price and button. */}
       <Box
         padding={laptopQuery ? '0 30px' : '0 104px'}
         left='0'
