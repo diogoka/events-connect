@@ -101,7 +101,8 @@ const CardButton = ({
           }}
           onClick={(e) => handleClickButtonCard(e)}
           disabled={
-            (!isUserPage && isAttending) || (isDisabled && !isAttending)
+            (!isUserPage && isAttending) ||
+            (isDisabled && !isAttending && !isOwner)
           }
         >
           {isOwner

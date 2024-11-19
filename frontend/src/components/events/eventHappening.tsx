@@ -12,6 +12,7 @@ import scheduleIconSvg from '../../../public/icons/scheduleIconSvg.svg';
 
 import arrowLeftIconSvg from '../../../public/icons/arrowLeftIconSvg.svg';
 import arrowRightIconSvg from '../../../public/icons/arrowRightIconSvg.svg';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   events: Event[];
@@ -26,19 +27,28 @@ const EventsHappening = ({ events, user, laptopQuery }: Props) => {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const currentEvent = events[currentEventIndex];
 
+  const router = useRouter();
+
   const startTime = TimeFn(currentEvent.date_event_start);
   const endTime = TimeFn(currentEvent.date_event_end);
 
-  const handlePreviousEvent = () => {
+  const handlePreviousEvent = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setCurrentEventIndex((prevIndex) =>
       prevIndex === 0 ? events.length - 1 : prevIndex - 1
     );
   };
 
-  const handleNextEvent = () => {
+  const handleNextEvent = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setCurrentEventIndex((prevIndex) =>
       prevIndex === events.length - 1 ? 0 : prevIndex + 1
     );
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/events/${currentEvent.id_event}`);
   };
 
   return (
@@ -74,7 +84,11 @@ const EventsHappening = ({ events, user, laptopQuery }: Props) => {
           background: `linear-gradient(180deg, rgba(32, 37, 60, 0.24) 24%, rgba(32, 37, 60, 0.80) 80%), url(${currentEvent.image_url_event}) lightgray 50% / cover no-repeat`,
           overflow: 'hidden',
           marginBottom: '12px',
+          border: 'none',
+          cursor: 'pointer',
         }}
+        component={'button'}
+        onClick={(e) => handleCardClick(e)}
       >
         {events.length > 1 && (
           <Box
@@ -87,7 +101,7 @@ const EventsHappening = ({ events, user, laptopQuery }: Props) => {
               cursor: 'pointer',
             }}
             component={'button'}
-            onClick={handlePreviousEvent}
+            onClick={(e) => handlePreviousEvent(e)}
           >
             <Image
               src={arrowLeftIconSvg}
@@ -154,7 +168,7 @@ const EventsHappening = ({ events, user, laptopQuery }: Props) => {
               cursor: 'pointer',
             }}
             component={'button'}
-            onClick={handleNextEvent}
+            onClick={(e) => handleNextEvent(e)}
           >
             <Image
               src={arrowRightIconSvg}

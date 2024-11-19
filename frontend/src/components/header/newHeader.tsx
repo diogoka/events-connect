@@ -5,16 +5,20 @@ import { UserContext } from '@/context/userContext';
 import { Button, Box } from '@mui/material';
 
 import AvatarIcon from './avatar';
+import { EventContext, initialState } from '@/context/eventContext';
 
 type Props = {
   laptopQuery: boolean;
 };
 
 const NewHeader = ({ laptopQuery }: Props) => {
+  const { dispatch, setImage } = useContext(EventContext);
   const { user } = useContext(UserContext);
   const router = useRouter();
 
   const onNewEventClick = () => {
+    dispatch({ type: 'RESET', payload: initialState });
+    setImage(null);
     router.push('/events/new');
   };
   return (
