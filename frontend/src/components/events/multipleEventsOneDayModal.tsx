@@ -25,8 +25,6 @@ const MultipleEventsOneDayModal = ({
 }: Props) => {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
 
-  console.log('user', user);
-
   const handlePreviousEvent = () => {
     setCurrentEventIndex((prevIndex) =>
       prevIndex === 0 ? events.length - 1 : prevIndex - 1
@@ -47,10 +45,15 @@ const MultipleEventsOneDayModal = ({
     return user.id === eventIdOwner;
   };
 
+  const onClose = () => {
+    setCurrentEventIndex(0);
+    handleClose();
+  };
+
   return (
     <Modal
       open={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       aria-labelledby='modal-modal-title'
       aria-describedby='modal-modal-description'
     >

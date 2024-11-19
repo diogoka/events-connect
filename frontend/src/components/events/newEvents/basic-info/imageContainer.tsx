@@ -29,7 +29,7 @@ export default function ImageContainer({
             height={220}
             style={{
               objectFit: 'cover',
-              objectPosition: 'top',
+              // objectPosition: 'top',
               width: '100%',
             }}
           />

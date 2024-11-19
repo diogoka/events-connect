@@ -13,6 +13,7 @@ type Props = {
   handleClickButtonCard: (e: React.MouseEvent) => void;
   isUserPage: boolean;
   isDetail?: boolean;
+  isDisabled?: boolean;
 };
 
 const CardButton = ({
@@ -22,6 +23,7 @@ const CardButton = ({
   handleClickButtonCard,
   isUserPage,
   isDetail = false,
+  isDisabled = false,
 }: Props) => {
   return (
     <>
@@ -70,12 +72,16 @@ const CardButton = ({
               ? '#FFFAA0'
               : isAttending && isUserPage
               ? '#FFDAD6'
-              : '#4F5B92',
+              : isDetail
+              ? '#4F5B92'
+              : '#DDE1FF',
             color: isOwner
               ? 'black'
               : isAttending && isUserPage
               ? '#410002'
-              : '#FFFF',
+              : isDetail
+              ? '#FFFFFF'
+              : '#000000',
             '&:hover': {
               backgroundColor: isOwner
                 ? '#FFD700'
@@ -94,9 +100,19 @@ const CardButton = ({
             },
           }}
           onClick={(e) => handleClickButtonCard(e)}
-          disabled={!isUserPage && isAttending}
+          disabled={
+            (!isUserPage && isAttending) || (isDisabled && !isAttending)
+          }
         >
-          {isOwner ? 'Edit' : isAttending && isUserPage ? 'Cancel' : 'Join'}
+          {isOwner
+            ? 'Edit'
+            : isAttending && isUserPage
+            ? 'Cancel'
+            : isDisabled
+            ? 'No spots available'
+            : isDetail
+            ? 'Join Event'
+            : 'Join'}
         </Button>
       )}
     </>

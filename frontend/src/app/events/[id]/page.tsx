@@ -25,6 +25,7 @@ import calendarIconDetailSvg from '../../../../public/icons/calendarIconSvgDetai
 import scheduleIconSvgDetail from '../../../../public/icons/scheduleIconSvgDetail.svg';
 import groupIconSvg from '../../../../public/icons/groupIconSvg.svg';
 import nearMeIconSvg from '../../../../public/icons/nearMeIconSvg.svg';
+import spotsIconSvg from '../../../../public/icons/spotsIcon.svg';
 
 import { EventAttendee } from '@/types/pages.types';
 
@@ -259,7 +260,7 @@ export default function EventPage() {
 
   useEffect(() => {
     getEvent();
-  }, [isAttending]);
+  }, [isAttending, user]);
 
   return (
     <>
@@ -301,6 +302,7 @@ export default function EventPage() {
                 width: '100%',
                 height: '208px',
                 objectFit: 'cover',
+                // objectPosition: 'top',
                 borderRadius: '4px',
               }}
             />
@@ -325,7 +327,13 @@ export default function EventPage() {
         </Box>
 
         <Stack gap={1} direction={laptopQuery ? 'column' : 'row'}>
-          <Box sx={{ width: '100%', display: 'flex', gap: '8px' }}>
+          <Box
+            sx={{
+              width: '100%',
+              display: 'flex',
+              gap: '8px',
+            }}
+          >
             <Box
               sx={{
                 width: '50%',
@@ -335,6 +343,7 @@ export default function EventPage() {
                 alignItems: 'center',
                 padding: '16px',
                 gap: '8px',
+                minHeight: '80px',
               }}
             >
               <Image
@@ -423,6 +432,35 @@ export default function EventPage() {
                 >
                   {event?.location_event}
                 </Typography>
+              </>
+            )}
+          </Box>
+          <Box
+            sx={{
+              width: laptopQuery ? '100%' : '50%',
+              backgroundColor: '#F5F2FA',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '16px',
+              gap: '10px',
+            }}
+          >
+            <Image src={spotsIconSvg} alt='spots icon' width={24} height={24} />
+
+            {isLoading || !event ? (
+              <>
+                <FadeSkeleton variant='text' width='100%' height='70px' />
+              </>
+            ) : (
+              <>
+                {event?.capacity_event! < 0
+                  ? 'Unlimited spots'
+                  : event?.capacity_event === 0
+                  ? 'No available spots'
+                  : event?.capacity_event === 1
+                  ? '1 available spot'
+                  : `${event?.capacity_event} available spots`}
               </>
             )}
           </Box>
@@ -642,17 +680,30 @@ export default function EventPage() {
             )}
           </Box>
 
-          {isOwner && isPastEvent ? (
-            <DownloadAttendees eventId={event!.id_event!} />
+          {isLoading || !event ? (
+            <>
+              <FadeSkeleton
+                variant='rectangular'
+                width={'12%'}
+                height={'40px'}
+              />
+            </>
           ) : (
-            <CardButton
-              isUserPage={true}
-              isOwner={isOwner}
-              isAttending={isAttending}
-              isPastEvent={isPastEvent}
-              handleClickButtonCard={handleClickEvent}
-              isDetail
-            />
+            <>
+              {isOwner && isPastEvent ? (
+                <DownloadAttendees eventId={event!.id_event!} />
+              ) : (
+                <CardButton
+                  isUserPage={true}
+                  isOwner={isOwner}
+                  isAttending={isAttending}
+                  isPastEvent={isPastEvent}
+                  handleClickButtonCard={handleClickEvent}
+                  isDetail
+                  isDisabled={event?.capacity_event === 0}
+                />
+              )}
+            </>
           )}
         </Box>
         <NewEventModal

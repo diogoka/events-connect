@@ -17,7 +17,7 @@ const ChipComponent = ({ type }: Props) => {
             color: '#418B50',
             fontSize: '16px',
             fontWeight: 500,
-            padding: '0px 8px',
+            borderRadius: '6px',
           }}
         />
       ) : (

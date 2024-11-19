@@ -168,7 +168,6 @@ const NewEventCard = ({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-
               background: 'transparent',
               backgroundColor: 'transparent',
               padding: 0,

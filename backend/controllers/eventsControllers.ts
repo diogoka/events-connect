@@ -508,7 +508,23 @@ export const newAttendee = async (
   res: express.Response
 ) => {
   const { userId, eventId } = req.body;
+
   try {
+    const event = await prisma.events.findUnique({
+      where: { id_event: +eventId },
+      select: { capacity_event: true },
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.capacity_event === 0) {
+      return res
+        .status(400)
+        .json({ message: 'No spots available for this event' });
+    }
+
     const newAttendee = await prisma.attendees.create({
       data: {
         id_event: +eventId,
@@ -516,9 +532,17 @@ export const newAttendee = async (
       },
     });
 
+    await prisma.events.update({
+      where: { id_event: +eventId },
+      data: {
+        capacity_event: event.capacity_event - 1,
+      },
+    });
+
     res.status(201).json(newAttendee);
   } catch (error) {
-    res.status(500).json(error);
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred', error });
   }
 };
 
@@ -546,7 +570,25 @@ export const deleteAttendee = async (
       return res.status(404).json({ message: 'Attendee not found.' });
     }
 
-    return res.status(200).json(deleteAttendee);
+    const event = await prisma.events.findUnique({
+      where: { id_event: +eventId },
+      select: { capacity_event: true },
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found.' });
+    }
+
+    if (event.capacity_event >= 0) {
+      await prisma.events.update({
+        where: { id_event: +eventId },
+        data: {
+          capacity_event: event.capacity_event + 1,
+        },
+      });
+    }
+
+    return res.status(200).json({ message: 'Attendee deleted successfully.' });
   } catch (error) {
     console.error('Error deleting attendee:', error);
     return res.status(500).json({ message: 'Internal server error.' });

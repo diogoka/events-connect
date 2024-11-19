@@ -31,8 +31,6 @@ export default function EventsPage() {
   const [attendedEvents, setAttendedEvents] = useState<AttendedEvent[]>([]);
   const [eventsHappening, setEventsHappening] = useState<Event[]>([]);
   const [query, setQuery] = useState(false);
-  const [attendingEvents, setAttendingEvents] =
-    useState<{ id_event: number }[]>();
 
   const laptopQuery = useMediaQuery('(min-width:769px)');
 
@@ -206,7 +204,7 @@ export default function EventsPage() {
         getUpcomingEvents();
       }
     }
-  }, [isPastEvents, isPastMonthEvents, isCalendarView]);
+  }, [isPastEvents, isPastMonthEvents, isCalendarView, user]);
 
   return (
     <Box
