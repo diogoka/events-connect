@@ -6,28 +6,15 @@ import {
   Stack,
   Typography,
   useMediaQuery,
-  Button,
   Skeleton,
   Fade,
 } from '@mui/material';
 import { UserContext } from '@/context/userContext';
 import { Attendee, Event } from '@/types/types';
-import Image from 'next/image';
-import { monthDayFn, TimeFn } from '@/common/functions';
-import Avatar from '@mui/material/Avatar';
-import AvatarGroup from '@mui/material/AvatarGroup';
 import { api } from '@/services/api';
 import AttendeesModal from '@/components/event/attendees/attendees-modal';
 import MapWithMarker from '@/components/map/mapWithMarker';
-
-import calendarIconDetailSvg from '../../../../public/icons/calendarIconSvgDetail.svg';
-import scheduleIconSvgDetail from '../../../../public/icons/scheduleIconSvgDetail.svg';
-import groupIconSvg from '../../../../public/icons/groupIconSvg.svg';
-import nearMeIconSvg from '../../../../public/icons/nearMeIconSvg.svg';
-import spotsIconSvg from '../../../../public/icons/spotsIcon.svg';
-
 import { EventAttendee } from '@/types/pages.types';
-
 import CardButton from '@/components/events/newEventCardButton';
 import NewEventModal from '@/components/events/newEventModal';
 import { EventModalType } from '@/types/components.types';
@@ -41,6 +28,7 @@ import { Tag } from '@/types/types';
 import DownloadAttendees from '@/components/event/download-attendees';
 import NewEventReviewModal from '@/components/events/newEventReviewModal';
 import FadeSkeleton from '@/components/common/fadeSkeleton';
+import EventInformation from '@/components/events/eventInformation';
 
 export default function EventPage() {
   const { user } = useContext(UserContext);
@@ -68,11 +56,7 @@ export default function EventPage() {
 
   const params = useParams();
   const EVENT_ID = params.id;
-  const laptopQuery = useMediaQuery('(max-width:769px)');
-
-  const monthAndDay = monthDayFn(event?.date_event_start!);
-  const startTime = TimeFn(event?.date_event_start!);
-  const endTime = TimeFn(event?.date_event_end!);
+  const isMobile = useMediaQuery('(max-width:769px)');
 
   const router = useRouter();
   const { openSnackbar } = useSnack();
@@ -113,6 +97,10 @@ export default function EventPage() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
   };
 
   const handleDeleteAttendee = async () => {
@@ -321,210 +309,28 @@ export default function EventPage() {
             )}
           </Typography>
         </Box>
+
         {/* Event information */}
-        <Stack
-          gap={laptopQuery ? 1 : 0}
-          direction={laptopQuery ? 'column' : 'row'}
-        >
-          <Box
-            sx={{
-              width: '100%',
-              display: 'flex',
-              gap: laptopQuery ? '8px' : '0px',
-            }}
-          >
-            <Box
-              sx={{
-                width: '50%',
-                backgroundColor: '#F5F2FA',
-                borderRadius: laptopQuery ? '8px' : '8px 0 0 8px',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '16px',
-                gap: '8px',
-                minHeight: '80px',
-              }}
-            >
-              <Image
-                src={calendarIconDetailSvg}
-                alt='calendar icon'
-                height={24}
-                width={24}
-              />
-              {isLoading || !event ? (
-                <>
-                  <FadeSkeleton variant='text' width='100%' height='70px' />
-                </>
-              ) : (
-                <>
-                  <Typography sx={{ fontSize: '18px' }}>
-                    {monthAndDay}
-                  </Typography>
-                </>
-              )}
-            </Box>
-            <Box
-              sx={{
-                width: '50%',
-                backgroundColor: '#F5F2FA',
-                borderRadius: laptopQuery ? '8px' : '0',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '16px',
-                gap: '8px',
-              }}
-            >
-              <Image
-                src={scheduleIconSvgDetail}
-                alt='schedule icon'
-                height={24}
-                width={24}
-              />
 
-              {isLoading || !event ? (
-                <>
-                  <FadeSkeleton variant='text' width='100%' height='70px' />
-                </>
-              ) : (
-                <>
-                  <Typography sx={{ fontSize: '18px' }}>
-                    {startTime.replace(/\s+/g, '')} to{' '}
-                    {endTime.replace(/\s+/g, '')}
-                  </Typography>
-                </>
-              )}
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              width: '100%',
-              backgroundColor: '#F5F2FA',
-              borderRadius: laptopQuery ? '8px' : '0',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '16px',
-              gap: '8px',
-            }}
-          >
-            <Image
-              src={nearMeIconSvg}
-              alt='near me icon'
-              width={24}
-              height={24}
+        {isLoading || !event ? (
+          <>
+            <FadeSkeleton
+              variant='rectangular'
+              width={'100%'}
+              height={'70px'}
             />
+          </>
+        ) : (
+          <>
+            <EventInformation
+              event={event!}
+              attendees={attendees}
+              isMobile={isMobile}
+              setIsModalOpen={handleOpenModal}
+            />
+          </>
+        )}
 
-            {isLoading || !event ? (
-              <>
-                <FadeSkeleton variant='text' width='100%' height='70px' />
-              </>
-            ) : (
-              <>
-                <Typography
-                  component='a'
-                  sx={{
-                    textDecoration: 'underline',
-                    fontSize: '18px',
-                    cursor: 'pointer',
-                  }}
-                  href={`https://maps.google.com/?q=${event?.location_event}`}
-                  target='_blank'
-                >
-                  {event?.location_event}
-                </Typography>
-              </>
-            )}
-          </Box>
-          <Box
-            sx={{
-              width: laptopQuery ? '100%' : '50%',
-              backgroundColor: '#F5F2FA',
-              borderRadius: laptopQuery ? '8px' : '0',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '16px',
-              gap: '10px',
-            }}
-          >
-            <Image src={spotsIconSvg} alt='spots icon' width={24} height={24} />
-
-            {isLoading || !event ? (
-              <>
-                <FadeSkeleton variant='text' width='100%' height='70px' />
-              </>
-            ) : (
-              <>
-                {event?.capacity_event! < 0
-                  ? 'Unlimited spots'
-                  : event?.capacity_event === 0
-                  ? 'No available spots'
-                  : event?.capacity_event === 1
-                  ? '1 available spot'
-                  : `${event?.capacity_event} available spots`}
-              </>
-            )}
-          </Box>
-          <Box
-            sx={{
-              width: '100%',
-              backgroundColor: '#F5F2FA',
-              borderRadius: laptopQuery ? '8px' : '0 8px 8px 0',
-              display: 'flex',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              padding: '16px',
-              gap: '10px',
-            }}
-          >
-            <Image src={groupIconSvg} alt='group icon' width={24} height={24} />
-
-            {isLoading || !event ? (
-              <>
-                <FadeSkeleton
-                  variant='rectangular'
-                  width='100%'
-                  height='40px'
-                />
-              </>
-            ) : (
-              <>
-                {attendees.length === 0 ? (
-                  <>
-                    <Typography sx={{ fontSize: '18px' }}>
-                      No Attendees yet
-                    </Typography>
-                  </>
-                ) : (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      width: '100%',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <AvatarGroup max={5}>
-                      {attendees.map((attendee, index) => (
-                        <Avatar
-                          key={index}
-                          alt={'avatar'}
-                          src={attendee.users.avatarURL}
-                        />
-                      ))}
-                    </AvatarGroup>
-                    <Button
-                      sx={{ fontSize: '18px', padding: '0 4px' }}
-                      onClick={() => {
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      All Attendees
-                    </Button>
-                  </Box>
-                )}
-              </>
-            )}
-          </Box>
-        </Stack>
         {/* Description */}
         <Box sx={{ width: '100%' }}>
           <Typography sx={{ fontSize: '18px' }} component={'div'}>
@@ -642,7 +448,7 @@ export default function EventPage() {
 
       {/* Sticky bar for price and button. */}
       <Box
-        padding={laptopQuery ? '0 30px' : '0 104px'}
+        padding={isMobile ? '0 30px' : '0 104px'}
         left='0'
         width='100%'
         margin='0 auto'
@@ -713,19 +519,19 @@ export default function EventPage() {
           user={{ id: user?.id, role: user?.roleName }}
           closeModal={closeModal}
           handleDeleteAttendees={handleDeleteAttendee}
-          laptopQuery={laptopQuery}
+          isMobile={isMobile}
         />
         <ModalAttendParticipation
           isOpen={isAttendModalOpen}
           onClose={closeAttendModal}
-          laptopQuery={laptopQuery}
+          isMobile={isMobile}
           addAttendee={handleAddAttendee}
         />
         <NewEventReviewModal
           isOpen={isReviewModalOpen}
           user={{ id: user?.id, role: user?.roleName }}
           closeModal={closeReviewModal}
-          laptopQuery={laptopQuery}
+          isMobile={isMobile}
         />
       </Box>
     </>

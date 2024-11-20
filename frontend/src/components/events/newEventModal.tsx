@@ -13,7 +13,7 @@ type Props = {
   user: { id: string | undefined; role: string | undefined };
   closeModal: (id: number) => void;
   handleDeleteAttendees?: () => void;
-  laptopQuery: boolean;
+  isMobile: boolean;
 };
 
 const style = {
@@ -63,7 +63,7 @@ const NewEventModal = ({
   user,
   closeModal,
   handleDeleteAttendees,
-  laptopQuery,
+  isMobile,
 }: Props) => {
   const [open, setOpen] = useState<boolean>(isOpen.isOpen);
   const { openSnackbar } = useSnack();
@@ -99,7 +99,7 @@ const NewEventModal = ({
       aria-labelledby='modal-modal-title'
       aria-describedby='modal-modal-description'
     >
-      <Box sx={{ ...style, width: laptopQuery ? 400 : 450 }}>
+      <Box sx={{ ...style, width: isMobile ? 400 : 450 }}>
         <Typography
           id='modal-modal-title'
           variant='h6'
