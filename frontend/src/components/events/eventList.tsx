@@ -44,6 +44,7 @@ function EventList({
   isOrganizer = false,
 }: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
+  const isLargeScreen = useMediaQuery('(min-width: 1281px)');
 
   const [isModalOpen, setIsModalOpen] = useState<EventModalType>({
     eventId: 0,
@@ -78,12 +79,12 @@ function EventList({
   return (
     <Box sx={{ width: '100%' }}>
       <Stack
-        spacing={2}
+        spacing={isLargeScreen ? 3 : 2}
         sx={{
           display: 'flex',
           alignItems: 'center',
           marginTop: '0',
-          justifyContent: events.length > 2 ? 'space-between' : 'flex-start',
+          justifyContent: 'flex-start',
         }}
         useFlexGap
         flexWrap='wrap'
