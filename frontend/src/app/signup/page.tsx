@@ -237,18 +237,19 @@ export default function SignUpPage() {
               style={{ width: isMobile ? '50%' : '30%', height: 'auto' }}
             />
           </Box>
+
           <Stack
-            maxWidth={isMobile ? 'auto' : '600px'}
-            marginTop={isMobile ? '2rem' : 0}
-            marginInline='auto'
-            padding={isMobile ? '0 36px' : '0 6rem 2rem 6rem'}
+            maxWidth={isMobile ? 'auto' : '100%'}
+            marginTop={isMobile ? 0 : 0}
+            marginInline={isMobile ? 'auto' : 0}
+            padding={isMobile ? '0 36px' : '1rem 3rem 2rem 3rem'}
             sx={{
               maxHeight: '100vh',
               overflowY: 'auto',
             }}
           >
             <Typography
-              marginBlock={isMobile ? 'none' : '2rem'}
+              marginBlock={isMobile ? '2rem' : '2rem'}
               variant='h1'
               fontWeight='bold'
             >
@@ -259,91 +260,116 @@ export default function SignUpPage() {
               <>
                 <form onSubmit={handleFormSubmit}>
                   <Stack rowGap={'12px'} sx={{ marginBottom: '18px' }}>
-                    <NameInput
-                      name={userInputForm.firstName}
-                      type={'firstName'}
-                      setUserName={updateUserInputForm}
-                      label='First Name'
-                      disabled={isOpen}
-                    />
-                    <NameInput
-                      name={userInputForm.lastName}
-                      type={'lastName'}
-                      setUserName={updateUserInputForm}
-                      label='Last Name'
-                      disabled={isOpen}
-                    />
-                    <CourseInput
-                      courseId={userInputForm.courseId}
-                      type={'courseId'}
-                      setCourse={updateUserInputForm}
-                      disabled={isOpen}
-                    />
-                    <FormControl required>
-                      <TextField
-                        type='email'
-                        label={isGoogle ? firebaseAccount?.email : 'Email'}
-                        onChange={(event) =>
-                          updateUserInputForm('email', event.target.value)
-                        }
-                        required
-                        disabled={isOpen || isGoogle}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            '& fieldset': {
-                              border: 'none',
-                            },
-                            '&:hover fieldset': {
-                              border: 'none',
-                            },
-                            '&.Mui-focused fieldset': {
-                              border: 'none',
-                            },
-                          },
-                          backgroundColor: '#F5F2FA',
-                          borderRadius: '6px',
-                        }}
-                        InputProps={
-                          isGoogle
-                            ? {
-                                endAdornment: (
-                                  <InputAdornment position='end'>
-                                    <Button
-                                      sx={{
-                                        fontSize: '0.8rem',
-                                        height: '2rem',
-                                        padding: '0 0.5rem',
-                                      }}
-                                      variant='contained'
-                                      color='primary'
-                                      onClick={() => {
-                                        openSnackbar(
-                                          'You are being redirected. Select another email.',
-                                          'info'
-                                        );
-
-                                        setTimeout(() => {
-                                          setUser(null);
-                                          setFirebaseAccount(null);
-                                          setLoginStatus(LoginStatus.LoggedOut);
-                                          router.replace('/login');
-                                        }, 6000);
-                                      }}
-                                      disabled={isOpen}
-                                    >
-                                      Change Email
-                                    </Button>
-                                  </InputAdornment>
-                                ),
-                              }
-                            : {}
-                        }
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        gap: '12px',
+                      }}
+                    >
+                      <NameInput
+                        name={userInputForm.firstName}
+                        type={'firstName'}
+                        setUserName={updateUserInputForm}
+                        label='First Name'
+                        disabled={isOpen}
                       />
-                    </FormControl>
+                      <NameInput
+                        name={userInputForm.lastName}
+                        type={'lastName'}
+                        setUserName={updateUserInputForm}
+                        label='Last Name'
+                        disabled={isOpen}
+                      />
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        gap: '12px',
+                      }}
+                    >
+                      <CourseInput
+                        courseId={userInputForm.courseId}
+                        type={'courseId'}
+                        setCourse={updateUserInputForm}
+                        disabled={isOpen}
+                      />
+
+                      <FormControl required fullWidth>
+                        <TextField
+                          type='email'
+                          label={isGoogle ? firebaseAccount?.email : 'Email'}
+                          onChange={(event) =>
+                            updateUserInputForm('email', event.target.value)
+                          }
+                          required
+                          disabled={isOpen || isGoogle}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': {
+                                border: 'none',
+                              },
+                              '&:hover fieldset': {
+                                border: 'none',
+                              },
+                              '&.Mui-focused fieldset': {
+                                border: 'none',
+                              },
+                            },
+                            backgroundColor: '#F5F2FA',
+                            borderRadius: '6px',
+                          }}
+                          InputProps={
+                            isGoogle
+                              ? {
+                                  endAdornment: (
+                                    <InputAdornment position='end'>
+                                      <Button
+                                        sx={{
+                                          fontSize: '0.8rem',
+                                          height: '2rem',
+                                          padding: '0 0.5rem',
+                                        }}
+                                        variant='contained'
+                                        color='primary'
+                                        onClick={() => {
+                                          openSnackbar(
+                                            'You are being redirected. Select another email.',
+                                            'info'
+                                          );
+
+                                          setTimeout(() => {
+                                            setUser(null);
+                                            setFirebaseAccount(null);
+                                            setLoginStatus(
+                                              LoginStatus.LoggedOut
+                                            );
+                                            router.replace('/login');
+                                          }, 6000);
+                                        }}
+                                        disabled={isOpen}
+                                      >
+                                        Change
+                                      </Button>
+                                    </InputAdornment>
+                                  ),
+                                }
+                              : {}
+                          }
+                        />
+                      </FormControl>
+                    </Box>
 
                     {!isGoogle && (
-                      <>
-                        <FormControl required>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: isMobile ? 'column' : 'row',
+                          gap: '12px',
+                        }}
+                      >
+                        <FormControl required fullWidth>
                           <PasswordInput
                             label='Password'
                             setter={updateUserInputForm}
@@ -351,7 +377,7 @@ export default function SignUpPage() {
                             disabled={isOpen || isGoogle}
                           />
                         </FormControl>
-                        <FormControl required>
+                        <FormControl required fullWidth>
                           <PasswordInput
                             label='Confirm Password'
                             setter={updateUserInputForm}
@@ -359,7 +385,7 @@ export default function SignUpPage() {
                             disabled={isOpen || isGoogle}
                           />
                         </FormControl>
-                      </>
+                      </Box>
                     )}
                     <FormControl required>
                       <NumberTextFieldInput
@@ -373,56 +399,69 @@ export default function SignUpPage() {
 
                     <Box
                       sx={{
-                        display: 'inline-flex',
-                        alignItems: 'flex-start',
+                        display: 'flex',
+                        justifyContent: 'flex-start',
                         gap: '10px',
+                        marginLeft: '6px',
                       }}
                     >
-                      <Checkbox
-                        checked={checked}
-                        onClick={() => handleChangeCheckBox()}
-                        sx={{
-                          padding: '0',
-                        }}
-                      />
-                      <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
-                        I acknowledge that I have read and understood the
-                        <Link
-                          type='button'
-                          component='button'
+                      <Box>
+                        <Checkbox
+                          checked={checked}
+                          onClick={() => handleChangeCheckBox()}
                           sx={{
+                            padding: '0',
+                          }}
+                        />
+                      </Box>
+
+                      <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
+                        I acknowledge that I have read and understood the{' '}
+                        <Link
+                          component='button'
+                          type='button'
+                          onClick={openModal}
+                          sx={{
+                            fontSize: '15px',
+                            lineHeight: 'inherit',
+                            padding: 0,
+                            textDecoration: 'underline',
+                            verticalAlign: 'baseline',
                             '&:hover': {
                               cursor: 'pointer',
                             },
-                            ':disabled:hover': {
-                              cursor: 'auto',
-                            },
-                            marginLeft: '3px',
-                            fontSize: '15px',
                           }}
-                          onClick={openModal}
                         >
-                          {' '}
-                          Terms and Conditions.
+                          Terms and Conditions
                         </Link>
+                        .
                       </Typography>
                     </Box>
                   </Stack>
-                  <Button
-                    type='submit'
-                    variant='contained'
-                    color='primary'
-                    fullWidth
-                    disabled={!checked || isOpen}
+                  <Box
                     sx={{
-                      '&:disabled': {
-                        cursor: 'not-allowed',
-                        pointerEvents: 'auto',
-                      },
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     }}
                   >
-                    {load ? <ThreeDots color='white' /> : 'Register'}
-                  </Button>
+                    <Button
+                      type='submit'
+                      variant='contained'
+                      color='primary'
+                      disabled={!checked || isOpen}
+                      sx={{
+                        '&:disabled': {
+                          cursor: 'not-allowed',
+                          pointerEvents: 'auto',
+                        },
+                        minWidth: isMobile ? '100%' : '80%',
+                        maxWidth: '50%',
+                      }}
+                    >
+                      {load ? <ThreeDots color='white' /> : 'Register'}
+                    </Button>
+                  </Box>
 
                   <Typography
                     variant='body2'

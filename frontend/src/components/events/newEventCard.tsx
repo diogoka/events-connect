@@ -1,15 +1,9 @@
 'use client';
-import React, {
-  Dispatch,
-  SetStateAction,
-  use,
-  useContext,
-  useState,
-} from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { Event } from '@/types/pages.types';
 import { monthDayFn, TimeFn } from '@/common/functions';
 import EventImageWithDate from '../common/eventImageWithDate';
@@ -18,12 +12,7 @@ import shareIconSvg from '../../../public/icons/iosShareIconSvg.svg';
 import Image from 'next/image';
 import { useSnack } from '@/context/snackContext';
 import CardButton from './newEventCardButton';
-
 import DownloadAttendees from '../event/download-attendees';
-
-import { AttendeesListType } from '@/types/components.types';
-import { EventContext } from '@/context/eventContext';
-import dayjs from 'dayjs';
 
 type Props = {
   event: Event & {
@@ -53,17 +42,11 @@ const NewEventCard = ({
 }: Props) => {
   const startTime = TimeFn(event.date_event_start);
   const endTime = TimeFn(event.date_event_end);
-  const monthAndDay = monthDayFn(event.date_event_start);
-
-  const [attendeesList, setAttendeesList] = useState<AttendeesListType>(
-    {} as AttendeesListType
-  );
+  const monthAndDay = monthDayFn(event.date_event_start, true);
 
   const router = useRouter();
 
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  const { createdEvent, dispatch, setImage, image } = useContext(EventContext);
 
   const { openSnackbar } = useSnack();
 

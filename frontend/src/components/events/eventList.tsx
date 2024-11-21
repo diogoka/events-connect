@@ -164,13 +164,13 @@ function EventList({
         isOpen={isModalOpen}
         user={user}
         closeModal={closeModal}
-        laptopQuery={laptopQuery}
+        isMobile={laptopQuery}
       />
       <NewEventReviewModal
         isOpen={isModalOpen}
         user={user}
         closeModal={closeReviewModal}
-        laptopQuery={laptopQuery}
+        isMobile={laptopQuery}
       />
 
       {events.length !== 0 && !isCalendarView && (
