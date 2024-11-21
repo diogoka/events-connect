@@ -45,7 +45,7 @@ import { useSnack } from '@/context/snackContext';
 import Image from 'next/image';
 
 export default function SignUpPage() {
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery('(max-width: 1179px)');
   const router = useRouter();
 
   const {
@@ -228,24 +228,44 @@ export default function SignUpPage() {
               background: '#F5F2FA',
             }}
           >
-            <Image
-              src='/cornerstone-connect-logo-blue-bg-white.svg'
-              alt='cornerstone-connect logo'
-              width={600}
-              height={600}
-              priority={true}
-              style={{ width: isMobile ? '50%' : '30%', height: 'auto' }}
-            />
+            <Box
+              sx={{
+                width: {
+                  xs: '60%',
+                  sm: '50%',
+                  md: '40%',
+                  lg: '30%',
+                  xl: '20%',
+                },
+              }}
+            >
+              <Image
+                src='/cornerstone-connect-logo-blue-bg-white.svg'
+                alt='cornerstone-connect logo'
+                width={600}
+                height={600}
+                priority={true}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                }}
+              />
+            </Box>
           </Box>
 
           <Stack
             maxWidth={isMobile ? 'auto' : '100%'}
             marginTop={isMobile ? 0 : 0}
             marginInline={isMobile ? 'auto' : 0}
-            padding={isMobile ? '0 36px' : '1rem 3rem 2rem 3rem'}
             sx={{
               maxHeight: '100vh',
               overflowY: 'auto',
+              padding: {
+                xs: '0 36px',
+                sm: '1rem 3rem 2rem 3rem',
+                md: '1rem 4rem',
+                lg: '2rem 5rem',
+              },
             }}
           >
             <Typography
