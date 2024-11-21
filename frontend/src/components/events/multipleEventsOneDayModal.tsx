@@ -1,12 +1,11 @@
 import { AttendedEvent, Event } from '@/types/pages.types';
-import { Box, Modal, Typography } from '@mui/material';
+import { Box, Modal, Typography, IconButton } from '@mui/material';
 import React, { useState } from 'react';
 import NewEventCard from './newEventCard';
 import Image from 'next/image';
 import arrowLeftIconSvg from '../../../public/icons/arrowLeftIconSvg.svg';
 import arrowRightIconSvg from '../../../public/icons/arrowRightIconSvg.svg';
-
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import CloseIcon from '@mui/icons-material/Close'; // Import Close icon
 
 type Props = {
   isOpen: boolean;
@@ -70,6 +69,20 @@ const MultipleEventsOneDayModal = ({
           borderRadius: '6px',
         }}
       >
+        {/* Close Button */}
+        <IconButton
+          sx={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            zIndex: 2,
+            color: '#4F5B92',
+          }}
+          onClick={onClose}
+        >
+          <CloseIcon />
+        </IconButton>
+
         <Typography
           sx={{
             fontSize: '32px',
@@ -89,7 +102,6 @@ const MultipleEventsOneDayModal = ({
                 zIndex: 2,
                 backgroundColor: 'transparent',
                 position: 'absolute',
-
                 height: '75%',
                 border: 'none',
                 cursor: 'pointer',
@@ -119,7 +131,6 @@ const MultipleEventsOneDayModal = ({
                 ? checkAttendance(events[currentEventIndex].id_event)
                 : false
             }
-            laptopQuery={false}
             pastEvent={false}
             isOwner={
               isOpen

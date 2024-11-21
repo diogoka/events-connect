@@ -74,7 +74,7 @@ const EventsHappening = ({ events, user, laptopQuery }: Props) => {
       <Box
         sx={{
           position: 'relative',
-          minHeight: '208px',
+          minHeight: '218px',
           width: '100%',
           borderRadius: '6px',
           display: 'flex',

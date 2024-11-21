@@ -56,7 +56,7 @@ export default function EventPage() {
 
   const params = useParams();
   const EVENT_ID = params.id;
-  const isMobile = useMediaQuery('(max-width:769px)');
+  const isMobile = useMediaQuery('(max-width:1150px)');
 
   const router = useRouter();
   const { openSnackbar } = useSnack();
@@ -257,7 +257,7 @@ export default function EventPage() {
         <Box
           sx={{
             minWidth: '100%',
-            minHeight: '268px',
+            minHeight: '218px',
             position: 'relative',
           }}
         >
@@ -265,7 +265,7 @@ export default function EventPage() {
             <Skeleton
               variant='rectangular'
               width='100%'
-              height='268px'
+              height='218px'
               animation='wave'
               sx={{
                 borderRadius: '4px',
@@ -284,7 +284,7 @@ export default function EventPage() {
               sx={{
                 display: imageLoaded ? 'block' : 'none',
                 width: '100%',
-                height: '268px',
+                height: '218px',
                 objectFit: 'cover',
                 borderRadius: '4px',
               }}

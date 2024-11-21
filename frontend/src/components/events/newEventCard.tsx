@@ -23,7 +23,6 @@ type Props = {
     role: string | undefined;
   };
   isAttending?: boolean;
-  laptopQuery: boolean;
   pastEvent: boolean;
   isOwner: boolean;
   isUserPage: boolean;
@@ -32,9 +31,7 @@ type Props = {
 
 const NewEventCard = ({
   event,
-  user,
   isAttending = false,
-  laptopQuery,
   pastEvent,
   isOwner,
   isUserPage,
@@ -101,12 +98,12 @@ const NewEventCard = ({
   return (
     <Card
       sx={{
-        width: laptopQuery ? '32.1%' : '100%',
         boxShadow: 'none',
         backgroundColor: '#FBF8FF',
         cursor: 'pointer',
         border: 0,
         padding: 0,
+        width: '100%',
       }}
       component={'button'}
       onClick={(e) => handleClickCard(e)}

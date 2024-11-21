@@ -1,6 +1,6 @@
 'use client';
 import { Dispatch, SetStateAction, useState } from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, Grid, Stack, Typography } from '@mui/material';
 import { AttendedEvent, Events as Event } from '@/types/pages.types';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import NewEventCard from './newEventCard';
@@ -44,7 +44,7 @@ function EventList({
   isOrganizer = false,
 }: Props) {
   const laptopQuery = useMediaQuery('(min-width:769px)');
-  const isLargeScreen = useMediaQuery('(min-width: 1281px)');
+  const isSmallScreen = useMediaQuery('(min-width:1215px)');
 
   const [isModalOpen, setIsModalOpen] = useState<EventModalType>({
     eventId: 0,
@@ -78,18 +78,7 @@ function EventList({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Stack
-        spacing={isLargeScreen ? 3 : 2}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          marginTop: '0',
-          justifyContent: 'flex-start',
-        }}
-        useFlexGap
-        flexWrap='wrap'
-        direction={'row'}
-      >
+      <Box>
         {isCalendarView ? (
           <Box
             sx={{
@@ -100,7 +89,7 @@ function EventList({
               alignItems: 'center',
             }}
           >
-            {laptopQuery ? (
+            {isSmallScreen ? (
               <EventCalendarView
                 eventsToCalendar={events}
                 attendedEvents={attendedEvents}
@@ -111,7 +100,7 @@ function EventList({
             )}
           </Box>
         ) : (
-          <>
+          <Grid container columnSpacing={3} rowSpacing={3}>
             {events.length === 0 ? (
               <Typography
                 sx={{
@@ -144,23 +133,23 @@ function EventList({
                   : false;
 
                 return (
-                  <NewEventCard
-                    key={index}
-                    event={event}
-                    user={user}
-                    isAttending={attended}
-                    laptopQuery={laptopQuery}
-                    pastEvent={pastEvents}
-                    isOwner={isOwner}
-                    isUserPage={isUserPage}
-                    openModal={openModal}
-                  />
+                  <Grid item key={index} xs={12} md={6} lg={4} xl={4}>
+                    <NewEventCard
+                      event={event}
+                      user={user}
+                      isAttending={attended}
+                      pastEvent={pastEvents}
+                      isOwner={isOwner}
+                      isUserPage={isUserPage}
+                      openModal={openModal}
+                    />
+                  </Grid>
                 );
               })
             )}
-          </>
+          </Grid>
         )}
-      </Stack>
+      </Box>
       <NewEventModal
         isOpen={isModalOpen}
         user={user}

@@ -26,7 +26,7 @@ const EventImageWithDate = ({
       {!imageLoaded && (
         <Skeleton
           variant='rectangular'
-          height='208px'
+          height='218px'
           sx={{ borderRadius: '4px' }}
           animation='wave'
         />
@@ -35,7 +35,7 @@ const EventImageWithDate = ({
         <CardMedia
           component={'img'}
           sx={{
-            height: '208px',
+            height: '218px',
             width: '100%',
             borderRadius: '4px',
             display: imageLoaded ? 'block' : 'none',

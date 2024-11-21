@@ -127,7 +127,7 @@ const NewPreviewMode = ({ setToForm, ownerId }: Props) => {
         <Box
           sx={{
             minWidth: '100%',
-            minHeight: '268px',
+            minHeight: '218px',
             borderRadius: '4px',
           }}
         >
