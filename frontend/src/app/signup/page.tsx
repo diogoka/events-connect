@@ -232,10 +232,10 @@ export default function SignUpPage() {
               sx={{
                 width: {
                   xs: '60%',
-                  sm: '50%',
-                  md: '40%',
+                  sm: '40%',
+                  md: '30%',
                   lg: '30%',
-                  xl: '20%',
+                  xl: '30%',
                 },
               }}
             >
