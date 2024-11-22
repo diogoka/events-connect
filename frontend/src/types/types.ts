@@ -1,13 +1,12 @@
 import dayjs from 'dayjs';
 
 export type Attendee = {
-  id: string | undefined;
-  firstName: string;
-  lastName: string;
-  course: string;
-  email: string;
-  avatarURL?: string;
-  studentId: string;
+  users: {
+    first_name_user: string;
+    last_name_user: string;
+    avatarURL?: string;
+    id_user: string;
+  };
 };
 
 export type EventDate = {
@@ -16,9 +15,11 @@ export type EventDate = {
 };
 
 export type Tag = {
-  id_tag?: number;
-  name_tag?: string;
-  id_event?: number;
+  tags: {
+    id_tag?: number;
+    name_tag?: string;
+    id_event?: number;
+  };
 };
 
 export type Event = {
@@ -29,10 +30,12 @@ export type Event = {
   capacity_event: number;
   price_event: number;
   category_event: string;
-  tags: Array<Tag>;
+  events_tags: Array<Tag>;
   image_url_event: string;
   date_event_start?: string;
+  date_event_end?: string;
   attendees?: Array<Attendee>;
+  id_event?: number;
 };
 
 export type EventData = {

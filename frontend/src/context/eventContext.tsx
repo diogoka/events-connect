@@ -56,6 +56,8 @@ export const eventReducer = (state: EventData, action: EventAction) => {
       return { ...state, modality: action.payload.modality };
     case 'GET_WHOLE_DATA':
       return action.payload;
+    case 'UPDATE_ALL_FIELDS':
+      return { ...state, ...action.payload };
     case 'RESET':
       return initialState;
     default:

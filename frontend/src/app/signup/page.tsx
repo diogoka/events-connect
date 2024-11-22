@@ -31,19 +31,21 @@ import {
   studentValidation,
   checkPasswords,
 } from '@/services/studentValidation';
-import { RegisterMessage } from '@/types/alert.types';
+
 import Background from '@/components/registering/background';
 import NameInput from '@/components/user/form/name-input';
 import { UserInputForm } from '@/types/pages.types';
 import CourseInput from '@/components/user/form/course-input';
 import ModalAgreement from '@/components/login/modal-agreement';
 import { sendUserToServer } from '@/services/sendUserToServer';
-import AlertMessage from '@/components/registering/alertMessage';
 
 import ModalVerifyEmail from '@/components/registering/modalVerifyEmail';
+import { useSnack } from '@/context/snackContext';
+
+import Image from 'next/image';
 
 export default function SignUpPage() {
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery('(max-width: 1179px)');
   const router = useRouter();
 
   const {
@@ -66,12 +68,6 @@ export default function SignUpPage() {
     student_id: 0,
   });
 
-  const [registerMessage, setRegisterMessage] = useState<RegisterMessage>({
-    showMessage: false,
-    message: '',
-    severity: 'info',
-  });
-
   const [checked, setChecked] = useState<boolean>(false);
   const [load, setLoad] = useState<boolean>(false);
 
@@ -81,6 +77,7 @@ export default function SignUpPage() {
   const closeModal = () => setModalOpen(false);
 
   const [isUserCreated, setIsUserCreated] = useState<boolean>(false);
+  const { openSnackbar, isOpen } = useSnack();
 
   useEffect(() => {
     if (loginStatus === 'Logged In') {
@@ -103,30 +100,6 @@ export default function SignUpPage() {
     }));
   };
 
-  const handleMessage = async (
-    messageToShow: RegisterMessage,
-    time: number,
-    navigate?: string
-  ) => {
-    setRegisterMessage({
-      showMessage: messageToShow.showMessage,
-      message: messageToShow.message,
-      severity: messageToShow.severity,
-    });
-
-    setTimeout(() => {
-      setRegisterMessage({
-        showMessage: false,
-        message: '',
-        severity: 'info',
-      });
-      setLoad(false);
-      if (navigate) {
-        router.replace(navigate);
-      }
-    }, time * 1000);
-  };
-
   const handleChangeCheckBox = (): void => {
     checked ? setChecked(false) : setChecked(true);
   };
@@ -137,30 +110,20 @@ export default function SignUpPage() {
     if (code === 3) {
       setFirebaseAccount(null);
       setLoginStatus(LoginStatus.LoggedOut);
-      handleMessage(
-        {
-          showMessage: true,
-          message: `${message}. You are being redirected to Log in. \n Please, select a different email.`,
-          severity: 'error',
-        },
-        5,
-        '/login'
+      openSnackbar(
+        `${message}. You are being redirected to Log in. \n Please, select a different email.`,
+        'error'
       );
+      setTimeout(() => {
+        router.replace('/login');
+      }, 5000);
     } else {
-      handleMessage(
-        { showMessage: true, message: message, severity: 'error' },
-        4
-      );
+      openSnackbar(message, 'error');
     }
   };
 
   const handleConfirmModal = () => {
     setTimeout(() => {
-      setRegisterMessage({
-        showMessage: false,
-        message: '',
-        severity: 'info',
-      });
       setLoad(false);
       signOut(getAuth());
       setLoginStatus(LoginStatus.LoggedOut);
@@ -170,24 +133,15 @@ export default function SignUpPage() {
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     setLoad(true);
     if (!isGoogle) {
       const isPasswordMatch = checkPasswords(
         userInputForm.password!,
         userInputForm.confirmPassword!
       );
-
       if (!isPasswordMatch) {
-        handleMessage(
-          {
-            showMessage: true,
-            message: 'Passwords does not match.',
-            severity: 'error',
-          },
-          4
-        );
-
+        openSnackbar('Passwords does not match.', 'warning');
+        setLoad(false);
         return;
       }
     }
@@ -198,14 +152,8 @@ export default function SignUpPage() {
     );
 
     if (!checkStudentID.checked) {
-      handleMessage(
-        {
-          showMessage: true,
-          message: `${checkStudentID.message}`,
-          severity: 'error',
-        },
-        4
-      );
+      openSnackbar(`${checkStudentID.message}`, 'error');
+
       if (isGoogle) {
         handleCheckError(checkStudentID.code!, checkStudentID.message!);
       }
@@ -229,20 +177,7 @@ export default function SignUpPage() {
           await sendUserToServer(newUser);
           setIsUserCreated(true);
         } catch (error: any) {
-          setRegisterMessage({
-            showMessage: true,
-            message: `${error?.response?.data?.message}.`,
-            severity: 'error',
-          });
-
-          setTimeout(() => {
-            setRegisterMessage({
-              showMessage: false,
-              message: '',
-              severity: 'info',
-            });
-            setLoad(false);
-          }, 5500);
+          openSnackbar(`${error?.response?.data?.message}.`, 'error');
         }
       } else {
         createUserWithEmailAndPassword(
@@ -267,14 +202,7 @@ export default function SignUpPage() {
             setIsUserCreated(true);
           })
           .catch((error: any) => {
-            handleMessage(
-              {
-                showMessage: true,
-                message: `${getErrorMessage(error.code)}`,
-                severity: 'error',
-              },
-              4
-            );
+            openSnackbar(`${getErrorMessage(error.code)}`, 'error');
           });
       }
     }
@@ -282,216 +210,318 @@ export default function SignUpPage() {
 
   return (
     <>
-      {!isMobile && (
-        <Background registerMessage={registerMessage} isMobile={isMobile} />
-      )}
-
       <Box
-        bgcolor='white'
-        width={isMobile ? 'auto' : '50%'}
-        height={isMobile ? 'auto' : '100vh'}
-        minWidth={isMobile ? 'auto' : '560px'}
-        maxWidth={isMobile ? '345px' : '960px'}
-        marginInline='auto'
         sx={{
-          position: isMobile ? 'static' : 'fixed',
-          inset: '4rem 0 auto auto',
+          display: 'flex',
+          minHeight: '100vh',
         }}
       >
-        <Stack
-          maxWidth={isMobile ? 'auto' : '600px'}
-          marginTop={isMobile ? '2rem' : 0}
-          marginInline='auto'
-          padding={isMobile ? 'none' : '0 6rem 2rem 6rem'}
-          sx={{
-            height: isMobile ? 'auto' : '100vh',
-            maxHeight: '100vh',
-            overflowY: 'auto',
-          }}
-        >
-          <Typography
-            marginBlock={isMobile ? 'none' : '2rem'}
-            variant='h1'
-            fontWeight='bold'
+        {!isMobile && <Background />}
+        <Box sx={{ width: isMobile ? '100%' : '50%' }}>
+          <Box
+            sx={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '18px 0',
+              background: '#F5F2FA',
+            }}
           >
-            Sign Up
-          </Typography>
-          {isMobile && (
-            <AlertMessage
-              registerMessage={registerMessage}
-              isMobile={isMobile}
-            />
-          )}
+            <Box
+              sx={{
+                width: {
+                  xs: '60%',
+                  sm: '40%',
+                  md: '30%',
+                  lg: '30%',
+                  xl: '30%',
+                },
+              }}
+            >
+              <Image
+                src='/cornerstone-connect-logo-blue-bg-white.svg'
+                alt='cornerstone-connect logo'
+                width={600}
+                height={600}
+                priority={true}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                }}
+              />
+            </Box>
+          </Box>
 
-          {loginStatus === LoginStatus.LoggedOut || isGoogle ? (
-            <form onSubmit={handleFormSubmit}>
-              <Stack rowGap={'10px'}>
-                <NameInput
-                  name={userInputForm.firstName}
-                  type={'firstName'}
-                  setUserName={updateUserInputForm}
-                  label='First Name'
-                  disabled={registerMessage.showMessage}
-                />
-                <NameInput
-                  name={userInputForm.lastName}
-                  type={'lastName'}
-                  setUserName={updateUserInputForm}
-                  label='Last Name'
-                  disabled={registerMessage.showMessage}
-                />
-                <CourseInput
-                  courseId={userInputForm.courseId}
-                  type={'courseId'}
-                  setCourse={updateUserInputForm}
-                  disabled={registerMessage.showMessage}
-                />
-                <FormControl required>
-                  <TextField
-                    type='email'
-                    label={isGoogle ? firebaseAccount?.email : 'Email'}
-                    onChange={(event) =>
-                      updateUserInputForm('email', event.target.value)
-                    }
-                    required
-                    disabled={registerMessage.showMessage || isGoogle}
-                    InputProps={
-                      isGoogle
-                        ? {
-                            endAdornment: (
-                              <InputAdornment position='end'>
-                                <Button
-                                  sx={{
-                                    fontSize: '0.8rem',
-                                    height: '2rem',
-                                    padding: '0 0.5rem',
-                                  }}
-                                  variant='contained'
-                                  color='primary'
-                                  onClick={() => {
-                                    setRegisterMessage({
-                                      showMessage: true,
-                                      message:
-                                        'You are being redirected. Select another email.',
-                                      severity: 'info',
-                                    });
+          <Stack
+            maxWidth={isMobile ? 'auto' : '100%'}
+            marginTop={isMobile ? 0 : 0}
+            marginInline={isMobile ? 'auto' : 0}
+            sx={{
+              maxHeight: '100vh',
+              overflowY: 'auto',
+              padding: {
+                xs: '0 36px',
+                sm: '1rem 3rem 2rem 3rem',
+                md: '1rem 4rem',
+                lg: '2rem 5rem',
+              },
+            }}
+          >
+            <Typography
+              marginBlock={isMobile ? '2rem' : '2rem'}
+              variant='h1'
+              fontWeight='bold'
+            >
+              Create an account
+            </Typography>
 
-                                    setTimeout(() => {
-                                      setRegisterMessage({
-                                        showMessage: false,
-                                        message: '',
-                                        severity: 'info',
-                                      });
-                                      setUser(null);
-                                      setFirebaseAccount(null);
-                                      setLoginStatus(LoginStatus.LoggedOut);
-                                      router.replace('/login');
-                                    }, 6000);
-                                  }}
-                                  disabled={registerMessage.showMessage}
-                                >
-                                  Change Email
-                                </Button>
-                              </InputAdornment>
-                            ),
+            {loginStatus === LoginStatus.LoggedOut || isGoogle ? (
+              <>
+                <form onSubmit={handleFormSubmit}>
+                  <Stack rowGap={'12px'} sx={{ marginBottom: '18px' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        gap: '12px',
+                      }}
+                    >
+                      <NameInput
+                        name={userInputForm.firstName}
+                        type={'firstName'}
+                        setUserName={updateUserInputForm}
+                        label='First Name'
+                        disabled={isOpen}
+                      />
+                      <NameInput
+                        name={userInputForm.lastName}
+                        type={'lastName'}
+                        setUserName={updateUserInputForm}
+                        label='Last Name'
+                        disabled={isOpen}
+                      />
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        gap: '12px',
+                      }}
+                    >
+                      <CourseInput
+                        courseId={userInputForm.courseId}
+                        type={'courseId'}
+                        setCourse={updateUserInputForm}
+                        disabled={isOpen}
+                      />
+
+                      <FormControl required fullWidth>
+                        <TextField
+                          type='email'
+                          label={isGoogle ? firebaseAccount?.email : 'Email'}
+                          onChange={(event) =>
+                            updateUserInputForm('email', event.target.value)
                           }
-                        : {}
-                    }
-                  />
-                </FormControl>
+                          required
+                          disabled={isOpen || isGoogle}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': {
+                                border: 'none',
+                              },
+                              '&:hover fieldset': {
+                                border: 'none',
+                              },
+                              '&.Mui-focused fieldset': {
+                                border: 'none',
+                              },
+                            },
+                            backgroundColor: '#F5F2FA',
+                            borderRadius: '6px',
+                          }}
+                          InputProps={
+                            isGoogle
+                              ? {
+                                  endAdornment: (
+                                    <InputAdornment position='end'>
+                                      <Button
+                                        sx={{
+                                          fontSize: '0.8rem',
+                                          height: '2rem',
+                                          padding: '0 0.5rem',
+                                        }}
+                                        variant='contained'
+                                        color='primary'
+                                        onClick={() => {
+                                          openSnackbar(
+                                            'You are being redirected. Select another email.',
+                                            'info'
+                                          );
 
-                {!isGoogle && (
-                  <>
+                                          setTimeout(() => {
+                                            setUser(null);
+                                            setFirebaseAccount(null);
+                                            setLoginStatus(
+                                              LoginStatus.LoggedOut
+                                            );
+                                            router.replace('/login');
+                                          }, 6000);
+                                        }}
+                                        disabled={isOpen}
+                                      >
+                                        Change
+                                      </Button>
+                                    </InputAdornment>
+                                  ),
+                                }
+                              : {}
+                          }
+                        />
+                      </FormControl>
+                    </Box>
+
+                    {!isGoogle && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: isMobile ? 'column' : 'row',
+                          gap: '12px',
+                        }}
+                      >
+                        <FormControl required fullWidth>
+                          <PasswordInput
+                            label='Password'
+                            setter={updateUserInputForm}
+                            type={'password'}
+                            disabled={isOpen || isGoogle}
+                          />
+                        </FormControl>
+                        <FormControl required fullWidth>
+                          <PasswordInput
+                            label='Confirm Password'
+                            setter={updateUserInputForm}
+                            type={'confirmPassword'}
+                            disabled={isOpen || isGoogle}
+                          />
+                        </FormControl>
+                      </Box>
+                    )}
                     <FormControl required>
-                      <PasswordInput
-                        label='Password'
-                        setter={updateUserInputForm}
-                        type={'password'}
-                        disabled={registerMessage.showMessage || isGoogle}
+                      <NumberTextFieldInput
+                        label={'Student ID'}
+                        maxLength={10}
+                        setStudentID={updateUserInputForm}
+                        type={'student_id'}
+                        disabled={isOpen}
                       />
                     </FormControl>
-                    <FormControl required>
-                      <PasswordInput
-                        label='Confirm Password'
-                        setter={updateUserInputForm}
-                        type={'confirmPassword'}
-                        disabled={registerMessage.showMessage || isGoogle}
-                      />
-                    </FormControl>
-                  </>
-                )}
-                <FormControl required>
-                  <NumberTextFieldInput
-                    label={'Student ID'}
-                    maxLength={10}
-                    setStudentID={updateUserInputForm}
-                    type={'student_id'}
-                    disabled={registerMessage.showMessage}
-                  />
-                </FormControl>
 
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        gap: '10px',
+                        marginLeft: '6px',
+                      }}
+                    >
+                      <Box>
+                        <Checkbox
+                          checked={checked}
+                          onClick={() => handleChangeCheckBox()}
+                          sx={{
+                            padding: '0',
+                          }}
+                        />
+                      </Box>
+
+                      <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
+                        I acknowledge that I have read and understood the{' '}
+                        <Link
+                          component='button'
+                          type='button'
+                          onClick={openModal}
+                          sx={{
+                            fontSize: '15px',
+                            lineHeight: 'inherit',
+                            padding: 0,
+                            textDecoration: 'underline',
+                            verticalAlign: 'baseline',
+                            '&:hover': {
+                              cursor: 'pointer',
+                            },
+                          }}
+                        >
+                          Terms and Conditions
+                        </Link>
+                        .
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Button
+                      type='submit'
+                      variant='contained'
+                      color='primary'
+                      disabled={!checked || isOpen}
+                      sx={{
+                        '&:disabled': {
+                          cursor: 'not-allowed',
+                          pointerEvents: 'auto',
+                        },
+                        minWidth: isMobile ? '100%' : '80%',
+                        maxWidth: '50%',
+                      }}
+                    >
+                      {load ? <ThreeDots color='white' /> : 'Register'}
+                    </Button>
+                  </Box>
+
+                  <Typography
+                    variant='body2'
+                    align='center'
+                    sx={{ margin: '1rem 0' }}
+                  >
+                    If you are an organizer, please contact admin:{' '}
+                    head.tech@ciccc.ca
+                  </Typography>
+                </form>
                 <Box
                   sx={{
-                    display: 'inline-flex',
-                    alignItems: 'flex-start',
-                    gap: '10px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: '18px',
                   }}
                 >
-                  <Checkbox
-                    checked={checked}
-                    onClick={() => handleChangeCheckBox()}
-                    sx={{
-                      padding: '0',
+                  Have an account? Log in{' '}
+                  <Typography
+                    component={'a'}
+                    onClick={() => {
+                      router.push('/login');
                     }}
-                  />
-                  <Typography sx={{ fontSize: '15px', lineHeight: '2rem' }}>
-                    I acknowledge that I have read and understood the
-                    <Link
-                      type='button'
-                      component='button'
-                      sx={{
-                        '&:hover': {
-                          cursor: 'pointer',
-                        },
-                        ':disabled:hover': {
-                          cursor: 'auto',
-                        },
-                        marginLeft: '3px',
-                        fontSize: '15px',
-                      }}
-                      onClick={openModal}
-                    >
-                      {' '}
-                      Terms and Conditions.
-                    </Link>
+                    sx={{
+                      marginLeft: '2px',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    here
                   </Typography>
+                  .
                 </Box>
-              </Stack>
-              <Button
-                type='submit'
-                variant='contained'
-                color='primary'
-                fullWidth
-                disabled={!checked || registerMessage.showMessage}
-                sx={{
-                  '&:disabled': {
-                    cursor: 'not-allowed',
-                    pointerEvents: 'auto',
-                  },
-                }}
-              >
-                {load ? <ThreeDots color='white' /> : 'Register'}
-              </Button>
-
-              <Typography variant='body2' align='center'>
-                If you are an organizer, please contact admin:{' '}
-                head.tech@ciccc.ca
-              </Typography>
-            </form>
-          ) : (
-            <></>
-          )}
-        </Stack>
+              </>
+            ) : (
+              <></>
+            )}
+          </Stack>
+        </Box>
       </Box>
       <ModalAgreement openModal={isModalOpen} handleClose={closeModal} />
       <ModalVerifyEmail

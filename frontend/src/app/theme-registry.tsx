@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 'use client';
 import { useState } from 'react';
 import createCache from '@emotion/cache';
@@ -12,7 +13,7 @@ let theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: `
       @font-face {
-        font-family: 'Roboto';
+        font-family: 'Space Grotesk';
       }
       `,
     },
@@ -27,7 +28,6 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           fontSize: '18px',
-          color: '#666666',
         },
       },
     },
@@ -52,12 +52,53 @@ let theme = createTheme({
         },
       },
     },
+    MuiList: {
+      styleOverrides: {
+        root: {
+          padding: 0,
+        },
+      },
+    },
+    MuiListItem: {
+      styleOverrides: {
+        root: {
+          padding: 0,
+          margin: 0,
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          fontSize: '16px',
+          fontWeight: 500,
+          color: '#ffffff',
+          padding: 0,
+          margin: 0,
+        },
+      },
+    },
+  },
+  typography: {
+    fontFamily: `'Space Grotesk', 'Roboto', sans-serif`,
+    h1: {
+      fontFamily: `'Space Grotesk', sans-serif`,
+    },
+    h2: {
+      fontFamily: `'Space Grotesk', sans-serif`,
+    },
+    body1: {
+      fontFamily: `'Space Grotesk', sans-serif`,
+    },
+    body2: {
+      fontFamily: `'Space Grotesk', sans-serif`,
+    },
   },
   palette: {
     primary: {
       light: alpha('#3875CB', 0.1),
-      main: '#141D4F',
-      dark: '#070F3D',
+      main: '#4F5B92',
+      dark: '#3C466E',
       contrastText: '#fff',
     },
     secondary: {
@@ -67,16 +108,16 @@ let theme = createTheme({
       contrastText: '#fff',
     },
     info: {
-      light: '#accbf6',
-      main: '#3874CB',
-      dark: '#1053b1',
-      contrastText: '#fff',
+      light: '#F0F2FF',
+      main: '#DDE1FF',
+      dark: '#C2C7FF',
+      contrastText: '#000000',
     },
     error: {
-      light: '#f14c4c',
-      main: '#D00000',
+      light: '#FFDAD6',
+      main: '#FFDAD6',
       dark: '#970303',
-      contrastText: '#fff',
+      contrastText: '#410002',
     },
   },
   breakpoints: {
@@ -98,6 +139,7 @@ theme.typography.h1.textAlign = 'center';
 theme.typography.h2.fontSize = '18px';
 theme.typography.body1.color = theme.palette.secondary.main;
 theme.typography.body2.fontSize = '14px';
+theme.typography.fontFamily = 'Space Grotesk';
 
 export default function ThemeRegistry(props: any) {
   const { options, children } = props;

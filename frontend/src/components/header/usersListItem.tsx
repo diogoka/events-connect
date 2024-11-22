@@ -1,19 +1,16 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@mui/material';
+import { Button, Divider } from '@mui/material';
+import LogoutBtn from './logoutBtn';
 
 type Props = {
   toggleMenu: (isMenuOpen: boolean) => void;
+  role: string;
 };
 
-const UsersBtns = [
-  { label: 'Home', path: '/events' },
-  { label: 'My Events', path: '/user/my-events' },
-  { label: 'History', path: '/history' },
-  { label: 'My Profile', path: '/user' },
-];
+const UsersBtns = [{ label: 'My Events', path: '/user' }];
 
-export default function UsersListItem({ toggleMenu }: Props) {
+export default function UsersListItem({ toggleMenu, role }: Props) {
   const router = useRouter();
 
   const clickHandler = (path: string) => {
@@ -24,19 +21,31 @@ export default function UsersListItem({ toggleMenu }: Props) {
   return (
     <>
       {UsersBtns.map((button, index) => (
-        <Button
-          key={index}
-          onClick={() => clickHandler(button.path)}
-          variant='outlined'
-          color='primary'
-          sx={{
-            width: '100%',
-            m: '0 auto 1.25rem',
-          }}
-        >
-          {button.label}
-        </Button>
+        <>
+          <Button
+            key={index}
+            onClick={() => clickHandler(button.path)}
+            sx={{
+              color: 'primary.contrastText',
+              width: '100%',
+              textAlign: 'start',
+              display: 'flex',
+              justifyContent: 'start',
+              fontSize: '40px',
+            }}
+          >
+            {button.label}
+          </Button>
+          <Divider
+            variant='middle'
+            sx={{
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              margin: '40px 0',
+            }}
+          />
+        </>
       ))}
+      <LogoutBtn />
     </>
   );
 }

@@ -37,7 +37,7 @@ export const getUser = async (req: express.Request, res: express.Response) => {
     const userFoundById = await getUserById(userId);
     if (userFoundById) {
       if (!userFoundById?.is_verified) {
-        return res.status(401).send('Email is not verified.');
+        return res.status(401).json('Email is not verified.');
       } else {
         return res.status(200).json(userFoundById);
       }
@@ -65,7 +65,7 @@ export const getUser = async (req: express.Request, res: express.Response) => {
 
     return res.status(200).json(mapUserResponse(updatedUser));
   } catch (err: any) {
-    res.status(500).send(err.message);
+    res.status(500).json(err.message);
   }
 };
 

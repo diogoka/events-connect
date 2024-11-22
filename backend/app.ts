@@ -1,5 +1,4 @@
 import express from 'express';
-import pool from './db/db';
 import usersRouter from './routes/usersRoutes';
 import coursesRouter from './routes/coursesRoutes';
 import eventsRouter from './routes/eventsRoutes';
@@ -10,7 +9,7 @@ import 'dotenv/config';
 
 const corsOptions = {
   origin: '*',
-  methods: 'GET, POST, PUT, DELETE',
+  methods: 'GET, POST, PUT, DELETE, PATCH',
 };
 
 type Express = express.Application;

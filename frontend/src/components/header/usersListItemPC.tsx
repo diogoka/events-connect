@@ -7,7 +7,6 @@ import { Page } from '@/types/components.types';
 const usersBtns: Page[] = [
   { label: 'Events', path: '/events' },
   { label: 'My Events', path: '/user/my-events' },
-  { label: 'History', path: '/history' },
 ];
 
 export default function UsersListItemPC() {
@@ -45,7 +44,6 @@ export default function UsersListItemPC() {
           sx={{
             width: 'auto',
             padding: '2rem 1rem',
-            borderRadius: 0,
           }}
         >
           {button.label}

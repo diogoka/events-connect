@@ -56,7 +56,7 @@ export default function DateList({ dates, setDates }: Props) {
             *
           </Box>
         </Typography>
-        <Button
+        {/* <Button
           onClick={addDateBtnHandler}
           startIcon={<AddCircleOutlineIcon />}
           size='medium'
@@ -68,7 +68,7 @@ export default function DateList({ dates, setDates }: Props) {
           }}
         >
           Recurring Date
-        </Button>
+        </Button> */}
       </Stack>
       <Stack
         id='date'
@@ -99,7 +99,8 @@ export default function DateList({ dates, setDates }: Props) {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
                     disablePast
-                    label={`Start Date ${index + 1}`}
+                    // label={`Start Date ${index + 1}`}
+                    label={'Start Date'}
                     value={date.dateStart}
                     onChange={(newDateStart) => {
                       newDateStart
@@ -116,7 +117,8 @@ export default function DateList({ dates, setDates }: Props) {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
                     disablePast
-                    label={`End Date ${index + 1}`}
+                    // label={`End Date ${index + 1}`}
+                    label={'End Date'}
                     value={date.dateEnd}
                     minDateTime={date.dateStart}
                     onChange={(newDateEnd) => {

@@ -1,20 +1,35 @@
 'use client';
-import Switcher from '../common/switcher';
-import HeaderMB from './headerMB';
-import HeaderPC from './headerPC';
-import { AppBar } from '@mui/material';
+import { AppBar, Box, Toolbar, useMediaQuery } from '@mui/material';
+import Logo from './logo';
+import NewHeader from './newHeader';
 
 export default function Header() {
+  const laptopQuery = useMediaQuery('(min-width:769px)');
   return (
     <AppBar
-      position='fixed'
+      position='relative'
       sx={{
-        bgcolor: '#F5F8FC',
+        bgcolor: 'inherit',
         boxShadow: 'none',
-        borderBottom: '1px solid rgba(51, 3, 0, 0.1)',
+        padding: laptopQuery ? '18px 104px 32px 104px' : '16px 24px',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
       }}
     >
-      <Switcher sp={<HeaderMB />} pc={<HeaderPC />} />
+      <Box>
+        <Logo />
+      </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+        }}
+      >
+        <NewHeader laptopQuery={laptopQuery} />
+      </Box>
     </AppBar>
   );
 }

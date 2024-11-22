@@ -1,33 +1,229 @@
-'use client';
-import { useMediaQuery, Box, Typography } from '@mui/material';
+import { Box, Typography, Button, Divider, Link } from '@mui/material';
+
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+
 import { usePathname } from 'next/navigation';
 
-export default function Footer() {
-  const isMobile = useMediaQuery('(max-width: 768px)');
+import Image from 'next/image';
+
+import InstagramIconSvg from '../../public/icons/instagramIcon.svg';
+import FacebookIconSvg from '../../public/icons/facebookIcon.svg';
+import PinterestIconSvg from '../../public/icons/pinterestIcon.svg';
+import YouTubeIconSvg from '../../public/icons/youtubeIcon.svg';
+import LinkedInIconSvg from '../../public/icons/linkedinIcon.svg';
+import TikTokIconSvg from '../../public/icons/tiktokIcon.svg';
+import ListItemFooter from './Footer/ListItem/ListIem';
+
+import arrowIconSvg from '../../public/icons/arrowIconSvg.svg';
+import { UserContext } from '@/context/userContext';
+import { useContext } from 'react';
+
+type Props = {
+  laptopQuery: boolean;
+};
+
+export default function Footer({ laptopQuery }: Props) {
   const pathname = usePathname();
-  const isFooterRight = pathname === '/signup' && !isMobile;
-  const isFooterWhite = pathname === '/login' && !isMobile;
+  const detailPathname = /^\/events\/\d+$/;
+  const isDetailPage = detailPathname.test(pathname);
+
+  const { user } = useContext(UserContext);
 
   return (
     <Box
       component='footer'
-      width={isFooterRight ? '50%' : '100vw'}
-      minWidth={isFooterRight ? '560px' : 'auto'}
-      maxWidth={isFooterRight ? '960px' : 'auto'}
-      position='absolute'
-      right={0}
-      zIndex={200}
       textAlign='center'
       sx={{
-        transform: 'translateY(-100%)',
+        backgroundColor: '#4F5B92',
+        padding: laptopQuery ? '40px 104px' : '40px 24px',
+        marginBottom: isDetailPage ? '108px' : '0',
       }}
     >
-      <Typography
-        color={isFooterWhite ? 'white' : '#666666'}
-        fontSize='.75rem'
-        align='center'
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
       >
-        ©️ 2024 Cornerstone Connect All Rights Reserved.
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Image
+            src='/white-logo.svg'
+            alt='cornerstone-connect logo'
+            width={600}
+            height={600}
+            priority={true}
+            style={{ width: '155.60px', height: 'auto' }}
+          />
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Button
+            color='info'
+            variant='contained'
+            sx={{
+              borderRadius: '6px',
+              padding: '8px',
+              fontSize: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            <Image src={arrowIconSvg} alt='arrow icon' width={20} height={20} />
+            Back to top
+          </Button>
+        </Box>
+      </Box>
+
+      <Divider
+        sx={{
+          margin: '40px 0',
+          backgroundColor: 'rgba(255, 255, 255, 0.15)',
+          height: '1px',
+        }}
+      />
+
+      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+            }}
+          >
+            <Typography color={'white'} sx={{ textAlign: 'start' }}>
+              Links
+            </Typography>
+            <List
+              sx={{
+                width: '100%',
+                display: 'flex',
+                columnGap: laptopQuery ? '16px' : '8px',
+              }}
+            >
+              <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
+                <ListItemButton href='/events'>Home</ListItemButton>
+              </ListItem>
+              <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
+                <ListItemButton href={user ? '/user/my-events' : '/login'}>
+                  My Events
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem sx={{ width: 'fit-content', columnGap: '16px' }}>
+                <ListItemButton href={user ? '/user' : '/login'}>
+                  Profile
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+            }}
+          >
+            <Typography color={'white'} sx={{ textAlign: 'start' }}>
+              Follow Cornerstone
+            </Typography>
+            <List
+              sx={{
+                width: '100%',
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: laptopQuery ? 'flex-start' : 'space-between',
+                alignItems: 'start',
+                rowGap: laptopQuery ? '0' : '20px',
+                columnGap: laptopQuery ? '24px' : '0',
+              }}
+            >
+              <ListItemFooter
+                alt='intagram icon'
+                src={InstagramIconSvg}
+                size={24}
+                href='https://www.instagram.com/cicccvancouver/'
+                width={laptopQuery ? 'fit-content' : '30%'}
+              />
+
+              <ListItemFooter
+                alt='facebook icon'
+                src={FacebookIconSvg}
+                size={24}
+                href='https://www.facebook.com/cicccvancouver/'
+                width={laptopQuery ? 'fit-content' : '30%'}
+              />
+
+              <ListItemFooter
+                alt='pinterest icon'
+                src={PinterestIconSvg}
+                size={24}
+                href='https://www.pinterest.ca/cicccvancouver/'
+                width={laptopQuery ? 'fit-content' : '30%'}
+              />
+
+              <ListItemFooter
+                alt='youtube icon'
+                src={YouTubeIconSvg}
+                size={24}
+                href='https://www.youtube.com/channel/UCDj9ILg0V9aAF0NxCVDUlww'
+                width={laptopQuery ? 'fit-content' : '30%'}
+              />
+
+              <ListItemFooter
+                alt='linkedin icon'
+                src={LinkedInIconSvg}
+                size={24}
+                href='https://www.linkedin.com/school/cornerstone-international-community-college-of-canada/'
+                width={laptopQuery ? 'fit-content' : '30%'}
+              />
+
+              <ListItemFooter
+                alt='tiktok icon'
+                src={TikTokIconSvg}
+                size={24}
+                href='https://www.tiktok.com/@cicccvancouver/'
+                width={laptopQuery ? 'fit-content' : '30%'}
+              />
+            </List>
+          </Box>
+        </Box>
+      </Box>
+
+      <Typography sx={{ marginTop: '40px', color: 'white' }}>
+        ©️ 2024 Cornerstone Connect All Rights Reserved. Design by{' '}
+        <Link href='https://thifanybrito.com/' sx={{ color: 'white' }}>
+          Thifany Brito
+        </Link>
+        . Developed by{' '}
+        <Link href='https://diogoka.dev/' sx={{ color: 'white' }}>
+          Diogo de Almeida
+        </Link>
+        .
       </Typography>
     </Box>
   );

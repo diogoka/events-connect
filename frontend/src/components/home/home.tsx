@@ -1,6 +1,15 @@
-import { Box, Typography, Stack, Container, Paper } from '@mui/material';
+'use client';
+import {
+  Box,
+  Typography,
+  Stack,
+  Container,
+  Paper,
+  Skeleton,
+} from '@mui/material';
 import ButtonsHomePage from '@/components/home/buttons';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 export async function getStaticProps() {
   return {
@@ -10,9 +19,16 @@ export async function getStaticProps() {
 }
 
 function HomePage() {
-  const randomBackground = (): number => {
-    return Math.floor(Math.random() * (10 - 1 + 1) + 1);
-  };
+  const [bgLoading, setBgLoading] = useState(true);
+  const randomBackground = (): number => Math.floor(Math.random() * 10) + 1;
+  const bgImageUrl = `/homeBackground${randomBackground()}.jpg`;
+
+  useEffect(() => {
+    const img = new window.Image() as HTMLImageElement;
+    img.src = bgImageUrl;
+    img.onload = () => setBgLoading(false);
+  }, [bgImageUrl, bgLoading]);
+
   return (
     <Box
       sx={{
@@ -26,33 +42,44 @@ function HomePage() {
     >
       <Box
         sx={{
-          bgcolor: '#141D4F',
+          bgcolor: '#4F5B92',
           width: {
             sm: '100%',
             lg: '50%',
           },
-
           backgroundImage: {
-            sm: `url("/homeBackground${randomBackground()}.jpg")`,
+            sm: !bgLoading ? `url("${bgImageUrl}")` : 'none',
             lg: 'none',
           },
-
           backgroundSize: {
             sm: 'cover',
           },
-
           backgroundPosition: {
             sm: 'center',
           },
           padding: '0 6.5rem',
           display: 'flex',
           justifyContent: 'center',
+          position: 'relative',
         }}
       >
+        {bgLoading && (
+          <Skeleton
+            variant='rectangular'
+            animation='wave'
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        )}
+
         <Stack
           sx={{
             width: '79%',
-
             height: '100%',
             display: 'flex',
             justifyContent: 'center',
@@ -101,17 +128,29 @@ function HomePage() {
           </Paper>
         </Stack>
       </Box>
+
       <Box
         sx={{
           width: {
             sm: '0',
             lg: '50%',
           },
-          backgroundImage: `url("/homeBackground${randomBackground()}.jpg")`,
+          backgroundImage: !bgLoading ? `url("${bgImageUrl}")` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
-      ></Box>
+      >
+        {bgLoading && (
+          <Skeleton
+            variant='rectangular'
+            animation='wave'
+            sx={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        )}
+      </Box>
     </Box>
   );
 }

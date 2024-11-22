@@ -1,75 +1,182 @@
 'use client';
-import { useContext, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Stack, Button, Chip, Avatar } from '@mui/material';
+import { useEffect, useState, useContext } from 'react';
 import { UserContext } from '@/context/userContext';
-import { PageContext } from '@/context/pageContext';
-import { PageStatus } from '@/types/context.types';
-import { BsFillPersonFill } from 'react-icons/bs';
-import { HiMail } from 'react-icons/hi';
-import { IoIosSchool } from 'react-icons/io';
-import UserInfoItem from '@/components/user/user-info-item';
-import { useMediaQuery } from '@mui/material';
+import EventList from '@/components/events/eventList';
+import SearchBar from '@/components/searchBar';
+import { Typography, Box, useMediaQuery, Skeleton } from '@mui/material';
+import { CurrentUser, Event } from '@/types/pages.types';
+import { api } from '@/services/api';
+import SwitchViews from '@/components/events/switchViews';
+import React from 'react';
+import Profile from '@/components/user/profile';
+import { useSnack } from '@/context/snackContext';
 
-export default function UserPage() {
-  const isMobile = useMediaQuery('(max-width: 768px)');
+function UserPage() {
+  const { user } = useContext(UserContext);
 
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [events, setEvents] = useState<Event[]>([]);
+  const laptopQuery = useMediaQuery('(min-width:769px)');
+  const [numberOfEvents, setNumberOfEvents] = useState(0);
+  const [isPastEvents, setIsPastEvents] = useState<boolean>(false);
+  const [emptyList, setEmptyList] = useState(false);
 
-  const { user, firebaseAccount } = useContext(UserContext);
-  const { setPageStatus } = useContext(PageContext);
+  const currentUser: CurrentUser = {
+    id: user?.id ? user!.id : '',
+    role: user?.roleName ? user!.roleName : '',
+  };
+
+  const { openSnackbar } = useSnack();
+
+  const getUserUpcomingEvents = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(
+        `/api/events/upcoming/user/${user?.id}/?start=${numberOfEvents}&qnt=6`
+      );
+      setEvents(data);
+    } catch (error) {
+      openSnackbar('Something went wrong', 'error');
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserPastEvents = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(
+        `/api/events/past/user/${user?.id}/?start=${numberOfEvents}&qnt=6`
+      );
+      setEvents(data);
+    } catch (error) {
+      openSnackbar('Something went wrong', 'error');
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUpcomingOrganizerEvents = async () => {
+    try {
+      const response = await api.get(`/api/events/owner/${user?.id}`);
+
+      setEvents(response.data);
+    } catch (error) {}
+  };
+
+  const getPastOrganizerEvents = async () => {
+    try {
+      const response = await api.get(`/api/events/owner/past/${user?.id}`);
+      setEvents(response.data);
+    } catch (error) {}
+  };
+
+  const handleLoadMoreEvents = async () => {
+    try {
+      if (!isPastEvents) {
+        const {
+          data: { events },
+        } = await api.get(
+          `/api/events/upcoming/?start=${numberOfEvents + 6}&qnt=6`
+        );
+        if (events.length !== 6) {
+          setEvents(events);
+          setEmptyList(true);
+        } else if (events.length === 6) {
+          setEmptyList(true);
+        } else {
+          setEvents((prev) => [...prev, events]);
+        }
+        setNumberOfEvents((prev) => prev + 6);
+      } else {
+        const {
+          data: { events },
+        } = await api.get(
+          `/api/events/past/?start=${numberOfEvents + 6}&qnt=6`
+        );
+
+        if (events.length === 6) {
+          setEvents((prev) => [...prev, ...events]);
+          setEmptyList(false);
+        } else {
+          setEmptyList(true);
+        }
+        setNumberOfEvents((prev) => prev + 6);
+      }
+    } catch (error) {}
+  };
 
   useEffect(() => {
-    setPageStatus(PageStatus.Ready);
-  });
+    if (user && user.roleId === 1) {
+      if (isPastEvents) {
+        getPastOrganizerEvents();
+      } else {
+        getUpcomingOrganizerEvents();
+      }
+    } else {
+      if (isPastEvents) {
+        getUserPastEvents();
+      } else {
+        getUserUpcomingEvents();
+      }
+    }
+  }, [isPastEvents]);
+
+  if (!user) return;
 
   return (
-    <Stack width='100%' paddingBlock='4rem'>
-      <Stack alignItems='center' rowGap='1rem'>
-        <Avatar
-          src={`${
-            user?.provider === 'password'
-              ? user.avatarURL
-              : firebaseAccount?.photoURL
-          }`}
-          alt={user?.firstName}
-          sx={{
-            width: isMobile ? '7.5rem' : '10rem',
-            height: isMobile ? '7.5rem' : '10rem',
-            fontSize: isMobile ? '3rem' : '4rem',
-          }}
-        />
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        position: 'relative',
+      }}
+    >
+      <Profile />
+      <Typography
+        sx={{
+          width: '100%',
+          textAlign: 'start',
+          fontSize: '28px',
+          fontWeight: 700,
+          marginTop: '24px',
+        }}
+      >
+        My Events
+      </Typography>
 
-        {user?.roleName !== 'student' && (
-          <Chip
-            label={user?.roleName}
-            variant='filled'
-            color='error'
-            sx={{
-              fontWeight: 'bold',
-              textTransform: 'capitalize',
-            }}
+      <SwitchViews
+        pastEvents={isPastEvents}
+        setPastEvents={setIsPastEvents}
+        isDesktop={laptopQuery}
+        isUserPage={true}
+        isOrganizer={currentUser.role === 'organizer'}
+      />
+      {isLoading ? (
+        <Box sx={{ minHeight: '100%', minWidth: '100%', marginBottom: '18px' }}>
+          <Skeleton variant='rectangular' width={'100%'} height={722} />
+        </Box>
+      ) : (
+        <>
+          <EventList
+            events={events}
+            setEvents={setEvents}
+            user={currentUser}
+            handleLoadMoreEvents={handleLoadMoreEvents}
+            emptyList={emptyList}
+            pastEvents={isPastEvents}
+            isUserPage
+            query={false}
+            isOrganizer={currentUser.role === 'organizer'}
           />
-        )}
-
-        <UserInfoItem
-          icon={<BsFillPersonFill />}
-          value={user ? `${user!.firstName + ' ' + user!.lastName}` : ''}
-        />
-        <UserInfoItem icon={<HiMail />} value={user ? user!.email : ''} />
-        <UserInfoItem
-          icon={<IoIosSchool />}
-          value={user ? user!.courseName : ''}
-        />
-
-        <Button
-          variant='contained'
-          sx={{ width: '7.5rem' }}
-          onClick={() => router.push('/user/edit')}
-        >
-          Edit
-        </Button>
-      </Stack>
-    </Stack>
+        </>
+      )}
+    </Box>
   );
 }
+
+export default UserPage;

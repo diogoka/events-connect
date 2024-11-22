@@ -1,366 +1,539 @@
 'use client';
-import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { useParams } from 'next/navigation';
-import DetailInfo from '@/components/event/detail-info';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import {
   Box,
   Stack,
   Typography,
-  Link,
   useMediaQuery,
-  AlertColor,
-  AlertTitle,
-  Alert,
+  Skeleton,
+  Fade,
 } from '@mui/material';
-import DetailContainer from '@/components/event/detail-container';
-import DetailIconContainer from '@/components/event/detail-icon-container';
-import DetailTimeContainer from '@/components/event/detail-time-container';
-import DetailButtonContainer from '@/components/event/detail-button-container';
-import Review from '@/components/event/review/review';
 import { UserContext } from '@/context/userContext';
-import { PageContext } from '@/context/pageContext';
-import ImageHelper from '@/components/common/image-helper';
-import IconsContainer from '@/components/icons/iconsContainer';
-import dayjs from 'dayjs';
+import { Attendee, Event } from '@/types/types';
+import { api } from '@/services/api';
+import AttendeesModal from '@/components/event/attendees/attendees-modal';
 import MapWithMarker from '@/components/map/mapWithMarker';
-import { Attendee, Event, OtherInfo } from '@/types/types';
+import { EventAttendee } from '@/types/pages.types';
+import CardButton from '@/components/events/newEventCardButton';
+import NewEventModal from '@/components/events/newEventModal';
+import { EventModalType } from '@/types/components.types';
+import ModalAttendParticipation from '@/components/event/modal-attend-participation';
+import { useSnack } from '@/context/snackContext';
+import { EventContext } from '@/context/eventContext';
 
-import { AlertState } from '@/types/alert.types';
+import dayjs, { Dayjs } from 'dayjs';
+
+import { Tag } from '@/types/types';
+import DownloadAttendees from '@/components/event/download-attendees';
+import NewEventReviewModal from '@/components/events/newEventReviewModal';
+import FadeSkeleton from '@/components/common/fadeSkeleton';
+import EventInformation from '@/components/events/eventInformation';
 
 export default function EventPage() {
-  const { notFound } = useContext(PageContext);
   const { user } = useContext(UserContext);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { dispatch } = useContext(EventContext);
   const [event, setEvent] = useState<Event>();
-  const [otherInfo, setOtherInfo] = useState<OtherInfo>();
-  const [applied, setApplied] = useState<boolean>(false);
-  const [attendees, setAttendees] = useState<Array<Attendee>>();
-  const [organizerEvent, setOrganizerEvent] = useState<boolean>(false);
-  const [oldEvent, setOldEvent] = useState<boolean>(false);
-  const [isAlertVisible, setIsAlertVisible] = useState<boolean>(false);
-  const [forPreview, setForPreview] = useState<boolean>(false);
-  const [alertMessage, setAlertMessage] = useState<AlertState>({
-    title: '',
-    message: '',
-    severity: 'success',
+  const [attendees, setAttendees] = useState<Attendee[]>([] as Attendee[]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isAttending, setIsAttending] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [isPastEvent, setIsPastEvent] = useState(false);
+
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState<EventModalType>({
+    eventId: 0,
+    isOpen: false,
   });
 
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState<EventModalType>({
+    eventId: 0,
+    isOpen: false,
+  });
+
+  const [isAttendModalOpen, setIsAttendModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const params = useParams();
-
   const EVENT_ID = params.id;
-  const laptopQuery = useMediaQuery('(max-width:769px)');
+  const isMobile = useMediaQuery('(max-width:1150px)');
 
-  const handleAlert = (
-    isOpen: boolean,
-    titleParam: string,
-    messageParam: string,
-    severityParam: AlertColor
-  ) => {
-    setAlertMessage({
-      title: titleParam,
-      message: messageParam,
-      severity: severityParam,
+  const router = useRouter();
+  const { openSnackbar } = useSnack();
+
+  const closeReviewModal = () => {
+    setIsReviewModalOpen({ eventId: 0, isOpen: false });
+  };
+
+  const openReviewModal = (eventId: number) => {
+    setIsReviewModalOpen({ eventId: eventId, isOpen: true });
+  };
+
+  const getEvent = async () => {
+    try {
+      const { data } = await api.get(`/api/events/${EVENT_ID}`);
+      setEvent(data.event);
+
+      const isAttending = await checkAttendance(
+        data.event.attendees,
+        user?.id!
+      );
+      const isOwner = await checkOwnerShip(data.event.id_owner);
+      const isPast = checkIfPastEvent(data.event.date_event_end);
+      setIsOwner(isOwner!);
+      setIsAttending(isAttending);
+      setIsPastEvent(isPast);
+      setAttendees(data.event.attendees);
+    } catch (error) {
+      openSnackbar(`Something wrong. Try again later.${error}`, 'error');
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkIfPastEvent = (eventEndDate: string) =>
+    dayjs(eventEndDate).isBefore(dayjs());
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteAttendee = async () => {
+    try {
+      await api.delete('api/events/attendee', {
+        data: {
+          eventId: EVENT_ID,
+          userId: user!.id,
+        },
+      });
+      const updateAttendees = deleteAttendee(attendees, user!.id);
+      setAttendees(await updateAttendees);
+      setIsAttending(false);
+    } catch (error) {}
+  };
+
+  const handleAddAttendee = async () => {
+    try {
+      await api.post(
+        'api/events/attendee',
+        {
+          eventId: EVENT_ID,
+          userId: user!.id,
+        },
+        { headers: { 'Content-type': 'application/json' } }
+      );
+      setIsAttending(true);
+      await getEvent();
+      openSnackbar('You have successfully applied to this event', 'success');
+    } catch (error) {}
+  };
+
+  type TagType = {
+    id_tag: number;
+    name_tag: string;
+  };
+
+  const checkModality = (data: Tag[]) => {
+    let modality: Tag = {} as Tag;
+    let tagsArray: TagType[] = [];
+
+    data.forEach(({ tags }: Tag) => {
+      if (tags.id_tag === 16 || tags.id_tag === 17 || tags.id_tag === 18) {
+        modality = { tags: { id_tag: tags.id_tag, name_tag: tags.name_tag } };
+      } else {
+        tagsArray.push({ id_tag: tags.id_tag!, name_tag: tags.name_tag! });
+      }
     });
-    setIsAlertVisible(isOpen);
+    return { modality, tagsArray };
   };
 
-  const handleAlertClose = (event: React.SyntheticEvent) => {
-    event.stopPropagation();
-    setIsAlertVisible(false);
+  const handleClickEvent = async () => {
+    if (!user) {
+      router.push('/login');
+    } else {
+      if (isOwner) {
+        if (event) {
+          const { modality, tagsArray } = checkModality(event.events_tags);
+          const dateStart: Dayjs = dayjs(event.date_event_start);
+          const dateEnd: Dayjs = dayjs(event.date_event_end);
+          dispatch({
+            type: 'UPDATE_ALL_FIELDS',
+            payload: {
+              name_event: event.name_event,
+              description_event: event.description_event,
+              capacity_event: +event.capacity_event,
+              location_event: event.location_event,
+              price_event: +event.price_event,
+              category_event: event.category_event,
+              image_event: event.image_url_event,
+              modality: {
+                id_tag: modality.tags.id_tag!,
+                name_tag: modality.tags.name_tag!,
+              },
+              selectedTags: tagsArray,
+              dates: [{ dateStart, dateEnd }],
+              event_id: event.id_event,
+            },
+          });
+        }
+        router.push('/events/new');
+      } else {
+        if (isPastEvent) {
+          openReviewModal(event?.id_event!);
+        } else {
+          if (isAttending) {
+            openModal(+EVENT_ID);
+          } else {
+            if (event?.price_event! > 0) {
+              openAttendingModal();
+            } else {
+              handleAddAttendee();
+            }
+          }
+        }
+      }
+    }
   };
 
-  const alertFn = (title: string, message: string, severity: AlertColor) => {
-    return laptopQuery ? (
-      <Alert
-        severity={severity}
-        onClose={handleAlertClose}
-        variant='filled'
-        sx={{
-          position: 'absolute',
-          width: '90%',
-          top: '5rem',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 99999999,
-        }}
-      >
-        <AlertTitle sx={{ color: 'white' }}>{title}</AlertTitle>
-        {message}
-      </Alert>
-    ) : (
-      <Alert
-        severity={severity}
-        onClose={handleAlertClose}
-        variant='filled'
-        sx={{
-          position: 'absolute',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 99999999,
-        }}
-      >
-        <AlertTitle sx={{ color: 'white' }}>{title}</AlertTitle>
-        {message}
-      </Alert>
+  const checkAttendance = async (
+    attendeesList: EventAttendee[],
+    userId: string
+  ) => {
+    let isAttending = false;
+    attendeesList.map(({ users }) => {
+      if (users.id_user === userId) {
+        isAttending = true;
+      }
+    });
+    return isAttending;
+  };
+
+  const deleteAttendee = async (attendeesList: Attendee[], userId: string) => {
+    const updatedList = attendeesList.filter(
+      ({ users }) => users.id_user !== userId
     );
+    return updatedList;
   };
+
+  const checkOwnerShip = async (eventOwnerId: string) => {
+    if (user) {
+      return user.id === eventOwnerId;
+    }
+  };
+
+  const openModal = (eventId: number) => {
+    setIsCancelModalOpen({ eventId: eventId, isOpen: true });
+  };
+
+  const closeModal = (eventId: number) => {
+    setIsCancelModalOpen({ eventId: 0, isOpen: false });
+  };
+
+  const openAttendingModal = () => {
+    setIsAttendModalOpen(true);
+  };
+
+  const closeAttendModal = () => setIsAttendModalOpen(false);
 
   useEffect(() => {
-    axios
-      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/events/${EVENT_ID}`)
-      .then((res) => {
-        if (!res.data.event.id_event) {
-          notFound();
-          return;
-        }
+    getEvent();
+  }, [isAttending, user]);
 
-        setEvent({
-          ...res.data.event,
-          dates_event: [
-            {
-              date_event_start: dayjs(res.data.event.date_event_start),
-              date_event_end: dayjs(res.data.event.date_event_end),
-            },
-          ],
-        });
-
-        setAttendees([...res.data.event.attendees]);
-
-        setOtherInfo({
-          image_event: '',
-          id_event: res.data.event.id_event,
-          id_owner: res.data.event.id_owner,
-        });
-
-        res.data.event.attendees.map((val: Attendee) => {
-          val.id == user!.id && setApplied(true);
-        });
-
-        user?.roleName == 'organizer' &&
-          user?.id == res.data.event.id_owner &&
-          setOrganizerEvent(true);
-        let today = new Date();
-        let eventDate = new Date(res.data.event.date_event_start);
-        eventDate.setHours(0, 0, 0, 0);
-        today.setHours(0, 0, 0, 0);
-        eventDate < today && setOldEvent(true);
-
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error(error.response);
-      });
-  }, [applied]);
-
-  const eventCapacity = event?.capacity_event;
-
-  if (!otherInfo?.id_event) {
-    return <></>;
-  } else if (laptopQuery) {
-    ///////////////////// Mobile /////////////////////
-    return (
-      <Stack>
-        {isAlertVisible &&
-          alertFn(
-            alertMessage.title!,
-            alertMessage.message,
-            alertMessage.severity
+  return (
+    <>
+      <AttendeesModal
+        attendees={attendees}
+        open={isModalOpen}
+        handleClose={handleCloseModal}
+      />
+      {/* Stack for entire page. */}
+      <Stack rowGap={'40px'}>
+        {/* Image */}
+        <Box
+          sx={{
+            minWidth: '100%',
+            minHeight: '218px',
+            position: 'relative',
+          }}
+        >
+          {!imageLoaded && (
+            <Skeleton
+              variant='rectangular'
+              width='100%'
+              height='218px'
+              animation='wave'
+              sx={{
+                borderRadius: '4px',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+              }}
+            />
           )}
-
-        <DetailContainer
-          event={event!}
-          otherInfo={otherInfo!}
-          applied={applied}
-          organizerEvent={organizerEvent}
-          forMobile={laptopQuery}
-          forPreview={forPreview}
-          isAlertVisible={isAlertVisible}
-          setIsAlertVisible={setIsAlertVisible}
-          handleAlertFn={handleAlert}
-        />
-        {event && (
-          <DetailInfo
-            price={event.price_event}
-            maxSpots={event.capacity_event}
-            attendees={attendees!}
-            tags={event.tags}
-            category={event.category_event}
-            forMobile={laptopQuery}
-            forPreview={forPreview}
-          />
-        )}
-        {oldEvent ? (
-          <Review id_event={otherInfo!.id_event} applied={applied} />
-        ) : (
-          <DetailButtonContainer
-            event={event!}
-            otherInfo={otherInfo!}
-            applied={applied}
-            organizerEvent={organizerEvent}
-            forMobile={laptopQuery}
-            forPreview={forPreview}
-            maxSpots={eventCapacity}
-            setAttendees={setAttendees}
-            setApplied={setApplied}
-            handleAlertFn={handleAlert}
-          />
-        )}
-      </Stack>
-    );
-  } else {
-    ///////////////////// Lap Top /////////////////////
-
-    return (
-      <>
-        {isAlertVisible &&
-          alertFn(
-            alertMessage.title!,
-            alertMessage.message,
-            alertMessage.severity
-          )}
-        <Stack sx={{ marginBottom: '5%' }}>
-          <Box
-            width='100%'
-            display='flex'
-            paddingTop='50px'
-            justifyContent='space-between'
+          <Fade in={imageLoaded} timeout={1500} easing='ease-in'>
+            <Box
+              component='img'
+              src={event?.image_url_event || ''}
+              alt='Event Ima ge'
+              onLoad={() => setImageLoaded(true)}
+              sx={{
+                display: imageLoaded ? 'block' : 'none',
+                width: '100%',
+                height: '218px',
+                objectFit: 'cover',
+                borderRadius: '4px',
+              }}
+            />
+          </Fade>
+        </Box>
+        {/* Title */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            sx={{ fontSize: '36px', fontWeight: 700, textAlign: 'center' }}
           >
-            {/* /////////// Left /////////// */}
-            <Box width='67%'>
-              <DetailContainer
-                event={event!}
-                otherInfo={otherInfo!}
-                applied={applied}
-                organizerEvent={organizerEvent}
-                forMobile={laptopQuery}
-                forPreview={forPreview}
-                isAlertVisible={isAlertVisible}
-                setIsAlertVisible={setIsAlertVisible}
-              />
-              {event && (
-                <DetailInfo
-                  price={event.price_event}
-                  maxSpots={event.capacity_event}
-                  attendees={attendees!}
-                  tags={event.tags}
-                  category={event.category_event}
-                  forMobile={laptopQuery}
-                  forPreview={forPreview}
+            {isLoading || !event ? (
+              <FadeSkeleton variant='text' width='600px' height='100%' />
+            ) : (
+              <>{event?.name_event}</>
+            )}
+          </Typography>
+        </Box>
+
+        {/* Event information */}
+
+        {isLoading || !event ? (
+          <>
+            <FadeSkeleton
+              variant='rectangular'
+              width={'100%'}
+              height={'70px'}
+            />
+          </>
+        ) : (
+          <>
+            <EventInformation
+              event={event!}
+              attendees={attendees}
+              isMobile={isMobile}
+              setIsModalOpen={handleOpenModal}
+            />
+          </>
+        )}
+
+        {/* Description */}
+        <Box sx={{ width: '100%' }}>
+          <Typography sx={{ fontSize: '18px' }} component={'div'}>
+            {isLoading || !event ? (
+              <>
+                <FadeSkeleton variant='text' width='100%' height='200px ' />
+              </>
+            ) : (
+              <>
+                <pre
+                  style={{
+                    fontFamily: 'inherit',
+                    margin: 0,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: event?.description_event || '',
+                  }}
                 />
+              </>
+            )}
+          </Typography>
+        </Box>
+        {/* Location, tags and categories */}
+        <Stack gap={'16px'} sx={{ marginBottom: '150px' }}>
+          <Typography sx={{ fontSize: '24px', fontWeight: 700 }}>
+            Activity Location
+          </Typography>
+          <Box sx={{ width: '100%' }}>
+            {isLoading || !event ? (
+              <>
+                <FadeSkeleton
+                  variant='rectangular'
+                  width='100%'
+                  height='500px'
+                />
+              </>
+            ) : (
+              <>
+                <MapWithMarker location={event?.location_event!} />
+              </>
+            )}
+          </Box>
+
+          <Box sx={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
+            <Typography sx={{ fontSize: '18px' }}>Tags</Typography>
+
+            <Box sx={{ display: 'flex', gap: '12px' }}>
+              {isLoading || !event ? (
+                <>
+                  <FadeSkeleton
+                    variant='rectangular'
+                    width='100%'
+                    height='70px'
+                  />
+                </>
+              ) : (
+                <>
+                  {event?.events_tags.map(({ tags }, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: '#DFE1F9',
+                        padding: '8px',
+                        borderRadius: '6px',
+                        maxWidth: 'fit-content',
+                      }}
+                    >
+                      <Typography sx={{ fontSize: '18x', fontWeight: 500 }}>
+                        {tags.name_tag}
+                      </Typography>
+                    </Box>
+                  ))}
+                </>
               )}
             </Box>
+          </Box>
+          <Box sx={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
+            <Typography sx={{ fontSize: '18px' }}>Categories</Typography>
 
-            {/* /////////// Right /////////// */}
-            <Box width='30%'>
-              <DetailIconContainer
-                event={event!}
-                otherInfo={otherInfo!}
-                applied={applied}
-                organizerEvent={organizerEvent}
-                forMobile={laptopQuery}
-                forPreview={forPreview}
-                setIsAlertVisible={setIsAlertVisible}
-                handleAlertFn={handleAlert}
-              />
-              <Box>
-                <ImageHelper
-                  src={`${event?.image_url_event}`}
+            {isLoading || !event ? (
+              <>
+                <FadeSkeleton
+                  variant='rectangular'
                   width='100%'
-                  height='100%'
-                  style={{
-                    maxHeight: '260px',
-                    borderRadius: '.5rem',
+                  height='70px'
+                />
+              </>
+            ) : (
+              <>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#DFE1F9',
+                    padding: '8px',
+                    borderRadius: '6px',
+                    maxWidth: 'fit-content',
                   }}
-                  alt={event?.name_event ?? 'Event'}
-                />
-              </Box>
-              <Link
-                href={`https://maps.google.com/?q=${event?.location_event}`}
-                target='_blank'
-              >
-                <Box display='flex' marginTop='20px'>
-                  <IconsContainer
-                    icons={[
-                      {
-                        name: 'FaLocationArrow',
-                        isClickable: false,
-                        color: 'navy',
-                      },
-                    ]}
-                    onIconClick={() => {
-                      return;
-                    }}
-                  />
-                  <Typography>{event?.location_event}</Typography>
+                >
+                  <Typography sx={{ fontSize: '18x', fontWeight: 500 }}>
+                    {event?.category_event}
+                  </Typography>
                 </Box>
-              </Link>
-              <MapWithMarker location={event?.location_event ?? ''} />
-            </Box>
-            {/* //right */}
+              </>
+            )}
           </Box>
-          {/* //flex */}
         </Stack>
+      </Stack>
 
-        {oldEvent && (
-          <Review id_event={otherInfo!.id_event} applied={applied} />
-        )}
-
-        {/* /////////// Footer /////////// */}
-        {!oldEvent && (
-          <Box
-            padding='0 30px'
-            left='0'
-            width='100%'
-            margin='0 auto'
-            position='fixed'
-            bottom='0'
-            zIndex='201'
-            style={{ backgroundColor: '#dedede' }}
-          >
-            <Box
-              maxWidth='1280px'
-              width='100%'
-              paddingInline='40px'
-              marginInline='auto'
-              display='flex'
-              justifyContent='space-between'
-            >
-              <Box
-                display='flex'
-                flexDirection='column'
-                justifyContent='center'
-              >
-                <DetailTimeContainer
-                  event={event!}
-                  otherInfo={otherInfo!}
-                  applied={applied}
-                  organizerEvent={organizerEvent}
-                  forMobile={laptopQuery}
-                />
-                <Box marginLeft='10px' fontWeight='bold'>
-                  {event?.name_event}
-                </Box>
-              </Box>
-
-              <Box width='55%'>
-                <DetailButtonContainer
-                  event={event!}
-                  otherInfo={otherInfo!}
-                  applied={applied}
-                  organizerEvent={organizerEvent}
-                  forMobile={laptopQuery}
-                  forPreview={forPreview}
-                  maxSpots={eventCapacity}
-                  setApplied={setApplied}
-                  setAttendees={setAttendees}
-                  handleAlertFn={handleAlert}
-                />
-              </Box>
-            </Box>
+      {/* Sticky bar for price and button. */}
+      <Box
+        padding={isMobile ? '0 30px' : '0 104px'}
+        left='0'
+        width='100%'
+        margin='0 auto'
+        position='fixed'
+        bottom='0'
+        zIndex='201'
+        style={{ backgroundColor: '#DFE1F9' }}
+      >
+        <Box
+          sx={{
+            maxWidth: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '24px 0',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'baseline' }}>
+            {isLoading || !event ? (
+              <Skeleton
+                width={82}
+                height={60}
+                animation={'wave'}
+                variant='text'
+              />
+            ) : (
+              <>
+                <Typography sx={{ fontSize: '40px', fontWeight: 700 }}>
+                  {event?.price_event! <= 0
+                    ? 'Free'
+                    : `$${event?.price_event}/`}
+                </Typography>
+                {event?.price_event! > 0 && (
+                  <Typography sx={{ fontSize: '16px' }}>person</Typography>
+                )}
+              </>
+            )}
           </Box>
-        )}
-      </>
-    );
-  }
+
+          {isLoading || !event ? (
+            <>
+              <FadeSkeleton
+                variant='rectangular'
+                width={'12%'}
+                height={'40px'}
+              />
+            </>
+          ) : (
+            <>
+              {isOwner && isPastEvent ? (
+                <DownloadAttendees eventId={event!.id_event!} />
+              ) : (
+                <CardButton
+                  isUserPage={true}
+                  isOwner={isOwner}
+                  isAttending={isAttending}
+                  isPastEvent={isPastEvent}
+                  handleClickButtonCard={handleClickEvent}
+                  isDetail
+                  isDisabled={event?.capacity_event === 0}
+                />
+              )}
+            </>
+          )}
+        </Box>
+        <NewEventModal
+          isOpen={isCancelModalOpen}
+          user={{ id: user?.id, role: user?.roleName }}
+          closeModal={closeModal}
+          handleDeleteAttendees={handleDeleteAttendee}
+          isMobile={isMobile}
+        />
+        <ModalAttendParticipation
+          isOpen={isAttendModalOpen}
+          onClose={closeAttendModal}
+          isMobile={isMobile}
+          addAttendee={handleAddAttendee}
+        />
+        <NewEventReviewModal
+          isOpen={isReviewModalOpen}
+          user={{ id: user?.id, role: user?.roleName }}
+          closeModal={closeReviewModal}
+          isMobile={isMobile}
+        />
+      </Box>
+    </>
+  );
 }

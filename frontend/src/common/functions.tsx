@@ -99,10 +99,10 @@ export const TimeFn = (date: string) =>
     hour12: true,
   });
 
-export const monthDayFn = (date: string) =>
+export const monthDayFn = (date: string, isMobile: boolean = false) =>
   new Date(date).toLocaleString('en-us', {
-    month: 'short',
     day: 'numeric',
+    month: isMobile ? 'short' : 'long',
   });
 
 export const updateFirstName = (

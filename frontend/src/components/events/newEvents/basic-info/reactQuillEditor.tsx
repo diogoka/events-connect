@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './reactQuillEditorStyles.css';
@@ -18,9 +18,10 @@ interface EventProps {
 
 type Props = {
   onChange: (value: string) => void;
+  value: string;
 };
 
-const ReactQuillEditor = ({ onChange }: Props) => {
+const ReactQuillEditor = ({ onChange, value }: Props) => {
   const [createdEvent, setCreatedEvent] = useState<EventProps>({
     description_event: '',
   });
@@ -31,19 +32,21 @@ const ReactQuillEditor = ({ onChange }: Props) => {
   };
 
   return (
-    <ReactQuill
-      value={createdEvent.description_event}
-      onChange={changeDesc}
-      modules={modules}
-      placeholder='Please enter the event description'
-      style={{
-        height: '300px',
-        width: '100%',
-        marginBottom: '45px',
-        fontStyle: 'normal',
-        fontSize: '16px',
-      }}
-    />
+    <>
+      <ReactQuill
+        value={value}
+        onChange={changeDesc}
+        modules={modules}
+        placeholder='Please enter the event description'
+        style={{
+          height: '300px',
+          width: '100%',
+          marginBottom: '45px',
+          fontStyle: 'normal',
+          fontSize: '16px',
+        }}
+      />
+    </>
   );
 };
 

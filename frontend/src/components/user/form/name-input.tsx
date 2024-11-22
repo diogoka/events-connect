@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControl, TextField } from '@mui/material';
+import { FormControl, Input, TextField } from '@mui/material';
 import { User, UserInputForm } from '@/types/pages.types';
 
 type Props = {
@@ -25,6 +25,21 @@ export default function NameInput(props: Props) {
         inputProps={{ maxLength: 25 }}
         error={props.name.length >= 25 ? true : false}
         disabled={props.disabled}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              border: 'none',
+            },
+            '&:hover fieldset': {
+              border: 'none',
+            },
+            '&.Mui-focused fieldset': {
+              border: 'none',
+            },
+          },
+          backgroundColor: '#F5F2FA',
+          borderRadius: '6px',
+        }}
       />
     </FormControl>
   );

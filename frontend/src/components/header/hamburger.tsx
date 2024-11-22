@@ -6,6 +6,7 @@ import LogoutBtn from './logoutBtn';
 import OrganizerListItem from './organizerListItem';
 import { Box, IconButton, List, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import Logo from './logo';
 
 type Props = {
   toggleMenu: (isMenuOpen: boolean) => void;
@@ -14,32 +15,29 @@ type Props = {
 export default function Hamburger({ toggleMenu }: Props) {
   const { user } = useContext(UserContext);
   return (
-    <Box sx={{ width: '100vw', position: 'relative' }}>
-      <IconButton
-        onClick={() => toggleMenu(false)}
-        sx={{ position: 'absolute', top: '0.375rem', right: '1.3125rem' }}
-      >
-        <CloseIcon />
-      </IconButton>
-      <List
+    <Box sx={{ width: '100vw', height: '100%', overflow: 'hidden' }}>
+      <Box
         sx={{
-          width: '80%',
-          m: '3.125rem auto',
+          width: '100%',
+          backgroundColor: '#FBF8FF',
+          display: 'flex',
+          justifyContent: 'space-between',
+          padding: '16px 24px',
         }}
       >
-        <Stack
-          direction='column'
-          justifyContent='space-between'
-          alignItems='center'
-        >
-          <UsersListItem toggleMenu={toggleMenu} />
-          {user?.roleName === 'organizer' ? (
-            <OrganizerListItem toggleMenu={toggleMenu} />
-          ) : (
-            <></>
-          )}
-          <LogoutBtn />
-        </Stack>
+        <Logo closeMenu={toggleMenu} />
+        <IconButton onClick={() => toggleMenu(false)}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <List
+        sx={{
+          backgroundColor: 'primary.main',
+          padding: '40px 24px',
+          height: '100%',
+        }}
+      >
+        <UsersListItem toggleMenu={toggleMenu} role={user?.roleName!} />
       </List>
     </Box>
   );

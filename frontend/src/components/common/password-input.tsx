@@ -48,6 +48,21 @@ export default function PasswordInput(props: Props) {
         onChange={(event) => onChangeFn(event.target.value)}
         required
         disabled={props.disabled}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              border: 'none',
+            },
+            '&:hover fieldset': {
+              border: 'none',
+            },
+            '&.Mui-focused fieldset': {
+              border: 'none',
+            },
+          },
+          backgroundColor: '#F5F2FA',
+          borderRadius: '6px',
+        }}
       ></TextField>
       {isVisible ? (
         <AiOutlineEyeInvisible onClick={onClickIcon} style={iconStyle} />

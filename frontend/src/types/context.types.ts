@@ -103,6 +103,7 @@ export type EventData = {
   modality: Tag;
   category_event: string;
   image_event: string;
+  event_id?: number;
 };
 
 export type EventContextProps = {

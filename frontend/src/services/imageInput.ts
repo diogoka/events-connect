@@ -4,7 +4,7 @@ import { UseUploadImageType } from '@/types/services.types';
 
 export default function useUploadImage(
   maxAcceptedSizeMB: number,
-  maxComporessedSizeMB: number,
+  maxCompressedSizeMB: number,
   maxWidthOrHeight: number
 ): UseUploadImageType {
   const [image, setImage] = useState<File | null>(null);
@@ -15,15 +15,22 @@ export default function useUploadImage(
   ) => {
     if (event.target.files?.length === 1) {
       const file: File = event.target.files[0];
+
       if (file.size <= maxAcceptedSizeMB * 1024 * 1024) {
         const options = {
-          maxSizeMB: maxComporessedSizeMB,
+          maxSizeMB: maxCompressedSizeMB,
           maxWidthOrHeight: maxWidthOrHeight,
-          fileType: 'img/png',
+          fileType: 'image/png',
           useWebWorker: true,
+          initialQuality: 0.9,
         };
-        const compressedImage = await imageCompression(file, options);
-        setImage(compressedImage);
+
+        try {
+          const compressedImage = await imageCompression(file, options);
+          setImage(compressedImage);
+        } catch (error) {
+          setWarning('There was an error compressing the image.');
+        }
       } else {
         setWarning(
           `Please upload an image that is ${maxAcceptedSizeMB}MB or smaller.`
