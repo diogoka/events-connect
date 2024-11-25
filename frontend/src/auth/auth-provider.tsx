@@ -231,7 +231,9 @@ const AuthProvider = ({ children }: Props) => {
     <>
       {isHeaderReady() && <Header />}
       {getComponent(laptopQuery, pathname)}
-      {pathname !== '/' && <Footer laptopQuery={laptopQuery} />}
+      {pathname !== '/' && pathname !== '/verification' && (
+        <Footer laptopQuery={laptopQuery} />
+      )}
     </>
   );
 };
