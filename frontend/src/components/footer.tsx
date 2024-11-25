@@ -216,11 +216,17 @@ export default function Footer({ laptopQuery }: Props) {
 
       <Typography sx={{ marginTop: '40px', color: 'white' }}>
         ©️ 2024 Cornerstone Connect All Rights Reserved. Design by{' '}
-        <Link href='https://thifanybrito.com/' sx={{ color: 'white' }}>
+        <Link
+          href='https://thifanybrito.com/'
+          sx={{ color: 'white', textDecoration: 'underline' }}
+        >
           Thifany Brito
         </Link>
         . Developed by{' '}
-        <Link href='https://diogoka.dev/' sx={{ color: 'white' }}>
+        <Link
+          href='https://diogoka.dev/'
+          sx={{ color: 'white', textDecoration: 'underline' }}
+        >
           Diogo de Almeida
         </Link>
         .

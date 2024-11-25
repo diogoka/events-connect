@@ -33,8 +33,9 @@ const verificationPage = async ({ searchParams }: Props) => {
     <Box
       sx={{
         width: '100%',
-        height: '40%',
+        minHeight: '40%',
         borderRadius: '5px',
+        padding: '50px 50px',
       }}
     >
       <Alert variant='filled' severity={severity}>

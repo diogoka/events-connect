@@ -31,6 +31,7 @@ import { ResendEmailModal } from '@/components/login/resend-email-modal';
 import { useSnack } from '@/context/snackContext';
 
 import { api } from '@/services/api';
+import FadeSkeleton from '@/components/common/fadeSkeleton';
 
 export default function LoginPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -48,6 +49,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState<string>('');
   const [isPasswordReset, setIsPasswordReset] = useState<boolean>(false);
   const [resendVerificationEmail, setResendVerificationEmail] = useState(false);
+
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+  const handleBackgroundLoad = () => setBackgroundLoaded(true);
 
   const { openSnackbar } = useSnack();
 
@@ -161,16 +165,39 @@ export default function LoginPage() {
   return (
     <>
       <Box
-        width='100vw'
-        height={isMobile ? '100%' : '100vh'}
         sx={{
-          backgroundImage: isMobile ? 'none' : 'url("/auth-bg.png")',
-          backgroundSize: 'cover',
+          width: '100vw',
+          height: isMobile ? '100%' : '100vh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          position: 'relative',
         }}
       >
+        {!backgroundLoaded && (
+          <FadeSkeleton
+            variant='rectangular'
+            width='100%'
+            height='100%'
+            animation='wave'
+            style={{ position: 'absolute', top: 0, left: 0, zIndex: 0 }}
+          />
+        )}
+        <Box
+          component='img'
+          src='/auth-bg.png'
+          onLoad={handleBackgroundLoad}
+          sx={{
+            display: isMobile || backgroundLoaded ? 'block' : 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 0,
+          }}
+        />
         <Stack
           width={isMobile ? 'auto' : '600px'}
           marginInline='auto'
