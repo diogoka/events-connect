@@ -498,7 +498,9 @@ export default function EventPage() {
             </>
           ) : (
             <Box sx={{ display: 'flex', gap: '32px' }}>
-              <DownloadAttendees eventId={event!.id_event!} />
+              {!isMobile && isOwner && (
+                <DownloadAttendees eventId={event!.id_event!} />
+              )}
               <CardButton
                 isUserPage={true}
                 isOwner={isOwner}
