@@ -497,21 +497,20 @@ export default function EventPage() {
               />
             </>
           ) : (
-            <>
-              {isOwner && isPastEvent ? (
+            <Box sx={{ display: 'flex', gap: '32px' }}>
+              {!isMobile && isOwner && (
                 <DownloadAttendees eventId={event!.id_event!} />
-              ) : (
-                <CardButton
-                  isUserPage={true}
-                  isOwner={isOwner}
-                  isAttending={isAttending}
-                  isPastEvent={isPastEvent}
-                  handleClickButtonCard={handleClickEvent}
-                  isDetail
-                  isDisabled={event?.capacity_event === 0}
-                />
               )}
-            </>
+              <CardButton
+                isUserPage={true}
+                isOwner={isOwner}
+                isAttending={isAttending}
+                isPastEvent={isPastEvent}
+                handleClickButtonCard={handleClickEvent}
+                isDetail
+                isDisabled={event?.capacity_event === 0}
+              />
+            </Box>
           )}
         </Box>
         <NewEventModal
