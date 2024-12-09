@@ -356,7 +356,7 @@ export default function LoginPage() {
                 alignItems: 'center',
                 marginTop: '20px',
                 display: 'flex',
-                fontSize: '13px',
+                fontSize: isMobile ? '11px' : '13px',
               }}
             >
               If you haven’t received the verification email, click{' '}
@@ -368,7 +368,7 @@ export default function LoginPage() {
                 sx={{
                   cursor: 'pointer',
                   marginLeft: '2px',
-                  fontSize: '13px',
+                  fontSize: isMobile ? '11px' : '13px',
                 }}
               >
                 here.
