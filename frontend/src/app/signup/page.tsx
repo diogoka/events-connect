@@ -146,10 +146,14 @@ export default function SignUpPage() {
       }
     }
 
-    const checkStudentID = await studentValidation(
-      userInputForm.email,
-      userInputForm.student_id
-    );
+    // This function make a call to check if the Student ID and email are valid
+    // const checkStudentID = await studentValidation(
+    //   userInputForm.email,
+    //   userInputForm.student_id
+    // );
+
+    // For demo purposes, it will be always true:
+    const checkStudentID = { checked: true, message: '', code: 1 };
 
     if (!checkStudentID.checked) {
       openSnackbar(`${checkStudentID.message}`, 'error');
